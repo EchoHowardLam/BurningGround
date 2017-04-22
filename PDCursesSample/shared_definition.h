@@ -21,12 +21,12 @@ typedef struct vector Coordinate;
 typedef struct vector Dimension;
 typedef int BOOL;
 
-typedef enum { NOTHING = 0, PLAYER, BULLET, BOMB } ObjectType;
-typedef enum { NORTH, EAST, SOUTH, WEST } Direction;
+typedef enum { NOTHING = 0, PLAYER, BULLET, BOMB, FRAGMENT } ObjectType;
+typedef enum { UP, EAST, DOWN, WEST } Direction;
 extern double DIRECTION2X[4];
 extern double DIRECTION2Y[4];
 extern double DIAGONALX[4];
 extern double DIAGONALY[4];
 
 void setupDisplay();
-void sleep(unsigned ms);
+void cpuSleep(unsigned ms);

@@ -47,7 +47,7 @@ int doMenu() {
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 		
-		printInMiddle(7, 0, "ESTR1002B Game Project Sample");
+		printInMiddle(7, 0, "Burning Ground");
 		//printInMiddle(8, 0, "");
 		printInMiddle(9, 0, " Start Game ");
 		printInMiddle(10, 0, " Credit ");
@@ -70,7 +70,7 @@ int doMenu() {
 		refresh();		// update the display in one go, very important
 
 		// 3. stop running for some time to prevent using up all CPU power;
-		sleep(10);			// want to sleep for roughly 10ms
+		cpuSleep(10);			// want to sleep for roughly 10ms
 	}
 }
 
@@ -84,7 +84,7 @@ void doCredit() {
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 
-		printInMiddle(7, 0, "Blighted Heart Credit");
+		printInMiddle(7, 0, "Credit");
 		printInMiddle(9, 0, " Echo ");
 		printInMiddle(10, 0, " Sherlock ");
 
@@ -93,7 +93,7 @@ void doCredit() {
 		refresh();		// update the display in one go, very important
 
 						// 3. stop running for some time to prevent using up all CPU power;
-		sleep(10);			// want to sleep for roughly 10ms
+		cpuSleep(10);			// want to sleep for roughly 10ms
 	}
 	return;
 }
@@ -102,7 +102,7 @@ void drawBackground() {
 	clearScreen();		// just call clear screen now...
 }
 
-extern GameObject gameObject[100];		// stores all game object!
+extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
 
 int playerId;
 Direction playerFacing;
@@ -114,13 +114,17 @@ int doGameLoop() {
 	
 	// setup the level and player!
 	clear();
-	playerId = createObject(PLAYER, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	playerId = createObject(PLAYER, 5, 5);
 
 	Region localMap = generateEmptyLocalRegion(1000, 50);
 	localRegionAddRect(&localMap, 0, 0, 1000, 50, 0);
-	localRegionAddRect(&localMap, 0, 10, 30, 10, 1);
+	localRegionAddRect(&localMap, 0, 18, 35, 15, 1);
+	localRegionAddRect(&localMap, 36, 18, 5, 1, 1);
 	localRegionAddRect(&localMap, 60, 15, 10, 5, 1);
-	localRegionAddRect(&localMap, 20, 30, 10, 5, 1);
+	localRegionAddRect(&localMap, 80, 20, 15, 5, 1);
+	localRegionAddRect(&localMap, 200, 17, 30, 25, 1);
+	for (int i = 0; i < 100; i++)
+		localRegionAddRect(&localMap, 50 + rand() % 900, 10 + rand() % 30, 5 + rand() % 10, 5 + rand() % 10, 1);
 
 	Coordinate scrTopLeft = {0, 0};
 	
@@ -135,35 +139,36 @@ int doGameLoop() {
 		BOOL fired = FALSE;
 		while (ch != ERR)
 		{
-			//if (ch == KEY_UP) { pushObjectDest(playerId, floor(gameObject[playerId].x) + 0.5, floor(gameObject[playerId].y) - 1, 0.2, TRUE); playerFacing = NORTH; }
-			//else if (ch == KEY_DOWN) { pushObjectDest(playerId, floor(gameObject[playerId].x) + 0.5, floor(gameObject[playerId].y) + 1, 0.2, TRUE); playerFacing = SOUTH; }
-			//else if (ch == KEY_LEFT) { pushObjectDest(playerId, floor(gameObject[playerId].x) - 1, floor(gameObject[playerId].y), 0.2, TRUE); playerFacing = WEST; }
-			//else if (ch == KEY_RIGHT) { pushObjectDest(playerId, floor(gameObject[playerId].x) + 1, floor(gameObject[playerId].y), 0.2, TRUE); playerFacing = EAST; }
-			if (ch == KEY_UP) { pushObjectDir(playerId, 0.0, -1.0, 0.5); playerFacing = NORTH; }
-			else if (ch == KEY_DOWN) { pushObjectDir(playerId, 0.0, 1.0, 0.2); playerFacing = SOUTH; }
-			else if (ch == KEY_LEFT) { pushObjectDir(playerId, -1.0, 0.0, 0.2); playerFacing = WEST; }
-			else if (ch == KEY_RIGHT) { pushObjectDir(playerId, 1, 0.0, 0.2); playerFacing = EAST; }
+			if (ch == KEY_UP) { controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.6); playerFacing = UP; }
+			else if (ch == KEY_DOWN) { controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.5); playerFacing = DOWN; }
+			else if (ch == KEY_LEFT) { controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.5); playerFacing = WEST; }
+			else if (ch == KEY_RIGHT) { controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.5); playerFacing = EAST; }
+			//if (ch == KEY_UP) { pushObjectDir(playerId, 0.0, -1.0, 0.5); playerFacing = NORTH; }
+			//else if (ch == KEY_DOWN) { pushObjectDir(playerId, 0.0, 1.0, 0.2); playerFacing = SOUTH; }
+			//else if (ch == KEY_LEFT) { pushObjectDir(playerId, -1.0, 0.0, 0.2); playerFacing = WEST; }
+			//else if (ch == KEY_RIGHT) { pushObjectDir(playerId, 1, 0.0, 0.2); playerFacing = EAST; }
 			else if (fired) {} // avoid multiplt fire in one go
 			else if (ch == ' ') {
 				// shoot!
 				fired = TRUE;
 				double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
 				double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing];
-				int bulletId = createObjectProjectileDest(BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.5, -1, DESTROY_CRITERIA_HIT, FALSE, FALSE);
+				int bulletId = createObjectProjectileDest(BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, -1, DESTROY_CRITERIA_HIT, FALSE);
 			}
 			else if (ch == 'b') {
 				fired = TRUE;
 				double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
-				double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing];
-				int bombId = createObjectProjectileDest(BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.25, 40, 0, FALSE, TRUE);
+				double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing] - 0.4;
+				int bombId = createObjectProjectileDest(BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 20, 0, TRUE);
 			}
 			ch = getch();
 		}
 
 		// 3. update all game objects positions
+		acceObjects(&localMap);
 		moveObjects(&localMap);
-		scrTopLeft.x = gameObject[playerId].x - SCREEN_WIDTH / 2;
-		scrTopLeft.y = gameObject[playerId].y - SCREEN_HEIGHT / 2;
+		scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
+		scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
 		drawLocalRegion(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 		
 		// 4. render the display this turn
@@ -173,12 +178,13 @@ int doGameLoop() {
 		// 5. stop running for some time to prevent using up all CPU power;
 		// if you want to compensate for computational time and sleep non-fixed amount of time,
 		// you will need to get system time like clock() and calculate, but that is not necessary most of the time
-		sleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library
+		cpuSleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library
 	}
 }
 
 int main()
 {
+	srand((unsigned int)time(NULL));
 	loadImageFiles();
 	
 	// NOTE: Official HOWTO for Curses library: http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/
