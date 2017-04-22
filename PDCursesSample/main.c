@@ -74,11 +74,7 @@ int doMenu() {
 		refresh();		// update the display in one go, very important
 
 		// 3. stop running for some time to prevent using up all CPU power;
-<<<<<<< HEAD
-		cpuSleep(10);			// want to sleep for roughly 10ms
-=======
 		threadSleep(10);			// want to sleep for roughly 10ms
->>>>>>> origin/master
 	}
 }
 
@@ -101,11 +97,7 @@ void doCredit() {
 		refresh();		// update the display in one go, very important
 
 						// 3. stop running for some time to prevent using up all CPU power;
-<<<<<<< HEAD
-		cpuSleep(10);			// want to sleep for roughly 10ms
-=======
 		threadSleep(10);			// want to sleep for roughly 10ms
->>>>>>> origin/master
 	}
 	return;
 }
@@ -190,24 +182,17 @@ int doGameLoop() {
 		// 5. stop running for some time to prevent using up all CPU power;
 		// if you want to compensate for computational time and sleep non-fixed amount of time,
 		// you will need to get system time like clock() and calculate, but that is not necessary most of the time
-<<<<<<< HEAD
-		cpuSleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library
-=======
 		threadSleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library
->>>>>>> origin/master
 	}
 }
 
 int main()
 //int main(int argc, char *argv[])
 {
-<<<<<<< HEAD
 	srand((unsigned int)time(NULL));
-	loadImageFiles();
-=======
+	//loadImageFiles("");
 	//executablePath = argv[0];
 	//loadImageFiles();
->>>>>>> origin/master
 	
 	// NOTE: Official HOWTO for Curses library: http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/
 	// NOTE: How to setup PDCurses: https://jdonaldmccarthy.wordpress.com/2014/09/05/how-to-set-up-pdcurses-in-visual-studio-2013-c/

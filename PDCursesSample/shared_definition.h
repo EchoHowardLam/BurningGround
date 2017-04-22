@@ -42,8 +42,4 @@ extern double DIAGONALX[4];
 extern double DIAGONALY[4];
 
 void setupDisplay();
-<<<<<<< HEAD
-void cpuSleep(unsigned ms);
-=======
 void threadSleep(unsigned ms);
->>>>>>> origin/master

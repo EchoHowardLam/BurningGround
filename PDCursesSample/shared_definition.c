@@ -12,20 +12,11 @@ void setupDisplay() {
 }
 
 #if defined(_WIN32) || defined(_WIN64)
-<<<<<<< HEAD
-void cpuSleep(unsigned ms) {
-	Sleep(ms);
-}
-#else
-void cpuSleep(unsigned ms) {
-	usleep(ms * 1000);		// supposedly this should work on Mac, but I don't have a Mac, so I am not sure
-=======
 void threadSleep(unsigned ms) {
 	Sleep(ms);
 }
 #else
 void threadSleep(unsigned ms) {
 	usleep(ms * 1000);
->>>>>>> origin/master
 }
 #endif
