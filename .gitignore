@@ -6,6 +6,8 @@
 *.vcxproj.filters
 *.lib
 *.dll
+*.xcodeproj
+PDCursesSample/include/*
 
 # User-specific files
 *.suo
