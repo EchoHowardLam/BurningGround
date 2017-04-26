@@ -7,6 +7,8 @@
 #include "local_region.h"
 #include "image_load.h"
 
+#include "event_handle.h"
+
 extern double DIRECTION2X[4];
 extern double DIRECTION2Y[4];
 extern double DIAGONALX[4];
@@ -102,6 +104,33 @@ void doCredit() {
 	return;
 }
 
+void gameOver() {
+
+	while (1) {
+		// 1. get buffered user input
+		int ch = getch();
+		if (ch == ' ')
+			break;
+		// 2. render the display this turn
+		clear();		// clear what's on screen last time
+
+		printInMiddle(7, 0, "Game Over");
+		printInMiddle(9, 0, "You died");
+		printInMiddle(14, 0, "Hint");
+		printInMiddle(15, 0, "[space] fire");
+		printInMiddle(16, 0, "[b] bomb");
+		printInMiddle(17, 0, "[B] impact bomb");
+
+		printInMiddle(20, 0, "Press space to return to menu ... ");
+
+		refresh();		// update the display in one go, very important
+
+						// 3. stop running for some time to prevent using up all CPU power;
+		threadSleep(10);			// want to sleep for roughly 10ms
+	}
+	return;
+}
+
 void drawBackground() {
 	clearScreen();		// just call clear screen now...
 }
@@ -118,10 +147,12 @@ int doGameLoop() {
 	
 	// setup the level and player!
 	clear();
+	initializeObjects();
+	initializeKeyboardControl();
 	playerId = createObject(PLAYER, 5, 5);
 
 	Region localMap = generateEmptyLocalRegion(1000, 50);
-	localRegionAddRect(&localMap, 0, 0, 1000, 50, 0);
+	//localRegionAddRect(&localMap, 0, 0, 1000, 50, 0);
 	localRegionAddRect(&localMap, 0, 18, 35, 15, 1);
 	localRegionAddRect(&localMap, 36, 18, 5, 1, 1);
 	localRegionAddRect(&localMap, 60, 15, 10, 5, 1);
@@ -131,41 +162,45 @@ int doGameLoop() {
 		localRegionAddRect(&localMap, 50 + rand() % 900, 10 + rand() % 30, 5 + rand() % 10, 5 + rand() % 10, 1);
 
 	Coordinate scrTopLeft = {0, 0};
-	
+	BOOL keyboardPress[ACCEPTABLE_KEY_NUM] = { FALSE };
+	int coolDown = 0;
+
 	// main game loop...
 	while (1) {
 		// 1. draw background...
 		//drawBackground();
 		clear();
 		
+		if (coolDown > 0) coolDown--;
 		// 2. get buffered user input and determine player action
-		int ch = getch();
-		BOOL fired = FALSE;
-		while (ch != ERR)
-		{
-			if (ch == KEY_UP) { controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.6); playerFacing = UP; }
-			else if (ch == KEY_DOWN) { controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.5); playerFacing = DOWN; }
-			else if (ch == KEY_LEFT) { controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.5); playerFacing = WEST; }
-			else if (ch == KEY_RIGHT) { controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.5); playerFacing = EAST; }
-			//if (ch == KEY_UP) { pushObjectDir(playerId, 0.0, -1.0, 0.5); playerFacing = NORTH; }
-			//else if (ch == KEY_DOWN) { pushObjectDir(playerId, 0.0, 1.0, 0.2); playerFacing = SOUTH; }
-			//else if (ch == KEY_LEFT) { pushObjectDir(playerId, -1.0, 0.0, 0.2); playerFacing = WEST; }
-			//else if (ch == KEY_RIGHT) { pushObjectDir(playerId, 1, 0.0, 0.2); playerFacing = EAST; }
-			else if (fired) {} // avoid multiplt fire in one go
-			else if (ch == ' ') {
-				// shoot!
-				fired = TRUE;
-				double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
-				double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing];
-				int bulletId = createObjectProjectileDest(BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, -1, DESTROY_CRITERIA_HIT, FALSE);
-			}
-			else if (ch == 'b') {
-				fired = TRUE;
-				double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
-				double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing] - 0.4;
-				int bombId = createObjectProjectileDest(BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 20, 0, TRUE);
-			}
-			ch = getch();
+		for (int i = 0; i < ACCEPTABLE_KEY_NUM; i++)
+			keyboardPress[i] = FALSE;
+		getMultipleKeyboardPress(keyboardPress);
+		combineWASDwasdKeys(keyboardPress);
+		combineArrowKeys(keyboardPress);
+		combinewasdArrowKeys(keyboardPress);
+		if (keyboardPress[KB_UP_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.5); playerFacing = UP; }
+		else if (keyboardPress[KB_DOWN_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.5); playerFacing = DOWN; }
+		if (keyboardPress[KB_LEFT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.5); playerFacing = WEST; }
+		else if (keyboardPress[KB_RIGHT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.5); playerFacing = EAST; }
+		if (keyboardPress[' '] && coolDown <= 0) {
+			// shoot!
+			coolDown += 10;
+			double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
+			double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing];
+			int bulletId = createObjectProjectileDest(BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, -1, DESTROY_CRITERIA_HIT, FALSE);
+		}
+		else if (keyboardPress['b'] && coolDown <= 0) {
+			coolDown += 40;
+			double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
+			double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing] - 0.4;
+			int bombId = createObjectProjectileDest(BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 40, 0, TRUE);
+		}
+		else if (keyboardPress['n'] && coolDown <= 0) {
+			coolDown += 60;
+			double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
+			double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing] - 0.4;
+			int bombId = createObjectProjectileDest(BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 100, DESTROY_CRITERIA_STOP, TRUE);
 		}
 
 		// 3. update all game objects positions
@@ -183,7 +218,11 @@ int doGameLoop() {
 		// if you want to compensate for computational time and sleep non-fixed amount of time,
 		// you will need to get system time like clock() and calculate, but that is not necessary most of the time
 		threadSleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library
+
+		if (gameObject[playerId].type != PLAYER)
+			break;
 	}
+	gameOver();
 }
 
 int main()
@@ -210,6 +249,8 @@ int main()
 	start_color();
 	init_pair(1, COLOR_BLACK, COLOR_WHITE);		// 1: inverse
 	init_pair(2, COLOR_YELLOW, COLOR_BLACK);	// 2: highlight
+	init_pair(3, COLOR_B_RED, COLOR_BLACK);	// 3: lava
+	init_pair(4, COLOR_B_BLACK, COLOR_BLACK);	// 4: voidness
 
 	// Game logic!
 	int selectedMenu;

@@ -7,7 +7,7 @@
 #include "shared_definition.h"
 #include "local_region.h"
 
-#define MAX_OBJECT 200
+#define MAX_OBJECT 500
 
 #define DESTROY_CRITERIA_HIT 1
 #define DESTROY_CRITERIA_STOP 2
@@ -28,6 +28,7 @@ typedef struct {
 
 extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
 
+int initializeObjects(void);
 int createObject(ObjectType type, double startX, double startY);
 int createObjectProjectileDir(ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
 int createObjectProjectileDest(ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
@@ -38,4 +39,4 @@ void controlObjectX(int id, double destX, double speed);
 void controlObjectY(int id, double destY, double speed);
 void moveObjects(Region *environment);
 BOOL checkObjectOnFeet(Region *environment, int objId);
-
+BOOL removeEnvironmentBlock(Region *environment, double x, double y);

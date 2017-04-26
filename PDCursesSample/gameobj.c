@@ -2,6 +2,13 @@
 
 GameObject gameObject[MAX_OBJECT];
 
+int initializeObjects(void)
+{
+	for (int i = 0; i < MAX_OBJECT; i++)
+		gameObject[i].type = NOTHING;
+	return;
+}
+
 int createObject(ObjectType type, double startX, double startY)
 {
 	for (int i = MAX_OBJECT - 1; i >= 0; i--)
@@ -116,7 +123,7 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 
 		if (move(screenY, screenX) != ERR)
 		{
-			int tmp;
+			double tmp;
 			switch (gameObject[i].type)
 			{
 			case PLAYER:
@@ -190,9 +197,10 @@ void acceObjects(Region *environment)
 		BOOL on_feet = FALSE;
 		if (gameObject[i].underGravity)
 		{
-			gameObject[i].vel.y += 0.02;
-			if ((gameObject[i].vel.y > 0.01) && checkObjectOnFeet(environment, i)) // friction and normal force only works if you press it against the surface
+			gameObject[i].vel.y += 0.01;
+			if ((gameObject[i].vel.y > 0.001) && checkObjectOnFeet(environment, i)) // friction and normal force only works if you press it against the surface
 			{
+				gameObject[i].y = floor(gameObject[i].y) + 0.8;
 				on_feet = TRUE;
 				gameObject[i].vel.x = 0.0; // friction coefficient is infinite
 				gameObject[i].vel.y = 0.0; // absorb all downward momentum
@@ -201,10 +209,13 @@ void acceObjects(Region *environment)
 
 		if (gameObject[i].underMove)
 		{
-			/*if (gameObject[i].underGravity && (!on_feet))
+			// exception of physics to make player easier to control the character in flight
+			if (gameObject[i].underGravity && (!on_feet))
 			{
-				gameObject[i].vel.x += gameObject[i].motiveVel.x * 0.2;
-			}*/
+				if (fabs(gameObject[i].vel.x + gameObject[i].motiveVel.x * 0.4) <= fabs(gameObject[i].motiveVel.x * 0.4))
+					gameObject[i].vel.x += gameObject[i].motiveVel.x * 0.4;
+			}
+
 			BOOL cancelMove = (fabs(gameObject[i].dispX) + fabs(gameObject[i].dispY) <= 0.01); // finish moving
 			cancelMove |= (gameObject[i].underGravity && (!on_feet)); // unable to move on free will
 			if (cancelMove)
@@ -237,7 +248,10 @@ void acceObjects(Region *environment)
 			}
 		}
 		else { // regression
-			gameObject[i].motiveVel.x *= 0.95;
+			if (gameObject[i].motiveVel.x < 0.5)
+				gameObject[i].motiveVel.x = 0.0;
+			else
+				gameObject[i].motiveVel.x *= 0.95;
 			gameObject[i].motiveVel.y = 0.0;
 		}
 	}
@@ -281,6 +295,7 @@ void moveObjects(Region *environment)
 			continue;
 
 		BOOL toDelete = FALSE;
+		BOOL silentDelete = FALSE;
 		if (gameObject[i].turnsAlive != gameObject[i].lifespan)
 		{
 			double speed = gameObject[i].vel.x * gameObject[i].vel.x + gameObject[i].vel.y * gameObject[i].vel.y;
@@ -307,14 +322,17 @@ void moveObjects(Region *environment)
 			//gameObject[i].vel.x = adjustedVX;
 			//gameObject[i].vel.y = adjustedVY;
 			if (fnewX < 0 || fnewX >= environment->width || fnewY < 0 || fnewY >= environment->height)
+			{
 				toDelete = TRUE;
+				silentDelete = TRUE;
+			}
 			else if (environment->appearance[fnewY][fnewX] == ' ')
 			{
 				gameObject[i].x = newX;
 				gameObject[i].y = newY;
 			}
 			else {
-				//gameObject[i].y = floor(gameObject[i].y) + 0.5;
+				gameObject[i].y = floor(gameObject[i].y) + 0.8;
 				gameObject[i].vel.x = 0.0;
 				gameObject[i].vel.y = 0.0;
 				gameObject[i].underMove = FALSE;
@@ -328,24 +346,30 @@ void moveObjects(Region *environment)
 
 		if (toDelete)
 		{
-			switch (gameObject[i].type)
+			if (!silentDelete)
 			{
-			case BOMB:
-			{
-				// spawn fragments when bombs are destroyed!
-				double dirX, dirY, shrapnelV = 0.9;
-				for (int k = 0; k < 4; k++)
+				switch (gameObject[i].type)
 				{
-					dirX = rand() % 101 - 50;
-					dirY = rand() % 101 - 50;
-					// conservation of momentum -> there must be a shrapnel going in the opposite direction
-					createObjectProjectileDir(FRAGMENT, gameObject[i].x, gameObject[i].y, dirX, dirY, shrapnelV, 30, 0, TRUE);
-					createObjectProjectileDir(FRAGMENT, gameObject[i].x, gameObject[i].y, -dirX, -dirY, shrapnelV, 30, 0, TRUE);
+				case BOMB:
+				{
+					// spawn fragments when bombs are destroyed!
+					double dirX, dirY, shrapnelV = 0.9;
+					removeEnvironmentBlock(environment, gameObject[i].x, gameObject[i].y);
+					for (int k = 0; k < 4; k++)
+					{
+						dirX = rand() % 101 - 50;
+						dirY = rand() % 101 - 50;
+						// conservation of momentum -> there must be a shrapnel going in the opposite direction
+						createObjectProjectileDir(FRAGMENT, gameObject[i].x, gameObject[i].y, dirX, dirY, shrapnelV, 30, 0, TRUE);
+						createObjectProjectileDir(FRAGMENT, gameObject[i].x, gameObject[i].y, -dirX, -dirY, shrapnelV, 30, 0, TRUE);
+						removeEnvironmentBlock(environment, gameObject[i].x + DIRECTION2X[k], gameObject[i].y + DIRECTION2Y[k]);
+						removeEnvironmentBlock(environment, gameObject[i].x + DIAGONALX[k], gameObject[i].y + DIAGONALY[k]);
+					}
+					break;
 				}
-				break;
-			}
-			default:
-				break;
+				default:
+					break;
+				}
 			}
 			gameObject[i].type = NOTHING;		// destroy it!
 		}
@@ -356,7 +380,22 @@ void moveObjects(Region *environment)
 BOOL checkObjectOnFeet(Region *environment, int objId)
 {
 	if (environment == NULL) return FALSE;
+	int fX = (int)floor(gameObject[objId].x);
+	int fY = (int)floor(gameObject[objId].y) + 1;
+	if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
+		return FALSE;
 	if (environment->appearance[(int)floor(gameObject[objId].y) + 1][(int)floor(gameObject[objId].x)] != ' ')
 		return TRUE;
 	return FALSE;
+}
+
+BOOL removeEnvironmentBlock(Region *environment, double x, double y)
+{
+	if (environment == NULL) return FALSE;
+	int fX = (int)floor(x);
+	int fY = (int)floor(y);
+	if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
+		return FALSE;
+	environment->appearance[fY][fX] = ' ';
+	return TRUE;
 }

@@ -52,7 +52,20 @@ void drawLocalRegion(Region *target, Coordinate scrTopLeftPos, int scrW, int scr
 			if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width))
 				addch(target->appearance[ry][rx]);
 			else
-				addch(' ');
+			{
+				if (ry >= target->height)
+				{
+					attron(COLOR_PAIR(3));
+					addch('~');
+					attroff(COLOR_PAIR(3));
+				}
+				else {
+					attron(COLOR_PAIR(4));
+					addch('-');
+					attroff(COLOR_PAIR(4));
+				}
+			}
+				
 		}
 	}
 	return;
