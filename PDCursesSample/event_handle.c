@@ -109,6 +109,11 @@ void getMultipleKeyboardPress(BOOL *output)
 }
 
 #else
+void initializeKeyboardControl(void)
+{
+	return;
+}
+
 int getSingleKeyboardPress(void)
 {
 	return getch();
@@ -116,9 +121,9 @@ int getSingleKeyboardPress(void)
 
 void getMultipleKeyboardPress(BOOL *output)
 {
-	int ch = getch();
-	while (ch != ERR)
-	{
+	int ch = ' ';
+	do {
+		ch = getch();
 		if (ch == KEY_UP) { output[KB_UP_KEY] = TRUE; }
 		else if (ch == KEY_DOWN) { output[KB_DOWN_KEY] = TRUE; }
 		else if (ch == KEY_LEFT) { output[KB_LEFT_KEY] = TRUE; }
@@ -126,7 +131,7 @@ void getMultipleKeyboardPress(BOOL *output)
 		else if (ch >= 0 && ch < 128) {
 			output[ch] = TRUE;
 		}
-	}
+	} while (ch != ERR);
 	return;
 }
 
@@ -150,9 +155,9 @@ void combineArrowKeys(BOOL *output)
 }
 void combinewasdArrowKeys(BOOL *output)
 {
-	if (output['w'] && output[KB_UP_KEY]) { output['w'] = FALSE; output[KB_UP_KEY] = TRUE; }
-	if (output['s'] && output[KB_DOWN_KEY]) { output['s'] = FALSE; output[KB_DOWN_KEY] = TRUE; }
-	if (output['a'] && output[KB_LEFT_KEY]) { output['a'] = FALSE; output[KB_LEFT_KEY] = TRUE; }
-	if (output['d'] && output[KB_RIGHT_KEY]) { output['d'] = FALSE; output[KB_RIGHT_KEY] = TRUE; }
+	if (output['w'] || output[KB_UP_KEY]) { output['w'] = FALSE; output[KB_UP_KEY] = TRUE; }
+	if (output['s'] || output[KB_DOWN_KEY]) { output['s'] = FALSE; output[KB_DOWN_KEY] = TRUE; }
+	if (output['a'] || output[KB_LEFT_KEY]) { output['a'] = FALSE; output[KB_LEFT_KEY] = TRUE; }
+	if (output['d'] || output[KB_RIGHT_KEY]) { output['d'] = FALSE; output[KB_RIGHT_KEY] = TRUE; }
 	return;
 }

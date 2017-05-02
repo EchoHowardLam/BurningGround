@@ -2,7 +2,7 @@
 
 GameObject gameObject[MAX_OBJECT];
 
-int initializeObjects(void)
+void initializeObjects(void)
 {
 	for (int i = 0; i < MAX_OBJECT; i++)
 		gameObject[i].type = NOTHING;
@@ -212,8 +212,8 @@ void acceObjects(Region *environment)
 			// exception of physics to make player easier to control the character in flight
 			if (gameObject[i].underGravity && (!on_feet))
 			{
-				if (fabs(gameObject[i].vel.x + gameObject[i].motiveVel.x * 0.4) <= fabs(gameObject[i].motiveVel.x * 0.4))
-					gameObject[i].vel.x += gameObject[i].motiveVel.x * 0.4;
+				if (fabs(gameObject[i].vel.x + gameObject[i].motiveVel.x * 0.8) <= fabs(gameObject[i].motiveVel.x * 0.8))
+					gameObject[i].vel.x += gameObject[i].motiveVel.x * 0.8;
 			}
 
 			BOOL cancelMove = (fabs(gameObject[i].dispX) + fabs(gameObject[i].dispY) <= 0.01); // finish moving

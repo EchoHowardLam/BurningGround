@@ -119,7 +119,7 @@ void gameOver() {
 		printInMiddle(14, 0, "Hint");
 		printInMiddle(15, 0, "[space] fire");
 		printInMiddle(16, 0, "[b] bomb");
-		printInMiddle(17, 0, "[B] impact bomb");
+		printInMiddle(17, 0, "[n] impact bomb");
 
 		printInMiddle(20, 0, "Press space to return to menu ... ");
 
@@ -149,17 +149,17 @@ int doGameLoop() {
 	clear();
 	initializeObjects();
 	initializeKeyboardControl();
-	playerId = createObject(PLAYER, 5, 5);
+	playerId = createObject(PLAYER, 5, 105);
 
-	Region localMap = generateEmptyLocalRegion(1000, 50);
+	Region localMap = generateEmptyLocalRegion(1000, 150);
 	//localRegionAddRect(&localMap, 0, 0, 1000, 50, 0);
-	localRegionAddRect(&localMap, 0, 18, 35, 15, 1);
-	localRegionAddRect(&localMap, 36, 18, 5, 1, 1);
-	localRegionAddRect(&localMap, 60, 15, 10, 5, 1);
-	localRegionAddRect(&localMap, 80, 20, 15, 5, 1);
-	localRegionAddRect(&localMap, 200, 17, 30, 25, 1);
+	localRegionAddRect(&localMap, 0, 118, 35, 15, 1);
+	localRegionAddRect(&localMap, 36, 118, 5, 1, 1);
+	localRegionAddRect(&localMap, 60, 115, 10, 5, 1);
+	localRegionAddRect(&localMap, 80, 120, 15, 5, 1);
+	localRegionAddRect(&localMap, 200, 117, 30, 25, 1);
 	for (int i = 0; i < 100; i++)
-		localRegionAddRect(&localMap, 50 + rand() % 900, 10 + rand() % 30, 5 + rand() % 10, 5 + rand() % 10, 1);
+		localRegionAddRect(&localMap, 50 + rand() % 900, 100 + rand() % 30, 5 + rand() % 10, 5 + rand() % 10, 1);
 
 	Coordinate scrTopLeft = {0, 0};
 	BOOL keyboardPress[ACCEPTABLE_KEY_NUM] = { FALSE };
@@ -223,10 +223,10 @@ int doGameLoop() {
 			break;
 	}
 	gameOver();
+	return 1;
 }
 
-int main()
-//int main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	srand((unsigned int)time(NULL));
 	//loadImageFiles("");

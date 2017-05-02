@@ -41,8 +41,8 @@ void drawLocalRegion(Region *target, Coordinate scrTopLeftPos, int scrW, int scr
 {
 	scrW = SCREEN_WIDTH;
 	scrH = SCREEN_HEIGHT;
-	int x = floor(scrTopLeftPos.x);
-	int y = floor(scrTopLeftPos.y);
+	int x = (int)floor(scrTopLeftPos.x);
+	int y = (int)floor(scrTopLeftPos.y);
 	if (target == NULL) return;
 	for (int i = 0, ry = y; i < scrH; i++, ry++)
 	{

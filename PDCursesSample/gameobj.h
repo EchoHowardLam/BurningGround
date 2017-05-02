@@ -28,7 +28,7 @@ typedef struct {
 
 extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
 
-int initializeObjects(void);
+void initializeObjects(void);
 int createObject(ObjectType type, double startX, double startY);
 int createObjectProjectileDir(ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
 int createObjectProjectileDest(ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
