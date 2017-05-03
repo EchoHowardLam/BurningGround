@@ -70,7 +70,7 @@ int doMenu() {
 			break;
 		}
 		
-		printInMiddle(20, 7, "Press space to select ... ");
+		printInMiddle(20, 7, "                  Press space to select ...                  ");
 		
 		refresh();		// update the display in one go, very important
 
@@ -93,7 +93,7 @@ void doCredit() {
 		printInMiddle(9, COLOR_WHITE, " Echo ");
 		printInMiddle(10, COLOR_WHITE, " Sherlock ");
 
-		printInMiddle(20, COLOR_WHITE, "Press space to exit ... ");
+		printInMiddle(20, COLOR_WHITE, "                  Press space to exit ...                  ");
 
 		refresh();		// update the display in one go, very important
 
