@@ -15,11 +15,19 @@ int loadImageFiles(char *path) {
 	allObjs = (CharacterImage **) malloc(IMAGE_FILES * sizeof(CharacterImage *));
 	
 	char *filesToRead[IMAGE_FILES];
+#if defined(_WIN32) || defined(_WIN64)
 	filesToRead[0] = "\\graphics\\Player.txt";
+#else
+	filesToRead[0] = "/graphics/Player.txt";
+#endif
 	
 	int size = ((int) strlen(path)) + 1;
 	char *newpath = (char *) malloc(size * sizeof(char));
+#if defined(_WIN32) || defined(_WIN64)
 	int cut = lastIndexOf(path, '\\');
+#else
+	int cut = lastIndexOf(path, '/');
+#endif
 	memcpy(newpath, path, cut);
 	newpath[cut] = '\0';
 	
@@ -29,8 +37,7 @@ int loadImageFiles(char *path) {
 		strcat(tempFileName, filesToRead[i]);
 		
 		FILE *raw = fopen(tempFileName, "r");
-		size_t length = 0;
-		char *line[100];
+		unsigned char line[100];
 		
 		CharacterImage *loadImage = NULL, *lastImage = NULL;
 		int sectionOpening = 1;
@@ -70,13 +77,13 @@ int loadImageFiles(char *path) {
 				if (displayMode) {
 					loadImage->display[row] = (chtype *) malloc(loadImage->dimension->x * sizeof(chtype));
 					loadImage->solid[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
-					for (int k=0; k<length; k++) {
+					for (int k=0; k<loadImage->dimension->x; k++) {
 						if (line[k] >= 161)
-							loadImage->display[row][k] = ((int)line[k]) | A_ALTCHARSET;
+							loadImage->display[row][k] = ((int) line[k]) | A_ALTCHARSET;
 						else if (line[k] >= 130)
-							loadImage->display[row][k] = (((int)line[k]) -128+102-2) | A_ALTCHARSET;
+							loadImage->display[row][k] = (((int) line[k])-128+102-2) | A_ALTCHARSET;
 						else if (line[k] >= 128)
-							loadImage->display[row][k] = (((int)line[k]) -128+96) | A_ALTCHARSET;
+							loadImage->display[row][k] = (((int) line[k])-128+96) | A_ALTCHARSET;
 						else
 							loadImage->display[row][k] = line[k];
 						
@@ -84,7 +91,7 @@ int loadImageFiles(char *path) {
 					}
 				} else {
 					loadImage->color[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
-					for (int k=0; k<length; k++) {
+					for (int k=0; k<loadImage->dimension->x; k++) {
 						loadImage->color[row][k] = colorCodeToPair(line[k]);
 					}
 				}
@@ -141,37 +148,37 @@ CharacterImage* getImage(ObjectType objType, int ID) {
 int colorCodeToPair(char code) {
 	switch (code) {
 		case 'k':
-			return COLOR_PAIR(0);
+			return COLOR_PAIR(COLOR_BLACK);
 		case 'b':
-			return COLOR_PAIR(1);
+			return COLOR_PAIR(COLOR_BLUE);
 		case 'g':
-			return COLOR_PAIR(2);
+			return COLOR_PAIR(COLOR_GREEN);
 		case 'c':
-			return COLOR_PAIR(3);
+			return COLOR_PAIR(COLOR_CYAN);
 		case 'r':
-			return COLOR_PAIR(4);
+			return COLOR_PAIR(COLOR_RED);
 		case 'm':
-			return COLOR_PAIR(5);
+			return COLOR_PAIR(COLOR_MAGENTA);
 		case 'y':
-			return COLOR_PAIR(6);
+			return COLOR_PAIR(COLOR_YELLOW);
 		case 'w':
-			return COLOR_PAIR(7);
+			return COLOR_PAIR(COLOR_WHITE);
 		case 'K':
-			return COLOR_PAIR(8);
+			return COLOR_PAIR(COLOR_B_BLACK);
 		case 'B':
-			return COLOR_PAIR(9);
+			return COLOR_PAIR(COLOR_B_BLUE);
 		case 'G':
-			return COLOR_PAIR(10);
+			return COLOR_PAIR(COLOR_B_GREEN);
 		case 'C':
-			return COLOR_PAIR(11);
+			return COLOR_PAIR(COLOR_B_CYAN);
 		case 'R':
-			return COLOR_PAIR(12);
+			return COLOR_PAIR(COLOR_B_RED);
 		case 'M':
-			return COLOR_PAIR(13);
+			return COLOR_PAIR(COLOR_B_MAGENTA);
 		case 'Y':
-			return COLOR_PAIR(14);
+			return COLOR_PAIR(COLOR_B_YELLOW);
 		case 'W':
-			return COLOR_PAIR(15);
+			return COLOR_PAIR(COLOR_B_WHITE);
 	}
 	return -1;
 }
