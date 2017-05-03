@@ -9,11 +9,13 @@ DWORD WIN_EVENT_NumUnread;
 DWORD WIN_EVENT_NumRead;
 int WIN_EVENT_KBpress;
 
-void initializeKeyboardControl(void)
+BOOL initializeInputEvents(void)
 {
 	for (int i = 0; i < ACCEPTABLE_KEY_NUM; i++)
 		KBHistory[i] = FALSE;
-	return;
+	if (!SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
+		return 0;
+	return 1;
 }
 
 int getSingleKeyboardPress(void)
@@ -108,10 +110,71 @@ void getMultipleKeyboardPress(BOOL *output)
 	return;
 }
 
-#else
-void initializeKeyboardControl(void)
+void getAllUserInputs(BOOL *kb_output, MOutput *mouse_output)
 {
+	WIN_EVENT_hIn = GetStdHandle(STD_INPUT_HANDLE);
+
+	GetNumberOfConsoleInputEvents(WIN_EVENT_hIn, &WIN_EVENT_NumUnread);
+
+	while (WIN_EVENT_NumUnread >= 1)
+	{
+		ReadConsoleInput(WIN_EVENT_hIn, &WIN_EVENT_InRec, 1, &WIN_EVENT_NumRead);
+		switch (WIN_EVENT_InRec.EventType)
+		{
+		case KEY_EVENT:
+			switch (WIN_EVENT_InRec.Event.KeyEvent.wVirtualKeyCode)
+			{
+			case VK_UP:
+				if (WIN_EVENT_InRec.Event.KeyEvent.bKeyDown) { kb_output[KB_UP_KEY] = TRUE; }
+				KBHistory[KB_UP_KEY] = WIN_EVENT_InRec.Event.KeyEvent.bKeyDown;
+				break;
+			case VK_DOWN:
+				if (WIN_EVENT_InRec.Event.KeyEvent.bKeyDown) { kb_output[KB_DOWN_KEY] = TRUE; }
+				KBHistory[KB_DOWN_KEY] = WIN_EVENT_InRec.Event.KeyEvent.bKeyDown;
+				break;
+			case VK_LEFT:
+				if (WIN_EVENT_InRec.Event.KeyEvent.bKeyDown) { kb_output[KB_LEFT_KEY] = TRUE; }
+				KBHistory[KB_LEFT_KEY] = WIN_EVENT_InRec.Event.KeyEvent.bKeyDown;
+				break;
+			case VK_RIGHT:
+				if (WIN_EVENT_InRec.Event.KeyEvent.bKeyDown) { kb_output[KB_RIGHT_KEY] = TRUE; }
+				KBHistory[KB_RIGHT_KEY] = WIN_EVENT_InRec.Event.KeyEvent.bKeyDown;
+				break;
+			default:
+				WIN_EVENT_KBpress = WIN_EVENT_InRec.Event.KeyEvent.uChar.AsciiChar;
+				WIN_EVENT_InRec.Event.KeyEvent.uChar.AsciiChar = 0;
+				if (WIN_EVENT_KBpress >= 0 && WIN_EVENT_KBpress < 128)
+				{
+					if (WIN_EVENT_InRec.Event.KeyEvent.bKeyDown) { kb_output[WIN_EVENT_KBpress] = TRUE; }
+					KBHistory[WIN_EVENT_KBpress] = WIN_EVENT_InRec.Event.KeyEvent.bKeyDown;
+				}
+				break;
+			}
+			break;
+		case MOUSE_EVENT:
+			mouse_output->buttonState = 0;
+			if (WIN_EVENT_InRec.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
+			{
+				mouse_output->buttonState |= BG_MOUSE_BUTTON1_PRESSED;
+			}
+			mouse_output->x = WIN_EVENT_InRec.Event.MouseEvent.dwMousePosition.X;
+			mouse_output->y = WIN_EVENT_InRec.Event.MouseEvent.dwMousePosition.Y;
+			break;
+		}
+		WIN_EVENT_NumUnread--;
+	}
+	for (int i = 0; i < ACCEPTABLE_KEY_NUM; i++)
+	{
+		kb_output[i] |= KBHistory[i];
+	}
 	return;
+}
+
+#else
+BOOL initializeInputEvents(void)
+{
+	mousemask(ALL_MOUSE_EVENTS, NULL);
+	return 1;
 }
 
 int getSingleKeyboardPress(void)
@@ -131,6 +194,32 @@ void getMultipleKeyboardPress(BOOL *output)
 		else if (ch >= 0 && ch < 128) {
 			output[ch] = TRUE;
 		}
+	} while (ch != ERR);
+	return;
+}
+
+void getAllUserInputs(BOOL *kb_output, MOutput *mouse_output)
+{
+	mouse_output->buttonState = 0;
+	int ch = ' ';
+	do {
+		ch = getch();
+		if (ch >= 0 && ch < 128)
+		{
+			kb_output[ch] = TRUE;
+		}
+		else if (ch == KEY_MOUSE) {
+			MEVENT event;
+			if (getmouse(&event) == OK) {
+				mouse_output->buttonState = BG_MOUSE_BUTTON1_PRESSED;
+				mouse_output->x = event.x;
+				mouse_output->y = event.y;
+			}
+		}
+		else if (ch == KEY_UP) { kb_output[KB_UP_KEY] = TRUE; }
+		else if (ch == KEY_DOWN) { kb_output[KB_DOWN_KEY] = TRUE; }
+		else if (ch == KEY_LEFT) { kb_output[KB_LEFT_KEY] = TRUE; }
+		else if (ch == KEY_RIGHT) { kb_output[KB_RIGHT_KEY] = TRUE; }
 	} while (ch != ERR);
 	return;
 }

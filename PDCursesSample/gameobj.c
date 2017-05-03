@@ -127,15 +127,17 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			switch (gameObject[i].type)
 			{
 			case PLAYER:
-				attron(COLOR_PAIR(2));
+				attron(COLOR_PAIR(COLOR_WHITE));
 				addch('|');
 				if (move(screenY - 1, screenX) != ERR) {
 					addch(245 | A_ALTCHARSET);
 				}
-				attroff(COLOR_PAIR(2));
+				attroff(COLOR_PAIR(COLOR_WHITE));
 				break;
 			case BULLET:
+				attron(COLOR_PAIR(COLOR_WHITE));
 				addch('*');
+				attroff(COLOR_PAIR(COLOR_WHITE));
 				break;
 			case BOMB:
 				addch('@');
@@ -159,6 +161,19 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			}
 		}
 	}
+	return;
+}
+
+void displayCrossHair(int X, int Y)
+{
+	attron(COLOR_PAIR(COLOR_B_CYAN));
+	//addch(215 | A_ALTCHARSET);
+	if (move(Y, X - 2) != ERR) addch('[');
+	//if (move(Y, X - 1) != ERR) addch(' ');
+	if (move(Y, X) != ERR) addch('+');
+	//if (move(Y, X + 1) != ERR) addch(' ');
+	if (move(Y, X + 2) != ERR) addch(']');
+	attroff(COLOR_PAIR(COLOR_B_CYAN));
 	return;
 }
 

@@ -41,9 +41,9 @@ int doMenu() {
 	while (1) {
 		// 1. get buffered user input
 		int ch = getch();
-		if (ch == KEY_UP)
+		if (ch == KEY_UP || ch == 'w' || ch == 'W')
 			selectedItem = (selectedItem - 1 + totalItem) % totalItem;
-		else if (ch == KEY_DOWN)
+		else if (ch == KEY_DOWN || ch == 's' || ch == 'S')
 			selectedItem = (selectedItem + 1) % totalItem;
 		else if (ch == ' ') {
 			return selectedItem;
@@ -52,22 +52,22 @@ int doMenu() {
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 		
-		printInMiddle(7, 0, "Burning Ground");
+		printInMiddle(7, COLOR_B_YELLOW, "Burning Ground");
 		//printInMiddle(8, 0, "");
-		printInMiddle(9, 0, " Start Game ");
-		printInMiddle(10, 0, " Credit ");
-		printInMiddle(11, 0, " Exit ");
+		printInMiddle(9, COLOR_B_BLACK, " Start Game ");
+		printInMiddle(10, COLOR_B_BLACK, " Credit ");
+		printInMiddle(11, COLOR_B_BLACK, " Exit ");
 		
 		switch (selectedItem % totalItem)
 		{
 		case 0:
-			printInMiddle(9, 1, " Start Game ");
+			printInMiddle(9, COLOR_WHITE, " Start Game ");
 			break;
 		case 1:
-			printInMiddle(10, 1, " Credit ");
+			printInMiddle(10, COLOR_WHITE, " Credit ");
 			break;
 		case 2:
-			printInMiddle(11, 1, " Exit ");
+			printInMiddle(11, COLOR_WHITE, " Exit ");
 			break;
 		}
 		
@@ -117,11 +117,33 @@ void gameOver() {
 		printInMiddle(7, 0, "Game Over");
 		printInMiddle(9, 0, "You died");
 		printInMiddle(14, 0, "Hint");
-		printInMiddle(15, 0, "[space] fire");
-		printInMiddle(16, 0, "[b] bomb");
-		printInMiddle(17, 0, "[n] impact bomb");
+		printInMiddle(15, 0, "[Mouse 1] fire");
+		printInMiddle(16, 0, "[Space] bomb");
+		printInMiddle(17, 0, "[e] impact bomb");
 
 		printInMiddle(20, 0, "Press space to return to menu ... ");
+
+		refresh();		// update the display in one go, very important
+
+						// 3. stop running for some time to prevent using up all CPU power;
+		threadSleep(10);			// want to sleep for roughly 10ms
+	}
+	return;
+}
+
+void Error() {
+
+	while (1) {
+		// 1. get buffered user input
+		int ch = getch();
+		if (ch == ' ')
+			break;
+		// 2. render the display this turn
+		clear();		// clear what's on screen last time
+
+		printInMiddle(7, 0, "We encounter a fatal error");
+
+		printInMiddle(20, 0, "Press space to command suicide... ");
 
 		refresh();		// update the display in one go, very important
 
@@ -148,7 +170,11 @@ int doGameLoop() {
 	// setup the level and player!
 	clear();
 	initializeObjects();
-	initializeKeyboardControl();
+	if (!initializeInputEvents())
+	{
+		Error();
+		return -1;
+	}
 	playerId = createObject(PLAYER, 5, 105);
 
 	Region localMap = generateEmptyLocalRegion(1000, 150);
@@ -163,7 +189,11 @@ int doGameLoop() {
 
 	Coordinate scrTopLeft = {0, 0};
 	BOOL keyboardPress[ACCEPTABLE_KEY_NUM] = { FALSE };
+	MOutput mouseEvents;
+	mouseEvents.buttonState = 0;
+
 	int coolDown = 0;
+	int coolDown2 = 0;
 
 	// main game loop...
 	while (1) {
@@ -172,10 +202,11 @@ int doGameLoop() {
 		clear();
 		
 		if (coolDown > 0) coolDown--;
+		if (coolDown2 > 0) coolDown2--;
 		// 2. get buffered user input and determine player action
 		for (int i = 0; i < ACCEPTABLE_KEY_NUM; i++)
 			keyboardPress[i] = FALSE;
-		getMultipleKeyboardPress(keyboardPress);
+		getAllUserInputs(keyboardPress, &mouseEvents);
 		combineWASDwasdKeys(keyboardPress);
 		combineArrowKeys(keyboardPress);
 		combinewasdArrowKeys(keyboardPress);
@@ -183,34 +214,34 @@ int doGameLoop() {
 		else if (keyboardPress[KB_DOWN_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.5); playerFacing = DOWN; }
 		if (keyboardPress[KB_LEFT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.5); playerFacing = WEST; }
 		else if (keyboardPress[KB_RIGHT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.5); playerFacing = EAST; }
-		if (keyboardPress[' '] && coolDown <= 0) {
-			// shoot!
+		if (mouseEvents.buttonState && coolDown <= 0) {
 			coolDown += 10;
-			double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
-			double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing];
+			double destX = mouseEvents.x + scrTopLeft.x + 0.5;
+			double destY = mouseEvents.y + scrTopLeft.y + 0.5;
 			int bulletId = createObjectProjectileDest(BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, -1, DESTROY_CRITERIA_HIT, FALSE);
 		}
-		else if (keyboardPress['b'] && coolDown <= 0) {
-			coolDown += 40;
-			double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
-			double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing] - 0.4;
+		if (keyboardPress[' '] && coolDown2 <= 0) {
+			coolDown2 += 40;
+			double destX = mouseEvents.x + scrTopLeft.x + 0.5;
+			double destY = mouseEvents.y + scrTopLeft.y + 0.5;
 			int bombId = createObjectProjectileDest(BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 40, 0, TRUE);
 		}
-		else if (keyboardPress['n'] && coolDown <= 0) {
-			coolDown += 60;
-			double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
-			double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing] - 0.4;
+		else if (keyboardPress['e'] && coolDown2 <= 0) {
+			coolDown2 += 60;
+			double destX = mouseEvents.x + scrTopLeft.x + 0.5;
+			double destY = mouseEvents.y + scrTopLeft.y + 0.5;
 			int bombId = createObjectProjectileDest(BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 100, DESTROY_CRITERIA_STOP, TRUE);
 		}
 
 		// 3. update all game objects positions
 		acceObjects(&localMap);
 		moveObjects(&localMap);
+		
+		// 4. render the display this turn
 		scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
 		scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
 		drawLocalRegion(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
-		
-		// 4. render the display this turn
+		displayCrossHair(mouseEvents.x, mouseEvents.y);
 		displayObjects(scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 		refresh();		// update the display in one go
 
@@ -223,6 +254,7 @@ int doGameLoop() {
 			break;
 	}
 	gameOver();
+	cleanUpLocalRegion(&localMap);
 	return 1;
 }
 
@@ -247,17 +279,24 @@ int main(int argc, char *argv[])
 	
 	// Set up colors...colors are always in pairs in a terminal!
 	start_color();
-	init_pair(1, COLOR_BLACK, COLOR_WHITE);		// 1: inverse
-	init_pair(2, COLOR_YELLOW, COLOR_BLACK);	// 2: highlight
-	init_pair(3, COLOR_B_RED, COLOR_BLACK);	// 3: lava
-	init_pair(4, COLOR_B_BLACK, COLOR_BLACK);	// 4: voidness
-
+	for (int i = 1; i < 16; i++)
+		init_pair(i, i, COLOR_BLACK);
+	
 	// Game logic!
 	int selectedMenu;
 	do {
 		selectedMenu = doMenu();
-		if (selectedMenu == 0) doGameLoop();
-		else if(selectedMenu == 1) doCredit();
+		if (selectedMenu == 0)
+		{
+			switch (doGameLoop())
+			{
+			case -1:
+				return -1;
+			default:
+				break;
+			}
+		}
+		else if (selectedMenu == 1) doCredit();
 	} while (selectedMenu != 2);
 	
 

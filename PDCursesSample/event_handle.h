@@ -24,9 +24,10 @@ Check the event_handle_manual.c for code examples
 #define KB_RIGHT_KEY 131
 //128 + 4
 
-void initializeKeyboardControl(void);
+BOOL initializeInputEvents(void);
 int getSingleKeyboardPress(void);
 void getMultipleKeyboardPress(BOOL *output);
+void getAllUserInputs(BOOL *kb_output, MOutput *mouse_output);
 
 // The following three functions are only for getMultipleKeyboardPress's output
 // Supposed to be called in the order as declaration

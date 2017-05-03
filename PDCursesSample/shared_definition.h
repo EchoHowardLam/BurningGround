@@ -24,14 +24,22 @@
 #define COLOR_B_MAGENTA 13
 #define COLOR_B_WHITE 15
 
+#define BG_MOUSE_BUTTON1_PRESSED 1
+
 struct vector {
 	double x;
 	double y;
 };
 
+struct mouseOutput {
+	int x, y;
+	int buttonState;
+};
+
 typedef struct vector Vector;
 typedef struct vector Coordinate;
 typedef struct vector Dimension;
+typedef struct mouseOutput MOutput;
 typedef int BOOL;
 
 typedef enum { NOTHING = 0, PLAYER, BULLET, BOMB, FRAGMENT } ObjectType;
