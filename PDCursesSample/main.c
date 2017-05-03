@@ -162,6 +162,41 @@ int playerId;
 Direction playerFacing;
 
 int doGameLoop() {
+
+
+
+
+
+
+
+	CharacterImage* temp = getImage(PLAYER, 0);
+	if (temp != NULL) {
+		for (int i = 0; i<(int)temp->dimension->y; i++) {
+			for (int j = 0; j<(int)temp->dimension->x; j++) {
+				move(i, j);
+				attron(temp->color[i][j]);
+				addch(temp->display[i][j]);
+				attroff(temp->color[i][j]);
+			}
+		}
+	}
+	refresh();
+	for (;;);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	// Extended characters table: http://melvilletheatre.com/articles/ncurses-extended-characters/index.html
 	// e.g. addch(97 | A_ALTCHARSET) will print out a "brick" character
 	//      addch(96 | A_ALTCHARSET) will print out a diamond
