@@ -2,34 +2,6 @@
 
 CharacterImage **allObjs = NULL;
 
-int lastIndexOf(char *str, char needle) {
-	int currIndex = (int) strlen(str)-1;
-	while(currIndex >= 0) {
-		if (str[currIndex] == needle) return currIndex;
-		currIndex--;
-	}
-	return -1;
-}
-
-// \n is counted in strlen
-int indexNotOf(char *str, char needle) {
-	int currIndex = 0;
-	while(currIndex < strlen(str)-1) {
-		if (str[currIndex] == needle) currIndex++;
-		else return currIndex;
-	}
-	return -1;
-}
-
-int lastIndexNotOf(char *str, char needle) {
-	int currIndex = (int) strlen(str)-2;
-	while(currIndex >= 0) {
-		if (str[currIndex] == needle) currIndex--;
-		else return currIndex;
-	}
-	return -1;
-}
-
 int loadImageFiles(char *path) {
 	allObjs = (CharacterImage **) malloc(IMAGE_FILES * sizeof(CharacterImage *));
 	
@@ -124,7 +96,6 @@ int loadImageFiles(char *path) {
 			}
 			
 			fclose(raw);
-			//free(line);
 			free(tempFileName);
 		}
 	}
@@ -204,8 +175,8 @@ int colorCodeToPair(char code) {
 			return COLOR_PAIR(COLOR_B_YELLOW);
 		case 'W':
 			return COLOR_PAIR(COLOR_B_WHITE);
-	}return -1;
-	//return COLOR_PAIR(COLOR_BLACK);
+	}
+	return COLOR_PAIR(COLOR_BLACK);
 }
 
 void setUpColors() {

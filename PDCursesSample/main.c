@@ -5,6 +5,7 @@
 #include "gameobj.h"
 #include "local_region.h"
 #include "image_load.h"
+#include "map_load.h"
 
 #include "event_handle.h"
 
@@ -169,7 +170,7 @@ int doGameLoop() {
 
 
 
-	CharacterImage* temp = getImage(PLAYER, 1);
+	/*CharacterImage* temp = getImage(PLAYER, 1);
 	if (temp != NULL) {
 		for (int i = 0; i<(int)temp->dimension->y; i++) {
 			for (int j = 0; j<(int)temp->dimension->x; j++) {
@@ -182,8 +183,8 @@ int doGameLoop() {
 			}
 		}
 	}
-	refresh();
-	for (;;);
+	refresh();*/
+	//for (;;);
 
 
 
@@ -212,16 +213,8 @@ int doGameLoop() {
 		return -1;
 	}
 	playerId = createObject(PLAYER, 5, 105);
-
-	Region localMap = generateEmptyLocalRegion(1000, 150);
-	//localRegionAddRect(&localMap, 0, 0, 1000, 50, 0);
-	localRegionAddRect(&localMap, 0, 118, 35, 15, 1);
-	localRegionAddRect(&localMap, 36, 118, 5, 1, 1);
-	localRegionAddRect(&localMap, 60, 115, 10, 5, 1);
-	localRegionAddRect(&localMap, 80, 120, 15, 5, 1);
-	localRegionAddRect(&localMap, 200, 117, 30, 25, 1);
-	for (int i = 0; i < 100; i++)
-		localRegionAddRect(&localMap, 50 + rand() % 900, 100 + rand() % 30, 5 + rand() % 10, 5 + rand() % 10, 1);
+	
+	Region localMap = loadLevel(TEST, executablePath);
 
 	Coordinate scrTopLeft = {0, 0};
 	BOOL keyboardPress[ACCEPTABLE_KEY_NUM] = { FALSE };
