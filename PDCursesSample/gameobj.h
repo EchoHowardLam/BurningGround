@@ -1,7 +1,8 @@
 #pragma once
 
+#if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
-#include <stdlib.h>
+#endif
 #include <math.h>
 
 #include "shared_definition.h"

@@ -1,4 +1,3 @@
-﻿#include <stdlib.h> 
 #include <time.h>
 #include <math.h>
 
@@ -23,7 +22,7 @@ void clearScreen() {
 }
 
 void printInMiddle(int y, int colorPair, char *string) {
-	int length = strlen(string);
+	int length = (int) strlen(string);
 	
 	int x = (SCREEN_WIDTH - length)/2;
 	attron(COLOR_PAIR(colorPair));
@@ -31,12 +30,12 @@ void printInMiddle(int y, int colorPair, char *string) {
 	attroff(COLOR_PAIR(colorPair));
 }
 
-//char *executablePath;
+char *executablePath;
 
 int doMenu() {
 	int selectedItem = 0;
 	int totalItem = 3;
-	//loadImageFiles(executablePath);
+	loadImageFiles(executablePath);
 
 	while (1) {
 		// 1. get buffered user input
@@ -50,7 +49,7 @@ int doMenu() {
 		}
 
 		// 2. render the display this turn
-		clear();		// clear what's on screen last time
+		//clear();		// clear what's on screen last time
 		
 		printInMiddle(7, COLOR_B_YELLOW, "Burning Ground");
 		//printInMiddle(8, 0, "");
@@ -71,7 +70,7 @@ int doMenu() {
 			break;
 		}
 		
-		printInMiddle(20, 0, "Press space to select ... ");
+		printInMiddle(20, 7, "Press space to select ... ");
 		
 		refresh();		// update the display in one go, very important
 
@@ -90,11 +89,11 @@ void doCredit() {
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 
-		printInMiddle(7, 0, "Credit");
-		printInMiddle(9, 0, " Echo ");
-		printInMiddle(10, 0, " Sherlock ");
+		printInMiddle(7, 7, "Credit");
+		printInMiddle(9, 7, " Echo ");
+		printInMiddle(10, 7, " Sherlock ");
 
-		printInMiddle(20, 0, "Press space to exit ... ");
+		printInMiddle(20, 7, "Press space to exit ... ");
 
 		refresh();		// update the display in one go, very important
 
@@ -114,14 +113,14 @@ void gameOver() {
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 
-		printInMiddle(7, 0, "Game Over");
-		printInMiddle(9, 0, "You died");
-		printInMiddle(14, 0, "Hint");
-		printInMiddle(15, 0, "[Mouse 1] fire");
-		printInMiddle(16, 0, "[Space] bomb");
-		printInMiddle(17, 0, "[e] impact bomb");
+		printInMiddle(7, 15, "Game Over");
+		printInMiddle(9, 15, "You died");
+		printInMiddle(14, 7, "Hint");
+		printInMiddle(15, 7, "[Mouse 1] fire");
+		printInMiddle(16, 7, "[Space] bomb");
+		printInMiddle(17, 7, "[e] impact bomb");
 
-		printInMiddle(20, 0, "Press space to return to menu ... ");
+		printInMiddle(20, 7, "Press space to return to menu ... ");
 
 		refresh();		// update the display in one go, very important
 
@@ -261,9 +260,7 @@ int doGameLoop() {
 int main(int argc, char *argv[])
 {
 	srand((unsigned int)time(NULL));
-	//loadImageFiles("");
-	//executablePath = argv[0];
-	//loadImageFiles();
+	executablePath = argv[0];
 	
 	// NOTE: Official HOWTO for Curses library: http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/
 	// NOTE: How to setup PDCurses: https://jdonaldmccarthy.wordpress.com/2014/09/05/how-to-set-up-pdcurses-in-visual-studio-2013-c/
@@ -279,9 +276,10 @@ int main(int argc, char *argv[])
 	
 	// Set up colors...colors are always in pairs in a terminal!
 	start_color();
-	for (int i = 1; i < 16; i++)
-		init_pair(i, i, COLOR_BLACK);
+	//for (int i = 1; i < 16; i++)
+		//init_pair(i, i, COLOR_BLACK);
 	
+	setUpColors();
 	// Game logic!
 	int selectedMenu;
 	do {
