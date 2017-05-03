@@ -30,3 +30,11 @@ while (ch != ERR)
 }
 
 */
+
+/*
+
+double destX = gameObject[playerId].x + DIRECTION2X[playerFacing];
+double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing] - 0.4;
+
+
+*/
