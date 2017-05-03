@@ -89,11 +89,11 @@ void doCredit() {
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 
-		printInMiddle(7, 7, "Credit");
-		printInMiddle(9, 7, " Echo ");
-		printInMiddle(10, 7, " Sherlock ");
+		printInMiddle(7, COLOR_WHITE, "Credit");
+		printInMiddle(9, COLOR_WHITE, " Echo ");
+		printInMiddle(10, COLOR_WHITE, " Sherlock ");
 
-		printInMiddle(20, 7, "Press space to exit ... ");
+		printInMiddle(20, COLOR_WHITE, "Press space to exit ... ");
 
 		refresh();		// update the display in one go, very important
 
@@ -113,14 +113,14 @@ void gameOver() {
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 
-		printInMiddle(7, 15, "Game Over");
-		printInMiddle(9, 15, "You died");
-		printInMiddle(14, 7, "Hint");
-		printInMiddle(15, 7, "[Mouse 1] fire");
-		printInMiddle(16, 7, "[Space] bomb");
-		printInMiddle(17, 7, "[e] impact bomb");
+		printInMiddle(7, COLOR_B_RED, "Game Over");
+		printInMiddle(9, COLOR_RED, "You died");
+		printInMiddle(14, COLOR_WHITE, "Hint");
+		printInMiddle(15, COLOR_WHITE, "[Mouse 1] fire");
+		printInMiddle(16, COLOR_WHITE, "[Space] bomb");
+		printInMiddle(17, COLOR_WHITE, "[e] impact bomb");
 
-		printInMiddle(20, 7, "Press space to return to menu ... ");
+		printInMiddle(20, COLOR_WHITE, "Press space to return to menu ... ");
 
 		refresh();		// update the display in one go, very important
 
@@ -276,10 +276,8 @@ int main(int argc, char *argv[])
 	
 	// Set up colors...colors are always in pairs in a terminal!
 	start_color();
-	//for (int i = 1; i < 16; i++)
-		//init_pair(i, i, COLOR_BLACK);
-	
 	setUpColors();
+
 	// Game logic!
 	int selectedMenu;
 	do {

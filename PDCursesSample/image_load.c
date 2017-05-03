@@ -15,11 +15,11 @@ int loadImageFiles(char *path) {
 	allObjs = (CharacterImage **) malloc(IMAGE_FILES * sizeof(CharacterImage *));
 	
 	char *filesToRead[IMAGE_FILES];
-	filesToRead[0] = "/graphics/Player.txt";
+	filesToRead[0] = "\\graphics\\Player.txt";
 	
-	int size = ((int) strlen(path));
+	int size = ((int) strlen(path)) + 1;
 	char *newpath = (char *) malloc(size * sizeof(char));
-	int cut = lastIndexOf(path, '/');
+	int cut = lastIndexOf(path, '\\');
 	memcpy(newpath, path, cut);
 	newpath[cut] = '\0';
 	
@@ -30,13 +30,13 @@ int loadImageFiles(char *path) {
 		
 		FILE *raw = fopen(tempFileName, "r");
 		size_t length = 0;
-		unsigned char *line = NULL;
+		char *line[100];
 		
 		CharacterImage *loadImage = NULL, *lastImage = NULL;
 		int sectionOpening = 1;
 		int displayMode = 1;
 		int row = 0;
-		while (getline(&line, &length, raw) != -1) {
+		while (fgets(line, 100, raw) != NULL) {
 			if (sectionOpening) {
 				loadImage = (CharacterImage *) malloc(sizeof(CharacterImage));
 				if (lastImage == NULL) allObjs[i] = loadImage;
@@ -72,11 +72,11 @@ int loadImageFiles(char *path) {
 					loadImage->solid[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
 					for (int k=0; k<length; k++) {
 						if (line[k] >= 161)
-							loadImage->display[row][k] = line[k] | A_ALTCHARSET;
+							loadImage->display[row][k] = ((int)line[k]) | A_ALTCHARSET;
 						else if (line[k] >= 130)
-							loadImage->display[row][k] = (line[k]-128+102-2) | A_ALTCHARSET;
+							loadImage->display[row][k] = (((int)line[k]) -128+102-2) | A_ALTCHARSET;
 						else if (line[k] >= 128)
-							loadImage->display[row][k] = (line[k]-128+96) | A_ALTCHARSET;
+							loadImage->display[row][k] = (((int)line[k]) -128+96) | A_ALTCHARSET;
 						else
 							loadImage->display[row][k] = line[k];
 						
@@ -95,7 +95,7 @@ int loadImageFiles(char *path) {
 		}
 		
 		fclose(raw);
-		free(line);
+		//free(line);
 		free(tempFileName);
 	}
 	free(newpath);
@@ -177,7 +177,9 @@ int colorCodeToPair(char code) {
 }
 
 void setUpColors() {
-	init_pair(0, COLOR_BLACK, COLOR_BLACK);
+	for (int i = 1; i < 16; i++)
+		init_pair(i, i, COLOR_BLACK);
+	/*init_pair(0, COLOR_BLACK, COLOR_BLACK);
 	init_pair(1, COLOR_BLUE, COLOR_BLACK);
 	init_pair(2, COLOR_GREEN, COLOR_BLACK);
 	init_pair(3, COLOR_CYAN, COLOR_BLACK);
@@ -192,7 +194,7 @@ void setUpColors() {
 	init_pair(12, COLOR_B_RED, COLOR_BLACK);
 	init_pair(13, COLOR_B_MAGENTA, COLOR_BLACK);
 	init_pair(14, COLOR_B_YELLOW, COLOR_BLACK);
-	init_pair(15, COLOR_B_WHITE, COLOR_BLACK);
+	init_pair(15, COLOR_B_WHITE, COLOR_BLACK);*/
 	
 	init_pair(20, COLOR_BLACK, COLOR_B_WHITE); // inverse
 }
