@@ -169,14 +169,16 @@ int doGameLoop() {
 
 
 
-	CharacterImage* temp = getImage(PLAYER, 0);
+	CharacterImage* temp = getImage(PLAYER, 1);
 	if (temp != NULL) {
 		for (int i = 0; i<(int)temp->dimension->y; i++) {
 			for (int j = 0; j<(int)temp->dimension->x; j++) {
-				move(i, j);
-				attron(temp->color[i][j]);
-				addch(temp->display[i][j]);
-				attroff(temp->color[i][j]);
+				if (temp->solid[i][j]) {
+					move(i, j);
+					attron(temp->color[i][j]);
+					addch(temp->display[i][j]);
+					attroff(temp->color[i][j]);
+				}
 			}
 		}
 	}

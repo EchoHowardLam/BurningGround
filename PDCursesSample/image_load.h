@@ -20,6 +20,8 @@ struct CharacterImage {
 };
 
 int lastIndexOf(char *str, char needle);
+int indexNotOf(char *str, char needle);
+int lastIndexNotOf(char *str, char needle);
 int loadImageFiles(char *path); // Load every single needed image file. Return 1 successful 0 failure
 CharacterImage* getImage(ObjectType objType, int ID); // Return 1 successful 0 failure
 //int getImage(ObjectType objType, int ID, CharacterImage* returnImg); // Return 1 successful 0 failure

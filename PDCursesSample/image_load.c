@@ -11,6 +11,25 @@ int lastIndexOf(char *str, char needle) {
 	return -1;
 }
 
+// \n is counted in strlen
+int indexNotOf(char *str, char needle) {
+	int currIndex = 0;
+	while(currIndex < strlen(str)-1) {
+		if (str[currIndex] == needle) currIndex++;
+		else return currIndex;
+	}
+	return -1;
+}
+
+int lastIndexNotOf(char *str, char needle) {
+	int currIndex = (int) strlen(str)-2;
+	while(currIndex >= 0) {
+		if (str[currIndex] == needle) currIndex--;
+		else return currIndex;
+	}
+	return -1;
+}
+
 int loadImageFiles(char *path) {
 	allObjs = (CharacterImage **) malloc(IMAGE_FILES * sizeof(CharacterImage *));
 	
@@ -37,74 +56,77 @@ int loadImageFiles(char *path) {
 		strcat(tempFileName, filesToRead[i]);
 		
 		FILE *raw = fopen(tempFileName, "rb");
-		//size_t length = 0;
-		unsigned char line[100];
-		
-		CharacterImage *loadImage = NULL, *lastImage = NULL;
-		int sectionOpening = 1;
-		int displayMode = 1;
-		int row = 0;
-		while (fgets(line, 100, raw) != NULL) {
-			if (sectionOpening) {
-				loadImage = (CharacterImage *) malloc(sizeof(CharacterImage));
-				if (lastImage == NULL) allObjs[i] = loadImage;
-				else lastImage->next = loadImage;
-				loadImage->next = NULL;
-				
-				char *aInt = strtok(line, " ");
-				int j=0;
-				while (aInt != NULL) {
-					if (j==0)
-						loadImage->charaID = atoi(aInt);
-					else if (j==1) {
-						loadImage->dimension = (Dimension *) malloc(sizeof(Dimension));
-						loadImage->dimension->x = atoi(aInt);
-					} else if (j==2) {
-						loadImage->dimension->y = atoi(aInt);
-						loadImage->display = (chtype **) malloc(loadImage->dimension->y * sizeof(chtype *));
-						loadImage->color = (int **) malloc(loadImage->dimension->y * sizeof(int *));
-						loadImage->solid = (int **) malloc(loadImage->dimension->y * sizeof(int *));
-					} else if (j==3) {
-						loadImage->center = (Coordinate *) malloc(sizeof(Coordinate));
-						loadImage->center->x = atoi(aInt);
-					} else if (j==4) {
-						loadImage->center->y = atoi(aInt);
-						sectionOpening = 0;
-					}
-					j++;
-					aInt = strtok(NULL, " ");
-				}
-			} else {
-				if (displayMode) {
-					loadImage->display[row] = (chtype *) malloc(loadImage->dimension->x * sizeof(chtype));
-					loadImage->solid[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
-					move(10, 10);
-					for (int k = 0; k < loadImage->dimension->x; k++) {
-						if (line[k] >= 161)
-							loadImage->display[row][k] = (line[k] | A_ALTCHARSET);
-						else if (line[k] >= 130)
-							loadImage->display[row][k] = (line[k] -128+102-2) | A_ALTCHARSET;
-						else if (line[k] >= 128)
-							loadImage->display[row][k] = (line[k] -128+96) | A_ALTCHARSET;
-						else
-							loadImage->display[row][k] = line[k];
-						loadImage->solid[row][k] = (line[k] == ' ');
+		if (raw != NULL) {
+			unsigned char line[100];
+			
+			CharacterImage *loadImage = NULL, *lastImage = NULL;
+			int sectionOpening = 1;
+			int displayMode = 1;
+			int row = 0;
+			while (fgets(line, 100, raw) != NULL) {
+				if (sectionOpening) {
+					loadImage = (CharacterImage *) malloc(sizeof(CharacterImage));
+					if (lastImage == NULL) allObjs[i] = loadImage;
+					else lastImage->next = loadImage;
+					loadImage->next = NULL;
+					
+					char *aInt = strtok(line, " ");
+					int j=0;
+					while (aInt != NULL) {
+						if (j==0)
+							loadImage->charaID = atoi(aInt);
+						else if (j==1) {
+							loadImage->dimension = (Dimension *) malloc(sizeof(Dimension));
+							loadImage->dimension->x = atoi(aInt);
+						} else if (j==2) {
+							loadImage->dimension->y = atoi(aInt);
+							loadImage->display = (chtype **) malloc(loadImage->dimension->y * sizeof(chtype *));
+							loadImage->color = (int **) malloc(loadImage->dimension->y * sizeof(int *));
+							loadImage->solid = (int **) malloc(loadImage->dimension->y * sizeof(int *));
+						} else if (j==3) {
+							loadImage->center = (Coordinate *) malloc(sizeof(Coordinate));
+							loadImage->center->x = atoi(aInt);
+						} else if (j==4) {
+							loadImage->center->y = atoi(aInt);
+							sectionOpening = 0;
+						}
+						j++;
+						aInt = strtok(NULL, " ");
 					}
 				} else {
-					loadImage->color[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
-					for (int k=0; k < loadImage->dimension->x; k++) {
-						loadImage->color[row][k] = colorCodeToPair(line[k]);
+					if (displayMode) {
+						loadImage->display[row] = (chtype *) malloc(loadImage->dimension->x * sizeof(chtype));
+						loadImage->solid[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
+						int headChar = indexNotOf(line, ' ');
+						int tailChar = lastIndexNotOf(line, ' ');
+						for (int k = 0; k < loadImage->dimension->x; k++) {
+							if (line[k] >= 161)
+								loadImage->display[row][k] = (line[k] | A_ALTCHARSET);
+							else if (line[k] >= 130)
+								loadImage->display[row][k] = (line[k] -128+102-2) | A_ALTCHARSET;
+							else if (line[k] >= 128)
+								loadImage->display[row][k] = (line[k] -128+96) | A_ALTCHARSET;
+							else
+								loadImage->display[row][k] = line[k];
+							
+							loadImage->solid[row][k] = (k >= headChar && k <= tailChar);
+						}
+					} else {
+						loadImage->color[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
+						for (int k=0; k < loadImage->dimension->x; k++) {
+							loadImage->color[row][k] = colorCodeToPair(line[k]);
+						}
 					}
+					row++;
+					if (row >= loadImage->dimension->y && displayMode) {displayMode = 0; row = 0;}
+					else if (row >= loadImage->dimension->y) {sectionOpening = 1; lastImage = loadImage; row = 0; displayMode = 1;}
 				}
-				row++;
-				if (row >= loadImage->dimension->y && displayMode) {displayMode = 0; row = 0;}
-				else if (row >= loadImage->dimension->y) {sectionOpening = 1; lastImage = loadImage; row = 0; displayMode = 1;}
 			}
+			
+			fclose(raw);
+			//free(line);
+			free(tempFileName);
 		}
-		
-		fclose(raw);
-		//free(line);
-		free(tempFileName);
 	}
 	free(newpath);
 	return 1;
@@ -112,14 +134,16 @@ int loadImageFiles(char *path) {
 
 CharacterImage* getImage(ObjectType objType, int ID) {
 	///////////////////////// Sample for main.c
-	/*CharacterImage* temp = getImage(PLAYER, 0);
+	/*CharacterImage* temp = getImage(PLAYER, 1);
 	if (temp != NULL) {
-		for (int i=0; i<temp->dimension->y; i++) {
-			for (int j=0; j<temp->dimension->x; j++) {
-				move(i, j);
-				attron(temp->color[i][j]);
-				addch(temp->display[i][j]);
-				attroff(temp->color[i][j]);
+		for (int i = 0; i<(int)temp->dimension->y; i++) {
+			for (int j = 0; j<(int)temp->dimension->x; j++) {
+				if (temp->solid[i][j]) {
+					move(i, j);
+					attron(temp->color[i][j]);
+					addch(temp->display[i][j]);
+					attroff(temp->color[i][j]);
+				}
 			}
 		}
 	}*/
@@ -180,8 +204,8 @@ int colorCodeToPair(char code) {
 			return COLOR_PAIR(COLOR_B_YELLOW);
 		case 'W':
 			return COLOR_PAIR(COLOR_B_WHITE);
-	}
-	return -1;
+	}return -1;
+	//return COLOR_PAIR(COLOR_BLACK);
 }
 
 void setUpColors() {
