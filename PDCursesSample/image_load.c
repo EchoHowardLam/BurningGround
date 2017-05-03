@@ -36,15 +36,15 @@ int loadImageFiles(char *path) {
 		strcpy(tempFileName, newpath);
 		strcat(tempFileName, filesToRead[i]);
 		
-		FILE *raw = fopen(tempFileName, "r");
+		FILE *raw = fopen(tempFileName, "rb");
 		//size_t length = 0;
-		unsigned char *line[100];
+		unsigned char line[100];
 		
 		CharacterImage *loadImage = NULL, *lastImage = NULL;
 		int sectionOpening = 1;
 		int displayMode = 1;
 		int row = 0;
-		while (fgets((unsigned char *)line, 100, raw) != NULL) {
+		while (fgets(line, 100, raw) != NULL) {
 			if (sectionOpening) {
 				loadImage = (CharacterImage *) malloc(sizeof(CharacterImage));
 				if (lastImage == NULL) allObjs[i] = loadImage;
@@ -80,15 +80,14 @@ int loadImageFiles(char *path) {
 					loadImage->solid[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
 					move(10, 10);
 					for (int k = 0; k < loadImage->dimension->x; k++) {
-						/*if (line[k] >= 161)
-							loadImage->display[row][k] = ((unsigned char)line[k]) | A_ALTCHARSET;
+						if (line[k] >= 161)
+							loadImage->display[row][k] = (line[k] | A_ALTCHARSET);
 						else if (line[k] >= 130)
-							loadImage->display[row][k] = (((unsigned char)line[k]) -128+102-2) | A_ALTCHARSET;
+							loadImage->display[row][k] = (line[k] -128+102-2) | A_ALTCHARSET;
 						else if (line[k] >= 128)
-							loadImage->display[row][k] = (((unsigned char)line[k]) -128+96) | A_ALTCHARSET;
-						else*/
-							loadImage->display[row][k] = (unsigned char)line[k];
-						addch((unsigned char)line[k]);
+							loadImage->display[row][k] = (line[k] -128+96) | A_ALTCHARSET;
+						else
+							loadImage->display[row][k] = line[k];
 						loadImage->solid[row][k] = (line[k] == ' ');
 					}
 				} else {
