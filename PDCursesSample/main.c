@@ -1,4 +1,3 @@
-﻿#include <stdlib.h> 
 #include <time.h>
 #include <math.h>
 
@@ -23,7 +22,7 @@ void clearScreen() {
 }
 
 void printInMiddle(int y, int colorPair, char *string) {
-	int length = strlen(string);
+	int length = (int) strlen(string);
 	
 	int x = (SCREEN_WIDTH - length)/2;
 	attron(COLOR_PAIR(colorPair));
@@ -31,12 +30,12 @@ void printInMiddle(int y, int colorPair, char *string) {
 	attroff(COLOR_PAIR(colorPair));
 }
 
-//char *executablePath;
+char *executablePath;
 
 int doMenu() {
 	int selectedItem = 0;
 	int totalItem = 3;
-	//loadImageFiles(executablePath);
+	loadImageFiles(executablePath);
 
 	while (1) {
 		// 1. get buffered user input
@@ -50,28 +49,28 @@ int doMenu() {
 		}
 
 		// 2. render the display this turn
-		clear();		// clear what's on screen last time
+		//clear();		// clear what's on screen last time
 		
-		printInMiddle(7, 0, "Burning Ground");
+		printInMiddle(7, 7, "Burning Ground");
 		//printInMiddle(8, 0, "");
-		printInMiddle(9, 0, " Start Game ");
-		printInMiddle(10, 0, " Credit ");
-		printInMiddle(11, 0, " Exit ");
+		printInMiddle(9, 7, " Start Game ");
+		printInMiddle(10, 7, " Credit ");
+		printInMiddle(11, 7, " Exit ");
 		
 		switch (selectedItem % totalItem)
 		{
 		case 0:
-			printInMiddle(9, 1, " Start Game ");
+			printInMiddle(9, 20, " Start Game ");
 			break;
 		case 1:
-			printInMiddle(10, 1, " Credit ");
+			printInMiddle(10, 20, " Credit ");
 			break;
 		case 2:
-			printInMiddle(11, 1, " Exit ");
+			printInMiddle(11, 20, " Exit ");
 			break;
 		}
 		
-		printInMiddle(20, 0, "Press space to select ... ");
+		printInMiddle(20, 7, "Press space to select ... ");
 		
 		refresh();		// update the display in one go, very important
 
@@ -90,11 +89,11 @@ void doCredit() {
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 
-		printInMiddle(7, 0, "Credit");
-		printInMiddle(9, 0, " Echo ");
-		printInMiddle(10, 0, " Sherlock ");
+		printInMiddle(7, 7, "Credit");
+		printInMiddle(9, 7, " Echo ");
+		printInMiddle(10, 7, " Sherlock ");
 
-		printInMiddle(20, 0, "Press space to exit ... ");
+		printInMiddle(20, 7, "Press space to exit ... ");
 
 		refresh();		// update the display in one go, very important
 
@@ -114,14 +113,14 @@ void gameOver() {
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 
-		printInMiddle(7, 0, "Game Over");
-		printInMiddle(9, 0, "You died");
-		printInMiddle(14, 0, "Hint");
-		printInMiddle(15, 0, "[space] fire");
-		printInMiddle(16, 0, "[b] bomb");
-		printInMiddle(17, 0, "[n] impact bomb");
+		printInMiddle(7, 15, "Game Over");
+		printInMiddle(9, 15, "You died");
+		printInMiddle(14, 7, "Hint");
+		printInMiddle(15, 7, "[space] fire");
+		printInMiddle(16, 7, "[b] bomb");
+		printInMiddle(17, 7, "[n] impact bomb");
 
-		printInMiddle(20, 0, "Press space to return to menu ... ");
+		printInMiddle(20, 7, "Press space to return to menu ... ");
 
 		refresh();		// update the display in one go, very important
 
@@ -229,9 +228,7 @@ int doGameLoop() {
 int main(int argc, char *argv[])
 {
 	srand((unsigned int)time(NULL));
-	//loadImageFiles("");
-	//executablePath = argv[0];
-	//loadImageFiles();
+	executablePath = argv[0];
 	
 	// NOTE: Official HOWTO for Curses library: http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/
 	// NOTE: How to setup PDCurses: https://jdonaldmccarthy.wordpress.com/2014/09/05/how-to-set-up-pdcurses-in-visual-studio-2013-c/
@@ -247,10 +244,7 @@ int main(int argc, char *argv[])
 	
 	// Set up colors...colors are always in pairs in a terminal!
 	start_color();
-	init_pair(1, COLOR_BLACK, COLOR_WHITE);		// 1: inverse
-	init_pair(2, COLOR_YELLOW, COLOR_BLACK);	// 2: highlight
-	init_pair(3, COLOR_B_RED, COLOR_BLACK);	// 3: lava
-	init_pair(4, COLOR_B_BLACK, COLOR_BLACK);	// 4: voidness
+	setUpColors();
 
 	// Game logic!
 	int selectedMenu;

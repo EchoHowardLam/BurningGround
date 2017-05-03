@@ -3,6 +3,8 @@
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 
+#include <stdlib.h>
+
 #if defined(_WIN32) || defined(_WIN64)
 #include "curses.h"
 #include <Windows.h>

@@ -55,9 +55,9 @@ void drawLocalRegion(Region *target, Coordinate scrTopLeftPos, int scrW, int scr
 			{
 				if (ry >= target->height)
 				{
-					attron(COLOR_PAIR(3));
+					attron(COLOR_PAIR(4));
 					addch('~');
-					attroff(COLOR_PAIR(3));
+					attroff(COLOR_PAIR(4));
 				}
 				else {
 					attron(COLOR_PAIR(4));

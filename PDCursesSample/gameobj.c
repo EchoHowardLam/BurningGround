@@ -127,12 +127,12 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			switch (gameObject[i].type)
 			{
 			case PLAYER:
-				attron(COLOR_PAIR(2));
+				attron(COLOR_PAIR(7));
 				addch('|');
 				if (move(screenY - 1, screenX) != ERR) {
 					addch(245 | A_ALTCHARSET);
 				}
-				attroff(COLOR_PAIR(2));
+				attroff(COLOR_PAIR(7));
 				break;
 			case BULLET:
 				addch('*');
