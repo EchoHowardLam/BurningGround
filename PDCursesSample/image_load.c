@@ -79,7 +79,7 @@ int loadImageFiles(char *path) {
 						else if (line[k] >= 128)
 							loadImage->display[row][k] = (((unsigned char)line[k]) -128+96) | A_ALTCHARSET;
 						else*/
-							loadImage->display[row][k] = line[k];
+							loadImage->display[row][k] = (unsigned char)line[k];
 						addch((unsigned char)line[k]);
 						
 						loadImage->solid[row][k] = (line[k] == ' ');
