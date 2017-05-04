@@ -2,15 +2,6 @@
 
 CharacterImage **allObjs = NULL;
 
-int lastIndexOf(char *str, char needle) {
-	int currIndex = (int) strlen(str)-1;
-	while(currIndex >= 0) {
-		if (str[currIndex] == needle) return currIndex;
-		currIndex--;
-	}
-	return -1;
-}
-
 int loadImageFiles(char *path) {
 	allObjs = (CharacterImage **) malloc(IMAGE_FILES * sizeof(CharacterImage *));
 	
