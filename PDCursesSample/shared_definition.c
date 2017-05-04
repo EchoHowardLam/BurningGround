@@ -42,7 +42,7 @@ int indexNotOf(char *str, char needle) {
 int lastIndexNotOf(char *str, char needle) {
 	int currIndex = (int) strlen(str)-1;
 	while(currIndex >= 0) {
-		if (str[currIndex] == needle || str[currIndex] == '\n') currIndex--;
+		if (str[currIndex] == needle || str[currIndex] == '\n' || str[currIndex] == '\r') currIndex--;
 		else return currIndex;
 	}
 	return -1;
