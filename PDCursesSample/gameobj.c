@@ -131,7 +131,7 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			{
 			case LIFE_HUMANOID:
 				{
-					gameObject[i].sprite = getImage(LIFE_HUMANOID, 1);
+					gameObject[i].sprite = getImage(LIFE_HUMANOID, 5);
 					if (gameObject[i].sprite == NULL) break;
 					int grx, gry;
 					int lx, ly;
@@ -147,9 +147,9 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 								if (move(screenY + gry, screenX + grx) != ERR)
 								{
 									fcolor = gameObject[i].sprite->color[ly][lx];
-									attron(COLOR_PAIR(fcolor));
+									attron(fcolor);
 									addch(gameObject[i].sprite->display[ly][lx]);
-									attroff(COLOR_PAIR(fcolor));
+									attroff(fcolor);
 								}
 							}
 						}

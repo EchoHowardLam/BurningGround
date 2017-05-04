@@ -255,8 +255,8 @@ int doGameLoop() {
 		scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
 		scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
 		drawLocalRegion(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
-		displayCrossHair(mouseEvents.x, mouseEvents.y);
 		displayObjects(scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
+		displayCrossHair(mouseEvents.x, mouseEvents.y);
 		refresh();		// update the display in one go
 
 		// 5. stop running for some time to prevent using up all CPU power;
@@ -275,7 +275,12 @@ int doGameLoop() {
 int main(int argc, char *argv[])
 {
 	srand((unsigned int)time(NULL));
+#if defined(_WIN32) || defined(_WIN64)
+	system("cd ../PDCursesSample/");
+	executablePath = ".\\";
+#else
 	executablePath = argv[0];
+#endif
 	if (!loadImageFiles(executablePath))
 	{
 		Error();
