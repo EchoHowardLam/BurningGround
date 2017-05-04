@@ -20,3 +20,30 @@ void threadSleep(unsigned ms) {
 	usleep(ms * 1000);
 }
 #endif
+
+int lastIndexOf(char *str, char needle) {
+	int currIndex = (int) strlen(str)-1;
+	while(currIndex >= 0) {
+		if (str[currIndex] == needle) return currIndex;
+		currIndex--;
+	}
+	return -1;
+}
+
+int indexNotOf(char *str, char needle) {
+	int currIndex = 0;
+	while(currIndex < strlen(str)-1) {
+		if (str[currIndex] == needle) currIndex++;
+		else return currIndex;
+	}
+	return -1;
+}
+
+int lastIndexNotOf(char *str, char needle) {
+	int currIndex = (int) strlen(str)-1;
+	while(currIndex >= 0) {
+		if (str[currIndex] == needle || str[currIndex] == '\n') currIndex--;
+		else return currIndex;
+	}
+	return -1;
+}

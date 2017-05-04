@@ -4,6 +4,7 @@
 #define SCREEN_HEIGHT 25
 
 #include <stdlib.h>
+#include <string.h>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include "curses.h"
@@ -55,3 +56,8 @@ extern double DIAGONALY[4];
 
 void setupDisplay();
 void threadSleep(unsigned ms);
+
+
+int lastIndexOf(char *str, char needle);
+int indexNotOf(char *str, char needle);
+int lastIndexNotOf(char *str, char needle);
