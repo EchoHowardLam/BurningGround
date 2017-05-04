@@ -7,4 +7,4 @@
 
 typedef enum {TUTORIAL, TEST} LevelName;
 
-Region loadLevel(LevelName level, char *executablePath);
+Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *executablePath);

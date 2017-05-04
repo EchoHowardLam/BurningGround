@@ -7,11 +7,15 @@ Region generateEmptyLocalRegion(int w, int h)
 	new_region.width = w;
 	new_region.height = h;
 	new_region.appearance = malloc(h * sizeof(chtype *));
+	new_region.blocked = malloc(h * sizeof(BOOL *));
 	for (int i = 0; i < h; i++)
 	{
 		new_region.appearance[i] = malloc(w * sizeof(chtype));
-		for (int j = 0; j < w; j++)
+		new_region.blocked[i] = malloc(w * sizeof(BOOL));
+		for (int j = 0; j < w; j++) {
 			new_region.appearance[i][j] = ' ';
+			new_region.blocked[i][j] = 0;
+		}
 	}
 	return new_region; // shallow copy is ok
 }
@@ -22,12 +26,14 @@ void cleanUpLocalRegion(Region *target)
 	for (int i = 0; i < h; i++)
 	{
 		free(target->appearance[i]);
+		free(target->blocked[i]);
 	}
 	free(target->appearance);
+	free(target->blocked);
 	return;
 }
 
-void localRegionAddRect(Region *target, int x, int y, int rectW, int rectH, int fill)
+void localRegionAddRectWithChar(Region *target, int x, int y, int rectW, int rectH, BOOL fill, BOOL block, chtype display)
 {
 	if (target == NULL) return;
 	for (int i = 0, ry = y; i < rectH; i++, ry++)
@@ -36,15 +42,58 @@ void localRegionAddRect(Region *target, int x, int y, int rectW, int rectH, int 
 		{
 			if (fill)
 			{
-				if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width))
-					target->appearance[ry][rx] = (97 | A_ALTCHARSET);
+				if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width)) {
+					target->appearance[ry][rx] = display;
+					target->blocked[ry][rx] = block;
+				}
 			}
 			else if ((i == 0 || i == rectH - 1) || (j == 0 || j == rectW - 1)) {
-				if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width))
-					target->appearance[ry][rx] = (97 | A_ALTCHARSET);
+				if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width)) {
+					target->appearance[ry][rx] = display;
+					target->blocked[ry][rx] = block;
+				}
 			}
 		}
 	}
+	return;
+}
+
+void localRegionAddRect(Region *target, int x, int y, int rectW, int rectH, BOOL fill, BOOL block)
+{
+	localRegionAddRectWithChar(target, x, y, rectW, rectH, fill, block, (97 | A_ALTCHARSET));
+	return;
+}
+
+void localRegionDelRect(Region *target, int x, int y, int rectW, int rectH, BOOL fill)
+{
+	localRegionAddRectWithChar(target, x, y, rectW, rectH, fill, 0, ' ');
+	return;
+}
+
+double euclidean(int x, int y) {
+	return sqrt(x*x+y*y);
+}
+
+void localRegionAddCircleWithChar(Region *target, int cx, int cy, int radius, int height, int fill, BOOL block, chtype display) {
+	for (int i=0, ry=cy-(height-radius); i <= height; i++, ry++) {
+		for (int j=0, rx=cx-radius; j <= 2*radius; j++, rx++) {
+			if (fill) {
+				if (euclidean(cx-rx, cy-ry) <= radius) {
+					target->appearance[ry][rx] = display;
+					target->blocked[ry][rx] = block;
+				}
+			} else {
+				if (euclidean(cx-rx, cy-ry) <= radius && euclidean(cx-rx, cy-ry) >= radius-1) {
+					target->appearance[ry][rx] = display;
+					target->blocked[ry][rx] = block;
+				}
+			}
+		}
+	}
+}
+
+void localRegionDelCircle(Region *target, int cx, int cy, int radius, int height, int fill) {
+	localRegionAddCircleWithChar(target, cx, cy, radius, height, fill, 0, ' ');
 	return;
 }
 

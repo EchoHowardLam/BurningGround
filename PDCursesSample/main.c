@@ -194,12 +194,13 @@ int doGameLoop() {
 		Error();
 		return 0;
 	}
-	playerId = createObject(LIFE_HUMANOID, 5, 105);
+	Coordinate start, end;
+	Region localMap = loadLevel(TEST, &start, &end, executablePath);
+	playerId = createObject(LIFE_HUMANOID, start.x, start.y);
 
 	//Region localMap = generateEmptyLocalRegion(1000, 150);
 	//localRegionAddRect(&localMap, 0, 0, 1000, 50, 0);
 	
-	Region localMap = loadLevel(TEST, executablePath);
 
 	Coordinate scrTopLeft = {0, 0};
 	BOOL keyboardPress[ACCEPTABLE_KEY_NUM] = { FALSE };
