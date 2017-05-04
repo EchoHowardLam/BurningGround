@@ -7,6 +7,7 @@
 typedef struct region {
 	chtype **appearance;
 	BOOL **blocked;
+	int **objId;
 	int width;
 	int height;
 } Region;
@@ -24,3 +25,4 @@ void localRegionDelCircle(Region *target, int cx, int cy, int radius, int height
 
 
 void drawLocalRegion(Region *target, Coordinate scrTopLeftPos, int scrW, int scrH); // x, y refer to the global coordinates of screen's top left corner
+void drawLocalRegionBlocked(Region *target, Coordinate scrTopLeftPos, int scrW, int scrH); // x, y refer to the global coordinates of screen's top left corner

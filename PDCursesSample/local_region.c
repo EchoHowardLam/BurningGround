@@ -8,13 +8,16 @@ Region generateEmptyLocalRegion(int w, int h)
 	new_region.height = h;
 	new_region.appearance = malloc(h * sizeof(chtype *));
 	new_region.blocked = malloc(h * sizeof(BOOL *));
+	new_region.objId = malloc(h * sizeof(int *));
 	for (int i = 0; i < h; i++)
 	{
 		new_region.appearance[i] = malloc(w * sizeof(chtype));
 		new_region.blocked[i] = malloc(w * sizeof(BOOL));
+		new_region.objId[i] = malloc(w * sizeof(int));
 		for (int j = 0; j < w; j++) {
 			new_region.appearance[i][j] = ' ';
 			new_region.blocked[i][j] = 0;
+			new_region.objId[i][j] = -1;
 		}
 	}
 	return new_region; // shallow copy is ok
@@ -27,9 +30,11 @@ void cleanUpLocalRegion(Region *target)
 	{
 		free(target->appearance[i]);
 		free(target->blocked[i]);
+		free(target->objId[i]);
 	}
 	free(target->appearance);
 	free(target->blocked);
+	free(target->objId);
 	return;
 }
 
@@ -130,6 +135,32 @@ void drawLocalRegion(Region *target, Coordinate scrTopLeftPos, int scrW, int scr
 				}
 			}
 				
+		}
+	}
+	return;
+}
+
+void drawLocalRegionBlocked(Region *target, Coordinate scrTopLeftPos, int scrW, int scrH)
+{
+	scrW = SCREEN_WIDTH;
+	scrH = SCREEN_HEIGHT;
+	int x = (int)floor(scrTopLeftPos.x);
+	int y = (int)floor(scrTopLeftPos.y);
+	if (target == NULL) return;
+	for (int i = 0, ry = y; i < scrH; i++, ry++)
+	{
+		for (int j = 0, rx = x; j < scrW; j++, rx++)
+		{
+			if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width))
+			{
+				if (move(i, j) == ERR) return;
+				if (target->blocked[ry][rx] && target->objId[ry][rx] != -1)
+				{
+					attron(COLOR_PAIR(COLOR_WHITE));
+					addch(rand() % 95 + 32);
+					attroff(COLOR_PAIR(COLOR_WHITE));
+				}
+			}
 		}
 	}
 	return;

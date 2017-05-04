@@ -9,7 +9,7 @@ void initializeObjects(void)
 	return;
 }
 
-int createObject(ObjectType type, double startX, double startY)
+int createObject(Region *environment, int master, ObjectType type, double startX, double startY)
 {
 	for (int i = MAX_OBJECT - 1; i >= 0; i--)
 	{
@@ -38,13 +38,15 @@ int createObject(ObjectType type, double startX, double startY)
 			gameObject[i].underGravity = FALSE;
 			break;
 		}
+		gameObject[i].facingDir = 1;
 		gameObject[i].sprite = NULL;
-		return i;
+		gameObject[i].master = master;
+		return defaultObjectsInit(environment, i);
 	}
 	return -1;
 }
 
-int createObjectProjectileDir(ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity)
+int createObjectProjectileDir(Region *environment, int master, ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity)
 {
 	for (int i = MAX_OBJECT - 1; i >= 0; i--)
 	{
@@ -73,13 +75,15 @@ int createObjectProjectileDir(ObjectType type, double startX, double startY, dou
 		gameObject[i].destroyCriteria = destroyCriteria;
 		gameObject[i].underMove = FALSE;
 		gameObject[i].underGravity = underGravity;
+		gameObject[i].facingDir = 1;
 		gameObject[i].sprite = NULL;
-		return i;
+		gameObject[i].master = master;
+		return defaultObjectsInit(environment, i);
 	}
 	return -1;
 }
 
-int createObjectProjectileDest(ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity)
+int createObjectProjectileDest(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity)
 {
 	for (int i = MAX_OBJECT - 1; i >= 0; i--)
 	{
@@ -108,10 +112,29 @@ int createObjectProjectileDest(ObjectType type, double startX, double startY, do
 		gameObject[i].destroyCriteria = destroyCriteria;
 		gameObject[i].underMove = FALSE;
 		gameObject[i].underGravity = underGravity;
+		gameObject[i].facingDir = 1;
 		gameObject[i].sprite = NULL;
-		return i;
+		gameObject[i].master = master;
+		return defaultObjectsInit(environment, i);
 	}
 	return -1;
+}
+
+// -1 fail, otherwise return objId
+int defaultObjectsInit(Region *environment, int objId)
+{
+	if (environment == NULL) return;
+	if (gameObject[objId].type == NOTHING) return;
+	switch (gameObject[objId].type)
+	{
+	case LIFE_HUMANOID:
+		gameObject[objId].sprite = getImage(LIFE_HUMANOID, 6 | (gameObject[objId].facingDir & 1));
+		if (!registerEnvironmentObject(environment, objId)) return -1;
+		break;
+	default:
+		break;
+	}
+	return objId;
 }
 
 void deleteObject(Region *environment, int id, BOOL silentDelete)
@@ -131,8 +154,8 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 				dirX = rand() % 101 - 50;
 				dirY = rand() % 101 - 50;
 				// conservation of momentum -> there must be a shrapnel going in the opposite direction
-				createObjectProjectileDir(FRAGMENT, gameObject[id].x, gameObject[id].y, dirX, dirY, shrapnelV, 30, 0, TRUE);
-				createObjectProjectileDir(FRAGMENT, gameObject[id].x, gameObject[id].y, -dirX, -dirY, shrapnelV, 30, 0, TRUE);
+				createObjectProjectileDir(environment, -1, FRAGMENT, gameObject[id].x, gameObject[id].y, dirX, dirY, shrapnelV, 30, 0, TRUE);
+				createObjectProjectileDir(environment, -1, FRAGMENT, gameObject[id].x, gameObject[id].y, -dirX, -dirY, shrapnelV, 30, 0, TRUE);
 				removeEnvironmentBlock(environment, gameObject[id].x + DIRECTION2X[k], gameObject[id].y + DIRECTION2Y[k]);
 				removeEnvironmentBlock(environment, gameObject[id].x + DIAGONALX[k], gameObject[id].y + DIAGONALY[k]);
 			}
@@ -142,6 +165,7 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 			break;
 		}
 	}
+	removeEnvironmentObject(environment, id, gameObject[id].x, gameObject[id].y, gameObject[id].sprite);
 	gameObject[id].type = NOTHING;		// destroy it!
 	return;
 }
@@ -332,9 +356,16 @@ void controlObjectX(int id, double destX, double speed)
 
 	gameObject[id].dispX = destX - gameObject[id].x;
 	if (gameObject[id].dispX > 0)
+	{
 		gameObject[id].motiveVel.x = speed;
-	else
+		if (gameObject[id].facingDir == 0)
+			gameObject[id].facingDir |= TURNING_UNSETTLED;
+	}
+	else {
 		gameObject[id].motiveVel.x = -speed;
+		if (gameObject[id].facingDir == 1)
+			gameObject[id].facingDir |= TURNING_UNSETTLED;
+	}
 	gameObject[id].underMove = TRUE;
 	return;
 }
@@ -395,7 +426,7 @@ void moveObjects(Region *environment)
 			}
 			else if (checkObjectCollision(environment, i, newX, newY))
 			{
-				gameObject[i].y = floor(gameObject[i].y) + 0.8;
+				gameObject[i].y = floor(gameObject[i].y) + 0.8; // still in the same grid
 				gameObject[i].vel.x = 0.0;
 				gameObject[i].vel.y = 0.0;
 				gameObject[i].underMove = FALSE;
@@ -403,8 +434,10 @@ void moveObjects(Region *environment)
 					toDelete = TRUE;
 			}
 			else {
+				removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, gameObject[i].sprite);
 				gameObject[i].x = newX;
 				gameObject[i].y = newY;
+				registerEnvironmentObject(environment, i);
 			}
 		}
 		else {
@@ -414,6 +447,40 @@ void moveObjects(Region *environment)
 		if (toDelete)
 		{
 			deleteObject(environment, i, silentDelete);
+		}
+	}
+	return;
+}
+
+void rotateObjects(Region *environment)
+{
+	if (environment == NULL)
+		return;
+	for (int i = 0; i < MAX_OBJECT; i++)
+	{
+		if (gameObject[i].type == NOTHING)
+			continue;
+		switch (gameObject[i].type)
+		{
+		case LIFE_HUMANOID:
+			if (gameObject[i].facingDir & TURNING_UNSETTLED)
+			{
+				CharacterImage *oldImage = gameObject[i].sprite;
+				gameObject[i].sprite = getImage(LIFE_HUMANOID, 6 | ((gameObject[i].facingDir & 1) ^ 1));
+				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+				{
+					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+					registerEnvironmentObject(environment, i);
+					gameObject[i].facingDir ^= (TURNING_UNSETTLED | 1);
+				}
+				else {
+					gameObject[i].sprite = oldImage;
+					gameObject[i].facingDir ^= TURNING_UNSETTLED;
+				}
+			}
+			break;
+		default:
+			break;
 		}
 	}
 	return;
@@ -430,7 +497,22 @@ void updateObjectsStatus(Region *environment)
 		switch (gameObject[i].type)
 		{
 		case LIFE_HUMANOID:
-			gameObject[i].sprite = getImage(LIFE_HUMANOID, 7);
+			{
+				CharacterImage *oldImage = gameObject[i].sprite;
+				CharacterImage *newImage = getImage(LIFE_HUMANOID, 6 | (gameObject[i].facingDir & 1));
+				if (oldImage != newImage)
+				{
+					gameObject[i].sprite = newImage;
+					if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+					{
+						removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+						registerEnvironmentObject(environment, i);
+					}
+					else {
+						gameObject[i].sprite = oldImage;
+					}
+				}
+			}
 			break;
 		case BULLET:
 			break;
@@ -451,6 +533,8 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	if (environment == NULL) return FALSE;
 	if (gameObject[objId].type == NOTHING) return FALSE;
 	double tmp;
+	int master = gameObject[objId].master;
+	if (master == -1) master = -2;
 	switch (gameObject[objId].type)
 	{
 	case LIFE_HUMANOID:
@@ -471,7 +555,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 					{
 						if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
 						{
-							if (environment->appearance[gay][gax] != ' ')
+							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
 								return TRUE;
 							}
@@ -482,19 +566,19 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 		}
 		break;
 	case BULLET:
-		if (environment->appearance[(int)floor(y)][(int)floor(x)] != ' ')
+		if (environment->blocked[(int)floor(y)][(int)floor(x)] && (environment->objId[(int)floor(y)][(int)floor(x)] != master))
 		{
 			return TRUE;
 		}
 		break;
 	case BOMB:
-		if (environment->appearance[(int)floor(y)][(int)floor(x)] != ' ')
+		if (environment->blocked[(int)floor(y)][(int)floor(x)] && (environment->objId[(int)floor(y)][(int)floor(x)] != master))
 		{
 			return TRUE;
 		}
 		break;
 	case FRAGMENT:
-		if (environment->appearance[(int)floor(y)][(int)floor(x)] != ' ')
+		if (environment->blocked[(int)floor(y)][(int)floor(x)] && (environment->objId[(int)floor(y)][(int)floor(x)] != master))
 		{
 			return TRUE;
 		}
@@ -523,7 +607,8 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 {
 	if (environment == NULL) return FALSE;
 	if (gameObject[objId].type == NOTHING) return FALSE;
-
+	int master = gameObject[objId].master;
+	if (master == -1) master = -2;
 	switch (gameObject[objId].type)
 	{
 	// add special cases that has no sprite
@@ -535,7 +620,7 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 			int fY = (int)floor(gameObject[objId].y) + 1;
 			if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
 				return FALSE;
-			if (environment->appearance[(int)floor(gameObject[objId].y) + 1][(int)floor(gameObject[objId].x)] != ' ')
+			if (environment->blocked[(int)floor(gameObject[objId].y) + 1][(int)floor(gameObject[objId].x)])
 				return TRUE;
 		}
 		break;
@@ -554,7 +639,7 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 				{
 					if (gax < 0 || gax >= environment->width)
 						return FALSE;
-					if (environment->appearance[gyUnderFoot][gax] != ' ')
+					if (environment->blocked[gyUnderFoot][gax] && (environment->objId[gyUnderFoot][gax] != master))
 						return TRUE;
 				}
 			}
@@ -572,5 +657,71 @@ BOOL removeEnvironmentBlock(Region *environment, double x, double y)
 	if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
 		return FALSE;
 	environment->appearance[fY][fX] = ' ';
+	environment->blocked[fY][fX] = 0;
+	return TRUE;
+}
+
+BOOL registerEnvironmentObject(Region *environment, int objId)
+{
+	if (environment == NULL) return FALSE;
+	if (gameObject[objId].sprite == NULL) return FALSE;
+	int gax, gay;
+	int lx, ly;
+	int topLeftgx = (int)floor(gameObject[objId].x) - (int)floor(gameObject[objId].sprite->center->x);
+	int topLeftgy = (int)floor(gameObject[objId].y) - (int)floor(gameObject[objId].sprite->center->y);
+	int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
+	int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+	int fcolor;
+	for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+	{
+		for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+		{
+			if (gameObject[objId].sprite->solid[ly][lx] > 0)
+			{
+				if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+				{
+					if (environment->blocked[gay][gax] == FALSE)
+					{
+						environment->blocked[gay][gax] = TRUE;
+						environment->objId[gay][gax] = objId;
+					}
+					else {
+						return FALSE;
+					}
+				}
+			}
+		}
+	}
+	return TRUE;
+}
+
+BOOL removeEnvironmentObject(Region *environment, int objId, double oldX, double oldY, CharacterImage *oldImage)
+{
+	if (environment == NULL) return FALSE;
+	if (oldImage == NULL) return FALSE;
+	int gax, gay;
+	int lx, ly;
+	int topLeftgx = (int)floor(oldX) - (int)floor(oldImage->center->x);
+	int topLeftgy = (int)floor(oldY) - (int)floor(oldImage->center->y);
+	int fdimx = (int)floor(oldImage->dimension->x);
+	int fdimy = (int)floor(oldImage->dimension->y);
+	int fcolor;
+	for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+	{
+		for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+		{
+			if (oldImage->solid[ly][lx] > 0)
+			{
+				if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+				{
+					if (environment->objId[gay][gax] == objId)
+					{
+						environment->blocked[gay][gax] = FALSE;
+						environment->objId[gay][gax] = -1;
+					}
+				}
+			}
+		}
+	}
 	return TRUE;
 }

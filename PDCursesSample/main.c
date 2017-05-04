@@ -14,7 +14,7 @@ extern double DIRECTION2Y[4];
 extern double DIAGONALX[4];
 extern double DIAGONALY[4];
 
-void clearScreen() {
+void clearScreen(void) {
 	// this creates less flicker than standard "clear()"
 	move(0, 0);
 	for (int i = 0; i < SCREEN_HEIGHT;i++)
@@ -33,7 +33,7 @@ void printInMiddle(int y, int colorPair, char *string) {
 
 char *executablePath;
 
-int doMenu() {
+int doMenu(void) {
 	int selectedItem = 0;
 	int totalItem = 3;
 
@@ -49,7 +49,7 @@ int doMenu() {
 		}
 
 		// 2. render the display this turn
-		//clear();		// clear what's on screen last time
+		clear();		// clear what's on screen last time
 		
 		printInMiddle(7, COLOR_B_YELLOW, "Burning Ground");
 		//printInMiddle(8, 0, "");
@@ -80,7 +80,7 @@ int doMenu() {
 	return 1;
 }
 
-void doCredit() {
+void doCredit(void) {
 
 	while (1) {
 		// 1. get buffered user input
@@ -104,7 +104,7 @@ void doCredit() {
 	return;
 }
 
-void gameOver() {
+void gameOver(void) {
 
 	while (1) {
 		// 1. get buffered user input
@@ -116,10 +116,12 @@ void gameOver() {
 
 		printInMiddle(7, COLOR_B_RED, "Game Over");
 		printInMiddle(9, COLOR_RED, "You died");
-		printInMiddle(14, COLOR_WHITE, "Hint");
-		printInMiddle(15, COLOR_WHITE, "[Mouse 1] fire");
-		printInMiddle(16, COLOR_WHITE, "[Space] bomb");
-		printInMiddle(17, COLOR_WHITE, "[e] impact bomb");
+		printInMiddle(12, COLOR_WHITE, "Hint");
+		printInMiddle(13, COLOR_WHITE, "[Mouse 1] fire");
+		printInMiddle(14, COLOR_WHITE, "[Space] bomb");
+		printInMiddle(15, COLOR_WHITE, "[e] impact bomb");
+		printInMiddle(16, COLOR_WHITE, "[r] restart");
+		printInMiddle(17, COLOR_WHITE, "[~] debug vision");
 
 		printInMiddle(20, COLOR_WHITE, "Press space to return to menu ... ");
 
@@ -131,7 +133,7 @@ void gameOver() {
 	return;
 }
 
-void Error() {
+void error(void) {
 
 	while (1) {
 		// 1. get buffered user input
@@ -162,26 +164,8 @@ extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
 int playerId;
 Direction playerFacing;
 
-// 0 fatal error 1 successful
+// 0 fatal error 1 gameover 2 restart
 int doGameLoop() {
-	
-	/*CharacterImage* temp = getImage(LIFE_HUMANOID, 1);
-	if (temp != NULL) {
-		for (int i = 0; i<(int)temp->dimension->y; i++) {
-			for (int j = 0; j<(int)temp->dimension->x; j++) {
-				move(i, j);
-				if (temp->solid[i][j] > 0)
-				{
-					attron(temp->color[i][j]);
-					addch(temp->display[i][j]);
-					attroff(temp->color[i][j]);
-				}
-			}
-		}
-	}
-	refresh();
-	for (;;);*/
-	
 	// Extended characters table: http://melvilletheatre.com/articles/ncurses-extended-characters/index.html
 	// e.g. addch(97 | A_ALTCHARSET) will print out a "brick" character
 	//      addch(96 | A_ALTCHARSET) will print out a diamond
@@ -189,14 +173,12 @@ int doGameLoop() {
 	// setup the level and player!
 	clear();
 	initializeObjects();
-	if (!initializeInputEvents())
-	{
-		Error();
-		return 0;
-	}
+	if (!initializeInputEvents()) return 0;
 	Coordinate start, end;
-	Region localMap = loadLevel(TEST, &start, &end, executablePath);
-	playerId = createObject(LIFE_HUMANOID, start.x, start.y);
+	Region localMap = loadLevel(TUTORIAL, &start, &end, executablePath);
+	playerId = createObject(&localMap, -1, LIFE_HUMANOID, start.x, start.y);
+	if (playerId == -1) return 0;
+	if (createObject(&localMap, -1, LIFE_HUMANOID, start.x + 10, start.y) == -1) return 0;
 
 	//Region localMap = generateEmptyLocalRegion(1000, 150);
 	//localRegionAddRect(&localMap, 0, 0, 1000, 50, 0);
@@ -207,6 +189,8 @@ int doGameLoop() {
 	MOutput mouseEvents;
 	mouseEvents.buttonState = 0;
 
+	BOOL restart = FALSE;
+	BOOL debugVision = FALSE;
 	int coolDown = 0;
 	int coolDown2 = 0;
 
@@ -233,31 +217,40 @@ int doGameLoop() {
 			coolDown += 10;
 			double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 			double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-			int bulletId = createObjectProjectileDest(BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, -1, DESTROY_CRITERIA_HIT, FALSE);
+			int bulletId = createObjectProjectileDest(&localMap, playerId, BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, -1, DESTROY_CRITERIA_HIT, FALSE);
 		}
 		if (keyboardPress[' '] && coolDown2 <= 0) {
 			coolDown2 += 40;
 			double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 			double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-			int bombId = createObjectProjectileDest(BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 40, 0, TRUE);
+			int bombId = createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 40, 0, TRUE);
 		}
 		else if (keyboardPress['e'] && coolDown2 <= 0) {
 			coolDown2 += 60;
 			double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 			double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-			int bombId = createObjectProjectileDest(BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 100, DESTROY_CRITERIA_STOP, TRUE);
+			int bombId = createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 100, DESTROY_CRITERIA_STOP, TRUE);
+		}
+		if (keyboardPress['~'])
+			debugVision = !debugVision;
+		if (keyboardPress['r'])
+		{
+			deleteObject(&localMap, playerId, TRUE);
+			restart = TRUE;
 		}
 
 		// 3. update all game objects positions
 		updateObjectsStatus(&localMap);
 		acceObjects(&localMap);
 		moveObjects(&localMap);
+		rotateObjects(&localMap);
 		
 		// 4. render the display this turn
 		scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
 		scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
 		drawLocalRegion(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 		displayObjects(scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
+		if (debugVision) drawLocalRegionBlocked(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 		displayCrossHair(mouseEvents.x, mouseEvents.y);
 		refresh();		// update the display in one go
 
@@ -269,8 +262,8 @@ int doGameLoop() {
 		if (gameObject[playerId].type != LIFE_HUMANOID)
 			break;
 	}
-	gameOver();
 	cleanUpLocalRegion(&localMap);
+	if (restart) return 2;
 	return 1;
 }
 
@@ -285,7 +278,7 @@ int main(int argc, char *argv[])
 #endif
 	if (!loadImageFiles(executablePath))
 	{
-		Error();
+		error();
 		return 0;
 	}
 	
@@ -311,13 +304,24 @@ int main(int argc, char *argv[])
 		selectedMenu = doMenu();
 		if (selectedMenu == 0)
 		{
-			switch (doGameLoop())
-			{
-			case 0:
-				return 0;
-			default:
-				break;
-			}
+			BOOL restart;
+			do {
+				restart = FALSE;
+				switch (doGameLoop())
+				{
+				case 0:
+					error();
+					return 0;
+				case 1:
+					gameOver();
+					break;
+				case 2:
+					restart = TRUE;
+					break;
+				default:
+					break;
+				}
+			} while (restart);
 		}
 		else if (selectedMenu == 1) doCredit();
 	} while (selectedMenu != 2);
