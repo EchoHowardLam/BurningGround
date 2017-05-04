@@ -69,7 +69,8 @@ int loadImageFiles(char *path) {
 				if (displayMode) {
 					loadImage->display[row] = (chtype *) malloc(loadImage->dimension->x * sizeof(chtype));
 					loadImage->solid[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
-					move(10, 10);
+					int headChar = indexNotOf(line, ' ');
+					int tailChar = lastIndexNotOf(line, ' ');
 					for (int k = 0; k < loadImage->dimension->x; k++) {
 						if (line[k] >= 161)
 							loadImage->display[row][k] = (line[k] | A_ALTCHARSET);
@@ -79,7 +80,8 @@ int loadImageFiles(char *path) {
 							loadImage->display[row][k] = (line[k] -128+96) | A_ALTCHARSET;
 						else
 							loadImage->display[row][k] = line[k];
-						loadImage->solid[row][k] = (line[k] == ' ');
+						
+						loadImage->solid[row][k] = (k >= headChar && k <= tailChar);
 					}
 				} else {
 					loadImage->color[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
