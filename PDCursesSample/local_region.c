@@ -15,6 +15,7 @@ Region generateEmptyLocalRegion(int w, int h)
 		new_region.appearance[i] = malloc(w * sizeof(chtype));
 		new_region.blocked[i] = malloc(w * sizeof(BOOL));
 		new_region.objId[i] = malloc(w * sizeof(int));
+		new_region.color[i] = malloc(w * sizeof(int));
 		for (int j = 0; j < w; j++) {
 			new_region.appearance[i][j] = ' ';
 			new_region.blocked[i][j] = 0;
