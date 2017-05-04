@@ -35,13 +35,15 @@ void initializeObjects(void);
 int createObject(ObjectType type, double startX, double startY);
 int createObjectProjectileDir(ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
 int createObjectProjectileDest(ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
-int deleteObject(int id, BOOL silentDelete);
-void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH);
+void deleteObject(Region *environment, int id, BOOL silentDelete);
+void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH); // please call updateObjectsStatus before calling this function
 void displayCrossHair(int X, int Y);
 void pushObjectDir(int id, double dirX, double dirY, double speed);
-void acceObjects(Region *environment);
+void acceObjects(Region *environment); // please call updateObjectsStatus before calling this function
 void controlObjectX(int id, double destX, double speed);
 void controlObjectY(int id, double destY, double speed);
-void moveObjects(Region *environment);
+void moveObjects(Region *environment); // please call updateObjectsStatus before calling this function
+void updateObjectsStatus(Region *environment);
+BOOL checkObjectCollision(Region *environment, int objId, double x, double y); // please call updateObjectsStatus before calling this function, 0 miss 1 hit
 BOOL checkObjectOnFeet(Region *environment, int objId);
 BOOL removeEnvironmentBlock(Region *environment, double x, double y);

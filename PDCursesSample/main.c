@@ -248,6 +248,7 @@ int doGameLoop() {
 		}
 
 		// 3. update all game objects positions
+		updateObjectsStatus(&localMap);
 		acceObjects(&localMap);
 		moveObjects(&localMap);
 		

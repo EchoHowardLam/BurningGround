@@ -114,6 +114,38 @@ int createObjectProjectileDest(ObjectType type, double startX, double startY, do
 	return -1;
 }
 
+void deleteObject(Region *environment, int id, BOOL silentDelete)
+{
+	if (environment == NULL) return;
+	if (!silentDelete)
+	{
+		switch (gameObject[id].type)
+		{
+		case BOMB:
+		{
+			// spawn fragments when bombs are destroyed!
+			double dirX, dirY, shrapnelV = 0.9;
+			removeEnvironmentBlock(environment, gameObject[id].x, gameObject[id].y);
+			for (int k = 0; k < 4; k++)
+			{
+				dirX = rand() % 101 - 50;
+				dirY = rand() % 101 - 50;
+				// conservation of momentum -> there must be a shrapnel going in the opposite direction
+				createObjectProjectileDir(FRAGMENT, gameObject[id].x, gameObject[id].y, dirX, dirY, shrapnelV, 30, 0, TRUE);
+				createObjectProjectileDir(FRAGMENT, gameObject[id].x, gameObject[id].y, -dirX, -dirY, shrapnelV, 30, 0, TRUE);
+				removeEnvironmentBlock(environment, gameObject[id].x + DIRECTION2X[k], gameObject[id].y + DIRECTION2Y[k]);
+				removeEnvironmentBlock(environment, gameObject[id].x + DIAGONALX[k], gameObject[id].y + DIAGONALY[k]);
+			}
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	gameObject[id].type = NOTHING;		// destroy it!
+	return;
+}
+
 void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 {
 	for (int i = 0; i < MAX_OBJECT; i++)
@@ -131,7 +163,6 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			{
 			case LIFE_HUMANOID:
 				{
-					gameObject[i].sprite = getImage(LIFE_HUMANOID, 4);
 					if (gameObject[i].sprite == NULL) break;
 					int grx, gry;
 					int lx, ly;
@@ -154,12 +185,6 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 							}
 						}
 					}
-					/*attron(COLOR_PAIR(COLOR_WHITE));
-					addch('|');
-					if (move(screenY - 1, screenX) != ERR) {
-						addch(212 | A_ALTCHARSET);
-					}
-					attroff(COLOR_PAIR(COLOR_WHITE));*/
 				}
 				break;
 			case BULLET:
@@ -186,6 +211,8 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 						addch(',');
 				}
 				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -207,8 +234,7 @@ void displayCrossHair(int X, int Y)
 
 void pushObjectDir(int id, double dirX, double dirY, double speed)
 {
-	if (gameObject[id].type == NOTHING)
-		return;
+	if (gameObject[id].type == NOTHING) return;
 
 	gameObject[id].dispX = dirX;
 	gameObject[id].dispY = dirY;
@@ -230,8 +256,7 @@ void pushObjectDir(int id, double dirX, double dirY, double speed)
 
 void acceObjects(Region *environment)
 {
-	if (environment == NULL)
-		return;
+	if (environment == NULL) return;
 	for (int i = 0; i < MAX_OBJECT; i++)
 	{
 		if (gameObject[i].type == NOTHING)
@@ -330,8 +355,7 @@ void controlObjectY(int id, double destY, double speed)
 
 void moveObjects(Region *environment)
 {
-	if (environment == NULL)
-		return;
+	if (environment == NULL) return;
 	for (int i = 0; i < MAX_OBJECT; i++)
 	{
 		if (gameObject[i].type == NOTHING)
@@ -369,18 +393,18 @@ void moveObjects(Region *environment)
 				toDelete = TRUE;
 				silentDelete = TRUE;
 			}
-			else if (environment->appearance[fnewY][fnewX] == ' ')
+			else if (checkObjectCollision(environment, i, newX, newY))
 			{
-				gameObject[i].x = newX;
-				gameObject[i].y = newY;
-			}
-			else {
 				gameObject[i].y = floor(gameObject[i].y) + 0.8;
 				gameObject[i].vel.x = 0.0;
 				gameObject[i].vel.y = 0.0;
 				gameObject[i].underMove = FALSE;
 				if (gameObject[i].destroyCriteria & (DESTROY_CRITERIA_HIT | DESTROY_CRITERIA_STOP))
 					toDelete = TRUE;
+			}
+			else {
+				gameObject[i].x = newX;
+				gameObject[i].y = newY;
 			}
 		}
 		else {
@@ -389,46 +413,154 @@ void moveObjects(Region *environment)
 
 		if (toDelete)
 		{
-			if (!silentDelete)
-			{
-				switch (gameObject[i].type)
-				{
-				case BOMB:
-				{
-					// spawn fragments when bombs are destroyed!
-					double dirX, dirY, shrapnelV = 0.9;
-					removeEnvironmentBlock(environment, gameObject[i].x, gameObject[i].y);
-					for (int k = 0; k < 4; k++)
-					{
-						dirX = rand() % 101 - 50;
-						dirY = rand() % 101 - 50;
-						// conservation of momentum -> there must be a shrapnel going in the opposite direction
-						createObjectProjectileDir(FRAGMENT, gameObject[i].x, gameObject[i].y, dirX, dirY, shrapnelV, 30, 0, TRUE);
-						createObjectProjectileDir(FRAGMENT, gameObject[i].x, gameObject[i].y, -dirX, -dirY, shrapnelV, 30, 0, TRUE);
-						removeEnvironmentBlock(environment, gameObject[i].x + DIRECTION2X[k], gameObject[i].y + DIRECTION2Y[k]);
-						removeEnvironmentBlock(environment, gameObject[i].x + DIAGONALX[k], gameObject[i].y + DIAGONALY[k]);
-					}
-					break;
-				}
-				default:
-					break;
-				}
-			}
-			gameObject[i].type = NOTHING;		// destroy it!
+			deleteObject(environment, i, silentDelete);
+		}
+	}
+	return;
+}
+
+void updateObjectsStatus(Region *environment)
+{
+	if (environment == NULL)
+		return;
+	for (int i = 0; i < MAX_OBJECT; i++)
+	{
+		if (gameObject[i].type == NOTHING)
+			continue;
+		switch (gameObject[i].type)
+		{
+		case LIFE_HUMANOID:
+			gameObject[i].sprite = getImage(LIFE_HUMANOID, 7);
+			break;
+		case BULLET:
+			break;
+		case BOMB:
+			break;
+		case FRAGMENT:
+			break;
+		default:
+			break;
 		}
 		gameObject[i].turnsAlive++;
 	}
+	return;
+}
+
+BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
+{
+	if (environment == NULL) return FALSE;
+	if (gameObject[objId].type == NOTHING) return FALSE;
+	double tmp;
+	switch (gameObject[objId].type)
+	{
+	case LIFE_HUMANOID:
+		{
+			if (gameObject[objId].sprite == NULL) return FALSE;
+			int gax, gay;
+			int lx, ly;
+			int topLeftgx = (int)floor(x) - (int)floor(gameObject[objId].sprite->center->x);
+			int topLeftgy = (int)floor(y) - (int)floor(gameObject[objId].sprite->center->y);
+			int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
+			int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+			int fcolor;
+			for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+			{
+				for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+				{
+					if (gameObject[objId].sprite->solid[ly][lx] > 0)
+					{
+						if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+						{
+							if (environment->appearance[gay][gax] != ' ')
+							{
+								return TRUE;
+							}
+						}
+					}
+				}
+			}
+		}
+		break;
+	case BULLET:
+		if (environment->appearance[(int)floor(y)][(int)floor(x)] != ' ')
+		{
+			return TRUE;
+		}
+		break;
+	case BOMB:
+		if (environment->appearance[(int)floor(y)][(int)floor(x)] != ' ')
+		{
+			return TRUE;
+		}
+		break;
+	case FRAGMENT:
+		if (environment->appearance[(int)floor(y)][(int)floor(x)] != ' ')
+		{
+			return TRUE;
+		}
+		/*tmp = (gameObject[objId].y - floor(gameObject[objId].y));
+		if (tmp <= 0.5)
+		{
+			if (tmp <= 0.25)
+				addch('`');
+			else
+				addch('\'');
+		}
+		else {
+			if (tmp <= 0.75)
+				addch('.');
+			else
+				addch(',');
+		}*/
+		break;
+	default:
+		break;
+	}
+	return FALSE;
 }
 
 BOOL checkObjectOnFeet(Region *environment, int objId)
 {
 	if (environment == NULL) return FALSE;
-	int fX = (int)floor(gameObject[objId].x);
-	int fY = (int)floor(gameObject[objId].y) + 1;
-	if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
-		return FALSE;
-	if (environment->appearance[(int)floor(gameObject[objId].y) + 1][(int)floor(gameObject[objId].x)] != ' ')
-		return TRUE;
+	if (gameObject[objId].type == NOTHING) return FALSE;
+
+	switch (gameObject[objId].type)
+	{
+	// add special cases that has no sprite
+	case BULLET:
+	case BOMB:
+	case FRAGMENT:
+		{
+			int fX = (int)floor(gameObject[objId].x);
+			int fY = (int)floor(gameObject[objId].y) + 1;
+			if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
+				return FALSE;
+			if (environment->appearance[(int)floor(gameObject[objId].y) + 1][(int)floor(gameObject[objId].x)] != ' ')
+				return TRUE;
+		}
+		break;
+	default:
+		{
+			if (gameObject[objId].sprite == NULL) return FALSE;
+			int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
+			int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+			int gax = (int)floor(gameObject[objId].x) - (int)floor(gameObject[objId].sprite->center->x);
+			int gyUnderFoot = (int)floor(gameObject[objId].y) - (int)floor(gameObject[objId].sprite->center->y) + fdimy;
+			if (gyUnderFoot < 0 || gyUnderFoot >= environment->height)
+				return FALSE;
+			for (int lx = 0; lx < fdimx; gax++, lx++)
+			{
+				if (gameObject[objId].sprite->solid[fdimy - 1][lx] > 0)
+				{
+					if (gax < 0 || gax >= environment->width)
+						return FALSE;
+					if (environment->appearance[gyUnderFoot][gax] != ' ')
+						return TRUE;
+				}
+			}
+		}
+		break;
+	}
 	return FALSE;
 }
 
