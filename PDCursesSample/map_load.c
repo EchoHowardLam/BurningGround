@@ -41,7 +41,7 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 	FILE *raw = fopen(newpath, "rb");
 	
 	if (raw != NULL) {
-		unsigned char line[100];
+		char line[100];
 		
 		int row = 0;
 		while (fgets(line, 100, raw) != NULL) {
@@ -84,8 +84,10 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 					BOOL del = 0;
 					int tempX = 0, tempY = 0, tempW = 0, tempH = 0, tempFill = 1, tempBlock = 1;
 					chtype displayChar = 97 | A_ALTCHARSET;
+					int tempColor = COLOR_PAIR(COLOR_WHITE);
 					// 0 - rect
 					// 1 - circle (W -> radius, H -> height from bottom)
+					// 2 - upper tri
 					int shape = 0;
 					while (aInt != NULL) {
 						if (num == 0) {
@@ -99,16 +101,30 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 						} else if (num == 4) {
 							char *modifier = strtok(aInt, "\\");
 							while (modifier != NULL) {
-								if (strcmp(modifier, "h") == 0)
+								if (strcmp((char *) modifier, "h") == 0)
 									tempFill = 0;
-								else if (strcmp(modifier, "d") == 0)
+								else if (strcmp((char *) modifier, "d") == 0)
 									del = 1;
-								else if (strcmp(modifier, "e") == 0)
+								else if (strcmp((char *) modifier, "e") == 0)
 									tempBlock = 0;
-								else if (strcmp(modifier, "R") == 0)
+								else if (modifier[0] == 'c')
+									tempColor = colorCodeToPair(modifier[1]);
+								else if (strcmp((char *) modifier, "R") == 0)
 									shape = 1;
+								else if (strcmp((char *) modifier, "T") == 0)
+									shape = 2;
 								else if (modifier[0] == '.')
 									displayChar = modifier[1];
+								else if (modifier[0] == ',') {
+									displayChar = modifier[1]-'0';
+									displayChar *= 10;
+									displayChar += modifier[2]-'0';
+									if (strlen(modifier) == 4) {
+										displayChar *= 10;
+										displayChar += modifier[3]-'0';
+									}
+									displayChar |= A_ALTCHARSET;
+								}
 								modifier = strtok(NULL, "\\");
 							}
 						}
@@ -119,12 +135,17 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 						if (del)
 							localRegionDelRect(&temp, tempX, tempY, tempW, tempH, tempFill);
 						else
-							localRegionAddRectWithChar(&temp, tempX, tempY, tempW, tempH, tempFill, tempBlock, displayChar);
+							localRegionAddRectWithChar(&temp, tempX, tempY, tempW, tempH, tempFill, tempBlock, displayChar, tempColor);
 					} else if (shape == 1) {
 						if (del)
 							localRegionDelCircle(&temp, tempX, tempY, tempW, tempH, tempFill);
 						else
-							localRegionAddCircleWithChar(&temp, tempX, tempY, tempW, tempH, tempFill, tempBlock, displayChar);
+							localRegionAddCircleWithChar(&temp, tempX, tempY, tempW, tempH, tempFill, tempBlock, displayChar, tempColor);
+					} else if (shape == 2) {
+						if (del)
+							localRegionDelUTri(&temp, tempX, tempY, tempW, tempH, tempFill);
+						else
+							localRegionAddUTriWithChar(&temp, tempX, tempY, tempW, tempH, tempFill, tempBlock, displayChar, tempColor);
 					}
 				}
 			}
@@ -133,7 +154,7 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 		
 		if (level == TEST) {
 			for (int i = 0; i < 100; i++) {
-				localRegionAddRect(&temp, 50 + rand() % 900, 100 + rand() % 30, 5 + rand() % 10, 5 + rand() % 10, rand()%2, 1);
+				localRegionAddRect(&temp, 50 + rand() % 900, 100 + rand() % 30, 5 + rand() % 10, 5 + rand() % 10, rand()%2, 1, COLOR_PAIR(COLOR_WHITE));
 			}
 		}
 		

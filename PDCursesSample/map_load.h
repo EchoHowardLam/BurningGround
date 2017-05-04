@@ -2,6 +2,7 @@
 
 #include "shared_definition.h"
 #include "local_region.h"
+#include "image_load.h"
 
 #include <stdio.h>
 

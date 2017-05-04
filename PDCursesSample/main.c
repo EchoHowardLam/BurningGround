@@ -195,7 +195,7 @@ int doGameLoop() {
 		return 0;
 	}
 	Coordinate start, end;
-	Region localMap = loadLevel(TEST, &start, &end, executablePath);
+	Region localMap = loadLevel(TUTORIAL, &start, &end, executablePath);
 	playerId = createObject(LIFE_HUMANOID, start.x, start.y);
 
 	//Region localMap = generateEmptyLocalRegion(1000, 150);
