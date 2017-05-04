@@ -44,7 +44,9 @@ typedef struct vector Dimension;
 typedef struct mouseOutput MOutput;
 typedef int BOOL;
 
-typedef enum { NOTHING = 0, PLAYER, BULLET, BOMB, FRAGMENT } ObjectType;
+typedef enum { NOTHING = 0,
+			   LIFE_HUMANOID,
+			   BULLET, BOMB, FRAGMENT } ObjectType;
 typedef enum { UP, EAST, DOWN, WEST } Direction;
 extern double DIRECTION2X[4];
 extern double DIRECTION2Y[4];

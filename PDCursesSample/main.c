@@ -35,7 +35,6 @@ char *executablePath;
 int doMenu() {
 	int selectedItem = 0;
 	int totalItem = 3;
-	loadImageFiles(executablePath);
 
 	while (1) {
 		// 1. get buffered user input
@@ -53,20 +52,20 @@ int doMenu() {
 		
 		printInMiddle(7, COLOR_B_YELLOW, "Burning Ground");
 		//printInMiddle(8, 0, "");
-		printInMiddle(9, COLOR_B_BLACK, " Start Game ");
-		printInMiddle(10, COLOR_B_BLACK, " Credit ");
-		printInMiddle(11, COLOR_B_BLACK, " Exit ");
+		printInMiddle(9, COLOR_B_BLACK, "  Start Game  ");
+		printInMiddle(10, COLOR_B_BLACK, "  Credit  ");
+		printInMiddle(11, COLOR_B_BLACK, "  Exit  ");
 		
 		switch (selectedItem % totalItem)
 		{
 		case 0:
-			printInMiddle(9, COLOR_WHITE, " Start Game ");
+			printInMiddle(9, COLOR_WHITE, "> Start Game <");
 			break;
 		case 1:
-			printInMiddle(10, COLOR_WHITE, " Credit ");
+			printInMiddle(10, COLOR_WHITE, "> Credit <");
 			break;
 		case 2:
-			printInMiddle(11, COLOR_WHITE, " Exit ");
+			printInMiddle(11, COLOR_WHITE, "> Exit <");
 			break;
 		}
 		
@@ -77,6 +76,7 @@ int doMenu() {
 		// 3. stop running for some time to prevent using up all CPU power;
 		threadSleep(10);			// want to sleep for roughly 10ms
 	}
+	return 1;
 }
 
 void doCredit() {
@@ -161,42 +161,26 @@ extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
 int playerId;
 Direction playerFacing;
 
+// 0 fatal error 1 successful
 int doGameLoop() {
-
-
-
-
-
-
-
-	CharacterImage* temp = getImage(PLAYER, 0);
+	
+	/*CharacterImage* temp = getImage(LIFE_HUMANOID, 1);
 	if (temp != NULL) {
 		for (int i = 0; i<(int)temp->dimension->y; i++) {
 			for (int j = 0; j<(int)temp->dimension->x; j++) {
 				move(i, j);
-				attron(temp->color[i][j]);
-				addch(temp->display[i][j]);
-				attroff(temp->color[i][j]);
+				if (temp->solid[i][j] > 0)
+				{
+					attron(temp->color[i][j]);
+					addch(temp->display[i][j]);
+					attroff(temp->color[i][j]);
+				}
 			}
 		}
 	}
 	refresh();
-	for (;;);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	for (;;);*/
+	
 	// Extended characters table: http://melvilletheatre.com/articles/ncurses-extended-characters/index.html
 	// e.g. addch(97 | A_ALTCHARSET) will print out a "brick" character
 	//      addch(96 | A_ALTCHARSET) will print out a diamond
@@ -207,9 +191,9 @@ int doGameLoop() {
 	if (!initializeInputEvents())
 	{
 		Error();
-		return -1;
+		return 0;
 	}
-	playerId = createObject(PLAYER, 5, 105);
+	playerId = createObject(LIFE_HUMANOID, 5, 105);
 
 	Region localMap = generateEmptyLocalRegion(1000, 150);
 	//localRegionAddRect(&localMap, 0, 0, 1000, 50, 0);
@@ -284,7 +268,7 @@ int doGameLoop() {
 		// you will need to get system time like clock() and calculate, but that is not necessary most of the time
 		threadSleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library
 
-		if (gameObject[playerId].type != PLAYER)
+		if (gameObject[playerId].type != LIFE_HUMANOID)
 			break;
 	}
 	gameOver();
@@ -296,6 +280,11 @@ int main(int argc, char *argv[])
 {
 	srand((unsigned int)time(NULL));
 	executablePath = argv[0];
+	if (!loadImageFiles(executablePath))
+	{
+		Error();
+		return 0;
+	}
 	
 	// NOTE: Official HOWTO for Curses library: http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/
 	// NOTE: How to setup PDCurses: https://jdonaldmccarthy.wordpress.com/2014/09/05/how-to-set-up-pdcurses-in-visual-studio-2013-c/
@@ -321,8 +310,8 @@ int main(int argc, char *argv[])
 		{
 			switch (doGameLoop())
 			{
-			case -1:
-				return -1;
+			case 0:
+				return 0;
 			default:
 				break;
 			}

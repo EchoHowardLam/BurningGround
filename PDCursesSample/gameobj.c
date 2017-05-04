@@ -31,13 +31,14 @@ int createObject(ObjectType type, double startX, double startY)
 		gameObject[i].underMove = FALSE;
 		switch (type)
 		{
-		case PLAYER:
+		case LIFE_HUMANOID:
 			gameObject[i].underGravity = TRUE;
 			break;
 		default:
 			gameObject[i].underGravity = FALSE;
 			break;
 		}
+		gameObject[i].sprite = NULL;
 		return i;
 	}
 	return -1;
@@ -72,6 +73,7 @@ int createObjectProjectileDir(ObjectType type, double startX, double startY, dou
 		gameObject[i].destroyCriteria = destroyCriteria;
 		gameObject[i].underMove = FALSE;
 		gameObject[i].underGravity = underGravity;
+		gameObject[i].sprite = NULL;
 		return i;
 	}
 	return -1;
@@ -106,6 +108,7 @@ int createObjectProjectileDest(ObjectType type, double startX, double startY, do
 		gameObject[i].destroyCriteria = destroyCriteria;
 		gameObject[i].underMove = FALSE;
 		gameObject[i].underGravity = underGravity;
+		gameObject[i].sprite = NULL;
 		return i;
 	}
 	return -1;
@@ -126,13 +129,38 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			double tmp;
 			switch (gameObject[i].type)
 			{
-			case PLAYER:
-				attron(COLOR_PAIR(COLOR_WHITE));
-				addch('|');
-				if (move(screenY - 1, screenX) != ERR) {
-					addch(245 | A_ALTCHARSET);
+			case LIFE_HUMANOID:
+				{
+					gameObject[i].sprite = getImage(LIFE_HUMANOID, 1);
+					if (gameObject[i].sprite == NULL) break;
+					int grx, gry;
+					int lx, ly;
+					int fdimx = (int)floor(gameObject[i].sprite->dimension->x);
+					int fdimy = (int)floor(gameObject[i].sprite->dimension->y);
+					int fcolor;
+					for (ly = 0, gry = -(int)floor(gameObject[i].sprite->center->y); ly < fdimy; gry++, ly++)
+					{
+						for (lx = 0, grx = -(int)floor(gameObject[i].sprite->center->x); lx < fdimx; grx++, lx++)
+						{
+							if (gameObject[i].sprite->solid[ly][lx] > 0)
+							{
+								if (move(screenY + gry, screenX + grx) != ERR)
+								{
+									fcolor = gameObject[i].sprite->color[ly][lx];
+									attron(COLOR_PAIR(fcolor));
+									addch(gameObject[i].sprite->display[ly][lx]);
+									attroff(COLOR_PAIR(fcolor));
+								}
+							}
+						}
+					}
+					/*attron(COLOR_PAIR(COLOR_WHITE));
+					addch('|');
+					if (move(screenY - 1, screenX) != ERR) {
+						addch(212 | A_ALTCHARSET);
+					}
+					attroff(COLOR_PAIR(COLOR_WHITE));*/
 				}
-				attroff(COLOR_PAIR(COLOR_WHITE));
 				break;
 			case BULLET:
 				attron(COLOR_PAIR(COLOR_WHITE));

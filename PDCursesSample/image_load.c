@@ -112,7 +112,7 @@ int loadImageFiles(char *path) {
 
 CharacterImage* getImage(ObjectType objType, int ID) {
 	///////////////////////// Sample for main.c
-	/*CharacterImage* temp = getImage(PLAYER, 0);
+	/*CharacterImage* temp = getImage(LIFE_HUMANOID, 0);
 	if (temp != NULL) {
 		for (int i=0; i<temp->dimension->y; i++) {
 			for (int j=0; j<temp->dimension->x; j++) {
@@ -130,7 +130,7 @@ CharacterImage* getImage(ObjectType objType, int ID) {
 		return NULL;
 	
 	switch (objType) {
-		case PLAYER: {
+		case LIFE_HUMANOID: {
 			CharacterImage *temp = allObjs[0];
 			while (temp != NULL) {
 				if (temp->charaID == ID) {

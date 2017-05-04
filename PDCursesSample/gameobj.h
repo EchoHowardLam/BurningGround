@@ -7,6 +7,7 @@
 
 #include "shared_definition.h"
 #include "local_region.h"
+#include "image_load.h"
 
 #define MAX_OBJECT 500
 
@@ -25,6 +26,7 @@ typedef struct {
 	//BOOL holdPos;				// whether this object will hold position after dispX/Y is exhausted
 	BOOL underMove;				// whether this object will continue moving by motiveSpeed
 	BOOL underGravity;			// whether this object is affected by gravity
+	CharacterImage* sprite;
 } GameObject;
 
 extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
