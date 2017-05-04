@@ -35,7 +35,7 @@ void initializeObjects(void);
 int createObject(ObjectType type, double startX, double startY);
 int createObjectProjectileDir(ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
 int createObjectProjectileDest(ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
-
+int deleteObject(int id, BOOL silentDelete);
 void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH);
 void displayCrossHair(int X, int Y);
 void pushObjectDir(int id, double dirX, double dirY, double speed);

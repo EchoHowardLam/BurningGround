@@ -131,7 +131,7 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			{
 			case LIFE_HUMANOID:
 				{
-					gameObject[i].sprite = getImage(LIFE_HUMANOID, 5);
+					gameObject[i].sprite = getImage(LIFE_HUMANOID, 4);
 					if (gameObject[i].sprite == NULL) break;
 					int grx, gry;
 					int lx, ly;
