@@ -17,6 +17,7 @@
 #define TURNING_UNSETTLED 2
 
 typedef struct {
+	int endurance;				// commonly known as HP
 	double x, y;				// current position
 	double dispX, dispY;		// displacement needed to move before fixing position
 	Vector vel;
@@ -51,6 +52,8 @@ void controlObjectY(int id, double destY, double speed);
 void moveObjects(Region *environment); // please call updateObjectsStatus before calling this function
 void rotateObjects(Region *environment);
 void updateObjectsStatus(Region *environment);
+BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double newY);
+BOOL interactObject(int objId, int damage, int effect);
 BOOL checkObjectCollision(Region *environment, int objId, double x, double y); // please call updateObjectsStatus before calling this function, 0 miss 1 hit
 BOOL checkObjectOnFeet(Region *environment, int objId);
 BOOL removeEnvironmentBlock(Region *environment, double x, double y);

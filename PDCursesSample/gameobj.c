@@ -16,6 +16,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 		if (gameObject[i].type != NOTHING)
 			continue;		// if not empty, try next
 
+		gameObject[i].endurance = 1;
 		gameObject[i].type = type;
 		gameObject[i].x = startX;
 		gameObject[i].y = startY;
@@ -35,10 +36,13 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 		case LIFE_EYEBALL:
 		case LIFE_MOSQUITOES:
 			gameObject[i].underGravity = FALSE;
+			gameObject[i].fixedFlight = FALSE;
+			break;
+		case LIFE_HUMANOID:
+			gameObject[i].underGravity = FALSE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case DEMO_LIFE_CANNOT_FLY:
-		case LIFE_HUMANOID:
 		default:
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
@@ -59,6 +63,7 @@ int createObjectProjectileDir(Region *environment, int master, ObjectType type, 
 		if (gameObject[i].type != NOTHING)
 			continue;		// if not empty, try next
 
+		gameObject[i].endurance = 1;
 		gameObject[i].type = type;
 		gameObject[i].x = startX;
 		gameObject[i].y = startY;
@@ -97,6 +102,7 @@ int createObjectProjectileDest(Region *environment, int master, ObjectType type,
 		if (gameObject[i].type != NOTHING)
 			continue;		// if not empty, try next
 
+		gameObject[i].endurance = 1;
 		gameObject[i].type = type;
 		gameObject[i].x = startX;
 		gameObject[i].y = startY;
@@ -128,6 +134,7 @@ int createObjectProjectileDest(Region *environment, int master, ObjectType type,
 	return -1;
 }
 
+// This function is for loading sprites
 // -1 fail, otherwise return objId
 int defaultObjectsInit(Region *environment, int objId)
 {
@@ -178,6 +185,8 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 				createObjectProjectileDir(environment, -1, FRAGMENT, gameObject[id].x, gameObject[id].y, -dirX, -dirY, shrapnelV, 30, 0, TRUE);
 				removeEnvironmentBlock(environment, gameObject[id].x + DIRECTION2X[k], gameObject[id].y + DIRECTION2Y[k]);
 				removeEnvironmentBlock(environment, gameObject[id].x + DIAGONALX[k], gameObject[id].y + DIAGONALY[k]);
+				interactObject(environment->objId[(int)floor(gameObject[id].y + DIRECTION2Y[k])][(int)floor(gameObject[id].x + DIRECTION2X[k])], 1, 0);
+				interactObject(environment->objId[(int)floor(gameObject[id].y + DIAGONALY[k])][(int)floor(gameObject[id].x + DIAGONALX[k])], 1, 0);
 			}
 			break;
 		}
@@ -452,6 +461,7 @@ void moveObjects(Region *environment)
 			}
 			else if (checkObjectCollision(environment, i, newX, newY))
 			{
+				triggerObjectHitEvent(environment, i, newX, newY);
 				gameObject[i].y = floor(gameObject[i].y) + 0.8; // still in the same grid
 				gameObject[i].vel.x = 0.0;
 				gameObject[i].vel.y = 0.0;
@@ -520,6 +530,11 @@ void updateObjectsStatus(Region *environment)
 	{
 		if (gameObject[i].type == NOTHING)
 			continue;
+		if (gameObject[i].endurance <= 0)
+		{
+			deleteObject(environment, i, FALSE);
+			continue;
+		}
 		switch (gameObject[i].type)
 		{
 		case LIFE_HUMANOID:
@@ -572,6 +587,72 @@ void updateObjectsStatus(Region *environment)
 	return;
 }
 
+// 0 error 1 event triggered(may not work though)
+BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double newY)
+{
+	if (environment == NULL) return FALSE;
+	if (gameObject[objId].type == NOTHING) return FALSE;
+	int master = gameObject[objId].master;
+	if (master == -1) master = -2;
+	switch (gameObject[objId].type)
+	{
+	case DEMO_OBJ_USING_IMG_LOADER:
+		{
+			/*if (gameObject[objId].sprite == NULL) return FALSE;
+			int gax, gay;
+			int lx, ly;
+			int topLeftgx = (int)floor(newX) - (int)floor(gameObject[objId].sprite->center->x);
+			int topLeftgy = (int)floor(newY) - (int)floor(gameObject[objId].sprite->center->y);
+			int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
+			int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+			for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+			{
+				for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+				{
+					if (gameObject[objId].sprite->solid[ly][lx] > 0)
+					{
+						if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+						{
+							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
+							{
+								return TRUE;
+							}
+						}
+					}
+				}
+			}*/
+		}
+		break;
+	case BULLET:
+	case FRAGMENT:
+		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
+		{
+			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], 1, 0);
+			return TRUE;
+		}
+		break;
+	default:
+		break;
+	}
+	return TRUE;
+}
+
+// 0 error 1 interaction triggered(may not work though)
+BOOL interactObject(int objId, int damage, int effect)
+{
+	if (objId == -1) return FALSE; // this is one of the few functions that may receive an enquiry about invalid objId
+	if (gameObject[objId].type == NOTHING) return FALSE;
+	if (damage >= 0) // No healing by negative number
+	{
+		if (gameObject[objId].endurance > damage)
+			gameObject[objId].endurance -= damage;
+		else
+			gameObject[objId].endurance = 0;
+	}
+	return TRUE;
+}
+
+// 0 error/miss 1 hit
 BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 {
 	if (environment == NULL) return FALSE;
@@ -647,6 +728,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	return FALSE;
 }
 
+// 0 error/not on feet 1 on feet
 BOOL checkObjectOnFeet(Region *environment, int objId)
 {
 	if (environment == NULL) return FALSE;
