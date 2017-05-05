@@ -52,6 +52,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case DEMO_LIFE_CANNOT_FLY:
+		case LIFE_MUSHROOM:
 		default:
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
@@ -254,6 +255,7 @@ int defaultObjectsInit(Region *environment, int objId)
 	if (gameObject[objId].type == NOTHING) return -1;
 	switch (gameObject[objId].type)
 	{
+<<<<<<< HEAD
 	case LIFE_HUMANOID:
 		gameObject[objId].sprite = getImage(LIFE_HUMANOID, 6 | (gameObject[objId].facingDir & 1));
 		if (!registerEnvironmentObject(environment, objId))
@@ -278,12 +280,16 @@ int defaultObjectsInit(Region *environment, int objId)
 			return -1;
 		}
 		break;
+	case LIFE_MUSHROOM:
+		gameObject[objId].sprite = getImage(LIFE_MOSQUITOES, rand()%3);
+		if (!registerEnvironmentObject(environment, objId))
+		{
+			deleteObject(environment, objId, TRUE);
+			return -1;
+		}
+		break;
 	default:
 		break;
-	}
-	for (int index = 0; index < TOTAL_EFFECT_COUNT; index++)
-	{
-		gameObject[objId].underEffect[index] = -1;
 	}
 	return objId;
 }
@@ -354,6 +360,7 @@ void displayObjects(Region *environment, Coordinate scrTopLeftPos, int scrW, int
 			case LIFE_HUMANOID:
 			case LIFE_EYEBALL:
 			case LIFE_MOSQUITOES:
+			case LIFE_MUSHROOM:
 				{
 					if (gameObject[i].sprite == NULL) break;
 					int grx, gry;
@@ -790,6 +797,24 @@ void updateObjectsStatus(Region *environment)
 				}
 			}
 			break;
+		case LIFE_MUSHROOM:
+			{
+				CharacterImage *oldImage = gameObject[i].sprite;
+				CharacterImage *newImage = getImage(LIFE_MUSHROOM, gameObject[i].sprite->charaID);
+				if (oldImage != newImage)
+				{
+					gameObject[i].sprite = newImage;
+					if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+					{
+						removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+						registerEnvironmentObject(environment, i);
+					}
+					else {
+						gameObject[i].sprite = oldImage;
+					}
+				}
+			}
+			break;
 		case MAGIC_LASER: // can use middle-line algorithm here for optimization
 			{
 				double curX = gameObject[i].x;
@@ -921,6 +946,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case LIFE_HUMANOID:
 	case LIFE_EYEBALL:
 	case LIFE_MOSQUITOES:
+	case LIFE_MUSHROOM:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
