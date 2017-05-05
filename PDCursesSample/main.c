@@ -198,54 +198,57 @@ int doGameLoop() {
 		// 1. draw background...
 		//drawBackground();
 		clear();
-		
-		if (coolDown > 0) coolDown--;
-		if (coolDown2 > 0) coolDown2--;
-		// 2. get buffered user input and determine player action
-		for (int i = 0; i < ACCEPTABLE_KEY_NUM; i++)
-			keyboardPress[i] = FALSE;
-		getAllUserInputs(keyboardPress, &mouseEvents);
-		combineWASDwasdKeys(keyboardPress);
-		combineArrowKeys(keyboardPress);
-		combinewasdArrowKeys(keyboardPress);
-		if (keyboardPress[KB_UP_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.5); playerFacing = UP; }
-		else if (keyboardPress[KB_DOWN_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.5); playerFacing = DOWN; }
-		if (keyboardPress[KB_LEFT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.5); playerFacing = WEST; }
-		else if (keyboardPress[KB_RIGHT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.5); playerFacing = EAST; }
-		if (mouseEvents.buttonState && coolDown <= 0) {
-			coolDown += 10;
-			double destX = mouseEvents.x + scrTopLeft.x + 0.5;
-			double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-			int bulletId = createObjectProjectileDest(&localMap, playerId, BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, -1, DESTROY_CRITERIA_HIT, FALSE);
-		}
-		if (keyboardPress[' '] && coolDown2 <= 0) {
-			coolDown2 += 40;
-			double destX = mouseEvents.x + scrTopLeft.x + 0.5;
-			double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-			int bombId = createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 40, 0, TRUE);
-		}
-		else if (keyboardPress['e'] && coolDown2 <= 0) {
-			coolDown2 += 60;
-			double destX = mouseEvents.x + scrTopLeft.x + 0.5;
-			double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-			int bombId = createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.8, 100, DESTROY_CRITERIA_STOP, TRUE);
-		}
-		if (keyboardPress['~'])
-			debugVision = !debugVision;
-		if (keyboardPress['r'])
-		{
-			deleteObject(&localMap, playerId, TRUE);
-			restart = TRUE;
-		}
-		
-		aiRun(&localMap);
-		spawnCheck(&localMap);
 
-		// 3. update all game objects positions
-		updateObjectsStatus(&localMap);
-		acceObjects(&localMap);
-		moveObjects(&localMap);
-		rotateObjects(&localMap);
+		for (int L = 0; L < 5; L++)
+		{
+			// 2. get buffered user input and determine player action
+			if (coolDown > 0) coolDown--;
+			if (coolDown2 > 0) coolDown2--;
+			for (int i = 0; i < ACCEPTABLE_KEY_NUM; i++)
+				keyboardPress[i] = FALSE;
+			getAllUserInputs(keyboardPress, &mouseEvents);
+			combineWASDwasdKeys(keyboardPress);
+			combineArrowKeys(keyboardPress);
+			combinewasdArrowKeys(keyboardPress);
+			if (keyboardPress[KB_UP_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.2); playerFacing = UP; }
+			else if (keyboardPress[KB_DOWN_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.2); playerFacing = DOWN; }
+			if (keyboardPress[KB_LEFT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.2); playerFacing = WEST; }
+			else if (keyboardPress[KB_RIGHT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.2); playerFacing = EAST; }
+			if (mouseEvents.buttonState && coolDown <= 0) {
+				coolDown += 50;
+				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
+				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
+				int bulletId = createObjectProjectileDest(&localMap, playerId, BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.2, -1, DESTROY_CRITERIA_HIT, FALSE);
+			}
+			if (keyboardPress[' '] && coolDown2 <= 0) {
+				coolDown2 += 200;
+				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
+				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
+				int bombId = createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 200, 0, TRUE);
+			}
+			else if (keyboardPress['e'] && coolDown2 <= 0) {
+				coolDown2 += 300;
+				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
+				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
+				int bombId = createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 500, DESTROY_CRITERIA_STOP, TRUE);
+			}
+			if (keyboardPress['~'])
+				debugVision = !debugVision;
+			if (keyboardPress['r'])
+			{
+				deleteObject(&localMap, playerId, TRUE);
+				restart = TRUE;
+			}
+
+			aiRun(&localMap);
+			spawnCheck(&localMap);
+
+			// 3. update all game objects positions
+			updateObjectsStatus(&localMap);
+			acceObjects(&localMap);
+			moveObjects(&localMap);
+			rotateObjects(&localMap);
+		}
 		
 		// 4. render the display this turn
 		scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;

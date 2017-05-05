@@ -29,6 +29,9 @@
 
 #define BG_MOUSE_BUTTON1_PRESSED 1
 
+#define GRAVITATIONAL_ACC 0.002
+#define FRICTION_TRIGGER 0.0001
+
 struct vector {
 	double x;
 	double y;

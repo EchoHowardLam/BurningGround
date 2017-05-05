@@ -39,7 +39,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = FALSE;
 			break;
 		case LIFE_HUMANOID:
-			gameObject[i].underGravity = FALSE;
+			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case DEMO_LIFE_CANNOT_FLY:
@@ -91,6 +91,7 @@ int createObjectProjectileDir(Region *environment, int master, ObjectType type, 
 		gameObject[i].facingDir = 1;
 		gameObject[i].sprite = NULL;
 		gameObject[i].master = master;
+		gameObject[i].spawnRegionCount = NULL;
 		return defaultObjectsInit(environment, i);
 	}
 	return -1;
@@ -130,6 +131,7 @@ int createObjectProjectileDest(Region *environment, int master, ObjectType type,
 		gameObject[i].facingDir = 1;
 		gameObject[i].sprite = NULL;
 		gameObject[i].master = master;
+		gameObject[i].spawnRegionCount = NULL;
 		return defaultObjectsInit(environment, i);
 	}
 	return -1;
@@ -176,6 +178,7 @@ int defaultObjectsInit(Region *environment, int objId)
 void deleteObject(Region *environment, int id, BOOL silentDelete)
 {
 	if (environment == NULL) return;
+	if (gameObject[id].type == NOTHING) return;
 	if (!silentDelete)
 	{
 		switch (gameObject[id].type)
@@ -183,15 +186,15 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 		case BOMB:
 		{
 			// spawn fragments when bombs are destroyed!
-			double dirX, dirY, shrapnelV = 0.9;
+			double dirX, dirY, shrapnelV = 0.2;
 			removeEnvironmentBlock(environment, gameObject[id].x, gameObject[id].y);
 			for (int k = 0; k < 4; k++)
 			{
 				dirX = rand() % 101 - 50;
 				dirY = rand() % 101 - 50;
 				// conservation of momentum -> there must be a shrapnel going in the opposite direction
-				createObjectProjectileDir(environment, -1, FRAGMENT, gameObject[id].x, gameObject[id].y, dirX, dirY, shrapnelV, 30, 0, TRUE);
-				createObjectProjectileDir(environment, -1, FRAGMENT, gameObject[id].x, gameObject[id].y, -dirX, -dirY, shrapnelV, 30, 0, TRUE);
+				createObjectProjectileDir(environment, -1, FRAGMENT, gameObject[id].x, gameObject[id].y, dirX, dirY, shrapnelV, 250, 0, TRUE);
+				createObjectProjectileDir(environment, -1, FRAGMENT, gameObject[id].x, gameObject[id].y, -dirX, -dirY, shrapnelV, 250, 0, TRUE);
 				removeEnvironmentBlock(environment, gameObject[id].x + DIRECTION2X[k], gameObject[id].y + DIRECTION2Y[k]);
 				removeEnvironmentBlock(environment, gameObject[id].x + DIAGONALX[k], gameObject[id].y + DIAGONALY[k]);
 				interactObject(environment->objId[(int)floor(gameObject[id].y + DIRECTION2Y[k])][(int)floor(gameObject[id].x + DIRECTION2X[k])], 1, 0);
@@ -333,8 +336,8 @@ void acceObjects(Region *environment)
 		BOOL on_feet = FALSE;
 		if (gameObject[i].underGravity)
 		{
-			gameObject[i].vel.y += 0.01;
-			if ((gameObject[i].vel.y > 0.001) && checkObjectOnFeet(environment, i)) // friction and normal force only works if you press it against the surface
+			gameObject[i].vel.y += GRAVITATIONAL_ACC;
+			if ((gameObject[i].vel.y > FRICTION_TRIGGER) && checkObjectOnFeet(environment, i)) // friction and normal force only works if you press it against the surface
 			{
 				gameObject[i].y = floor(gameObject[i].y) + 0.8;
 				on_feet = TRUE;
@@ -391,7 +394,7 @@ void acceObjects(Region *environment)
 			if (gameObject[i].motiveVel.x < 0.5)
 				gameObject[i].motiveVel.x = 0.0;
 			else
-				gameObject[i].motiveVel.x *= 0.95;
+				gameObject[i].motiveVel.x *= 0.99;
 			gameObject[i].motiveVel.y = 0.0;
 		}
 	}
@@ -661,6 +664,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], 1, 0);
 			return TRUE;
 		}
+		deleteObject(environment, objId, FALSE);
 		break;
 	default:
 		break;
