@@ -207,6 +207,8 @@ ObjectType codeToType(char *code) {
 		return LIFE_EYEBALL;
 	else if (strcmp(code, "mos") == 0)
 		return LIFE_MOSQUITOES;
+	else if (strcmp(code, "mush") == 0)
+		return LIFE_MUSHROOM;
 	else
 		return NOTHING;
 }

@@ -43,6 +43,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case DEMO_LIFE_CANNOT_FLY:
+		case LIFE_MUSHROOM:
 		default:
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
@@ -169,9 +170,18 @@ int defaultObjectsInit(Region *environment, int objId)
 				return -1;
 			}
 			break;
+		case LIFE_MUSHROOM:
+			gameObject[objId].sprite = getImage(LIFE_MOSQUITOES, rand()%3);
+			if (!registerEnvironmentObject(environment, objId))
+			{
+				deleteObject(environment, objId, TRUE);
+				return -1;
+			}
+			break;
 	default:
 		break;
 	}
+	
 	return objId;
 }
 
@@ -232,7 +242,8 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			case DEMO_OBJ_USING_IMG_LOADER:
 			case LIFE_HUMANOID:
 			case LIFE_EYEBALL:
-				case LIFE_MOSQUITOES:
+			case LIFE_MOSQUITOES:
+			case LIFE_MUSHROOM:
 				{
 					if (gameObject[i].sprite == NULL) break;
 					int grx, gry;
@@ -607,6 +618,24 @@ void updateObjectsStatus(Region *environment)
 				}
 			}
 				break;
+		case LIFE_MUSHROOM:
+			{
+				CharacterImage *oldImage = gameObject[i].sprite;
+				CharacterImage *newImage = getImage(LIFE_MUSHROOM, gameObject[i].sprite->charaID);
+				if (oldImage != newImage)
+				{
+					gameObject[i].sprite = newImage;
+					if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+					{
+						removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+						registerEnvironmentObject(environment, i);
+					}
+					else {
+						gameObject[i].sprite = oldImage;
+					}
+				}
+			}
+				break;
 		case BULLET:
 			break;
 		case BOMB:
@@ -700,6 +729,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case LIFE_HUMANOID:
 	case LIFE_EYEBALL:
 	case LIFE_MOSQUITOES:
+	case LIFE_MUSHROOM:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;

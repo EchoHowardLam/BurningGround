@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-#define IMAGE_FILES 3
+#define IMAGE_FILES 4
 
 typedef struct CharacterImage CharacterImage;
 

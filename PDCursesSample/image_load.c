@@ -10,10 +10,12 @@ int loadImageFiles(char *path) {
 	filesToRead[0] = "\\graphics\\Player.txt";
 	filesToRead[1] = "\\graphics\\eyeballs.txt";
 	filesToRead[2] = "\\graphics\\mosquitoes.txt";
+	filesToRead[3] = "\\graphics\\mushrooms.txt";
 #else
 	filesToRead[0] = "/graphics/Player.txt";
 	filesToRead[1] = "/graphics/eyeballs.txt";
 	filesToRead[2] = "/graphics/mosquitoes.txt";
+	filesToRead[3] = "/graphics/mushrooms.txt";
 #endif
 	
 	int size = ((int) strlen(path)) + 1;
@@ -137,6 +139,9 @@ CharacterImage* getImage(ObjectType objType, int ID) {
 		case LIFE_MOSQUITOES:
 			temp = allObjs[2];
 			break;
+		case LIFE_MUSHROOM:
+			temp = allObjs[3];
+			break;
 		default:
 			return NULL;
 	}
@@ -191,22 +196,6 @@ int colorCodeToPair(char code) {
 void setUpColors() {
 	for (int i = 1; i < 16; i++)
 		init_pair(i, i, COLOR_BLACK);
-	/*init_pair(0, COLOR_BLACK, COLOR_BLACK);
-	init_pair(1, COLOR_BLUE, COLOR_BLACK);
-	init_pair(2, COLOR_GREEN, COLOR_BLACK);
-	init_pair(3, COLOR_CYAN, COLOR_BLACK);
-	init_pair(4, COLOR_RED, COLOR_BLACK);
-	init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
-	init_pair(6, COLOR_YELLOW, COLOR_BLACK);
-	init_pair(7, COLOR_WHITE, COLOR_BLACK);
-	init_pair(8, COLOR_B_BLACK, COLOR_BLACK);
-	init_pair(9, COLOR_B_BLUE, COLOR_BLACK);
-	init_pair(10, COLOR_B_GREEN, COLOR_BLACK);
-	init_pair(11, COLOR_B_CYAN, COLOR_BLACK);
-	init_pair(12, COLOR_B_RED, COLOR_BLACK);
-	init_pair(13, COLOR_B_MAGENTA, COLOR_BLACK);
-	init_pair(14, COLOR_B_YELLOW, COLOR_BLACK);
-	init_pair(15, COLOR_B_WHITE, COLOR_BLACK);*/
 	
 	init_pair(20, COLOR_BLACK, COLOR_B_WHITE); // inverse
 }
