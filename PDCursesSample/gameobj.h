@@ -28,6 +28,7 @@ typedef struct {
 	//BOOL holdPos;				// whether this object will hold position after dispX/Y is exhausted
 	BOOL underMove;				// whether this object will continue moving by motiveSpeed
 	BOOL underGravity;			// whether this object is affected by gravity
+	BOOL fixedFlight;			// whether this object will stabilize in air when it is not underGravity
 	int facingDir;				// 0 left 1 right
 	CharacterImage* sprite;
 	int master;					// id of the object that spawns it, -1 for none

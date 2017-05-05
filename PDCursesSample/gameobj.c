@@ -31,11 +31,17 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 		gameObject[i].underMove = FALSE;
 		switch (type)
 		{
-		case LIFE_HUMANOID:
-			gameObject[i].underGravity = TRUE;
-			break;
-		default:
+		case DEMO_LIFE_CAN_FLY:
+		case LIFE_EYEBALL:
+		case LIFE_MOSQUITOES:
 			gameObject[i].underGravity = FALSE;
+			gameObject[i].fixedFlight = TRUE;
+			break;
+		case DEMO_LIFE_CANNOT_FLY:
+		case LIFE_HUMANOID:
+		default:
+			gameObject[i].underGravity = TRUE;
+			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
 			break;
 		}
 		gameObject[i].facingDir = 1;
@@ -75,6 +81,7 @@ int createObjectProjectileDir(Region *environment, int master, ObjectType type, 
 		gameObject[i].destroyCriteria = destroyCriteria;
 		gameObject[i].underMove = FALSE;
 		gameObject[i].underGravity = underGravity;
+		gameObject[i].fixedFlight = FALSE;
 		gameObject[i].facingDir = 1;
 		gameObject[i].sprite = NULL;
 		gameObject[i].master = master;
@@ -112,6 +119,7 @@ int createObjectProjectileDest(Region *environment, int master, ObjectType type,
 		gameObject[i].destroyCriteria = destroyCriteria;
 		gameObject[i].underMove = FALSE;
 		gameObject[i].underGravity = underGravity;
+		gameObject[i].fixedFlight = FALSE;
 		gameObject[i].facingDir = 1;
 		gameObject[i].sprite = NULL;
 		gameObject[i].master = master;
@@ -127,14 +135,22 @@ int defaultObjectsInit(Region *environment, int objId)
 	if (gameObject[objId].type == NOTHING) return -1;
 	switch (gameObject[objId].type)
 	{
-		case LIFE_HUMANOID:
-			gameObject[objId].sprite = getImage(LIFE_HUMANOID, 6 | (gameObject[objId].facingDir & 1));
-			if (!registerEnvironmentObject(environment, objId)) return -1;
-			break;
-		case LIFE_EYEBALL:
-			gameObject[objId].sprite = getImage(LIFE_EYEBALL, rand()%3);
-			if (!registerEnvironmentObject(environment, objId)) return -1;
-			break;
+	case LIFE_HUMANOID:
+		gameObject[objId].sprite = getImage(LIFE_HUMANOID, 6 | (gameObject[objId].facingDir & 1));
+		if (!registerEnvironmentObject(environment, objId))
+		{
+			deleteObject(environment, objId, TRUE);
+			return -1;
+		}
+		break;
+	case LIFE_EYEBALL:
+		gameObject[objId].sprite = getImage(LIFE_EYEBALL, rand()%3);
+		if (!registerEnvironmentObject(environment, objId))
+		{
+			deleteObject(environment, objId, TRUE);
+			return -1;
+		}
+		break;
 	default:
 		break;
 	}
@@ -189,6 +205,7 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			double tmp;
 			switch (gameObject[i].type)
 			{
+			case DEMO_OBJ_USING_IMG_LOADER:
 			case LIFE_HUMANOID:
 			case LIFE_EYEBALL:
 				{
@@ -302,6 +319,10 @@ void acceObjects(Region *environment)
 				gameObject[i].vel.x = 0.0; // friction coefficient is infinite
 				gameObject[i].vel.y = 0.0; // absorb all downward momentum
 			}
+		}
+		else if (gameObject[i].fixedFlight) {
+			gameObject[i].vel.x *= 0.2;
+			gameObject[i].vel.y *= 0.2;
 		}
 
 		if (gameObject[i].underMove)
@@ -555,11 +576,11 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 {
 	if (environment == NULL) return FALSE;
 	if (gameObject[objId].type == NOTHING) return FALSE;
-	double tmp;
 	int master = gameObject[objId].master;
 	if (master == -1) master = -2;
 	switch (gameObject[objId].type)
 	{
+	case DEMO_OBJ_USING_IMG_LOADER:
 	case LIFE_HUMANOID:
 	case LIFE_EYEBALL:
 		{
@@ -570,7 +591,6 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 			int topLeftgy = (int)floor(y) - (int)floor(gameObject[objId].sprite->center->y);
 			int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
 			int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
-			int fcolor;
 			for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
 			{
 				for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
@@ -648,6 +668,7 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 				return TRUE;
 		}
 		break;
+	case DEMO_OBJ_USING_IMG_LOADER:
 	default:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
@@ -695,7 +716,6 @@ BOOL registerEnvironmentObject(Region *environment, int objId)
 	int topLeftgy = (int)floor(gameObject[objId].y) - (int)floor(gameObject[objId].sprite->center->y);
 	int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
 	int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
-	int fcolor;
 	for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
 	{
 		for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
@@ -729,7 +749,6 @@ BOOL removeEnvironmentObject(Region *environment, int objId, double oldX, double
 	int topLeftgy = (int)floor(oldY) - (int)floor(oldImage->center->y);
 	int fdimx = (int)floor(oldImage->dimension->x);
 	int fdimy = (int)floor(oldImage->dimension->y);
-	int fcolor;
 	for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
 	{
 		for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)

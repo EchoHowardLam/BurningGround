@@ -7,8 +7,10 @@ void aiRun(Region *environment) {
 	{
 		switch (gameObject[i].type) {
 			case LIFE_EYEBALL: {
-				gameObject[i].vel.x += ((double) rand())/RAND_MAX/20*((rand()%2==0)?1:-1);
-				gameObject[i].vel.y += ((double) rand())/RAND_MAX/20*((rand()%2==0)?1:-1);
+				double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+				double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+				controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.8); // + 0.5 is compulsory as it is the center of a grid
+				controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.8);
 				break;
 			}
 			default:
