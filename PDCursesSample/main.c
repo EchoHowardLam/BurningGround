@@ -118,11 +118,12 @@ void gameOver(void) {
 		printInMiddle(7, COLOR_B_RED, "Game Over");
 		printInMiddle(9, COLOR_RED, "You died");
 		printInMiddle(12, COLOR_WHITE, "Hint");
-		printInMiddle(13, COLOR_WHITE, "[Mouse 1] fire");
-		printInMiddle(14, COLOR_WHITE, "[Space] bomb");
+		printInMiddle(13, COLOR_WHITE, "[Mouse 1] ice blob");
+		printInMiddle(14, COLOR_WHITE, "[Space] freeze ray");
 		printInMiddle(15, COLOR_WHITE, "[e] impact bomb");
-		printInMiddle(16, COLOR_WHITE, "[r] restart");
-		printInMiddle(17, COLOR_WHITE, "[~] debug vision");
+		printInMiddle(16, COLOR_WHITE, "[g] grenade");
+		printInMiddle(17, COLOR_WHITE, "[r] restart");
+		printInMiddle(18, COLOR_WHITE, "[~] debug vision");
 
 		printInMiddle(20, COLOR_WHITE, "Press space to return to menu ... ");
 
@@ -210,27 +211,41 @@ int doGameLoop() {
 			combineWASDwasdKeys(keyboardPress);
 			combineArrowKeys(keyboardPress);
 			combinewasdArrowKeys(keyboardPress);
-			if (keyboardPress[KB_UP_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.2); playerFacing = UP; }
-			else if (keyboardPress[KB_DOWN_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.2); playerFacing = DOWN; }
-			if (keyboardPress[KB_LEFT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.2); playerFacing = WEST; }
-			else if (keyboardPress[KB_RIGHT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.2); playerFacing = EAST; }
+			if (keyboardPress[KB_UP_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.15); playerFacing = UP; }
+			else if (keyboardPress[KB_DOWN_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.15); playerFacing = DOWN; }
+			if (keyboardPress[KB_LEFT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.15); playerFacing = WEST; }
+			else if (keyboardPress[KB_RIGHT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.15); playerFacing = EAST; }
 			if (mouseEvents.buttonState && coolDown <= 0) {
 				coolDown += 50;
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				int bulletId = createObjectProjectileDest(&localMap, playerId, BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.2, -1, DESTROY_CRITERIA_HIT, FALSE);
+				createObjectMagicProjectile(&localMap, playerId, MAGIC_BLOB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.2, -1, SPHERE_ICE, 0);
+					//createObjectProjectileDest(&localMap, playerId, BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.2, -1, DESTROY_CRITERIA_HIT, FALSE);
 			}
-			if (keyboardPress[' '] && coolDown2 <= 0) {
-				coolDown2 += 200;
+			if (keyboardPress[' '])
+			{
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				int bombId = createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 200, 0, TRUE);
+				createObjectMagicProjectile(&localMap, playerId, MAGIC_LASER, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.0, -1, SPHERE_ICE, 0);
 			}
-			else if (keyboardPress['e'] && coolDown2 <= 0) {
+			if (keyboardPress['e'] && coolDown2 <= 0)
+			{
 				coolDown2 += 300;
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				int bombId = createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 500, DESTROY_CRITERIA_STOP, TRUE);
+				createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 500, DESTROY_CRITERIA_STOP, TRUE);
+			}
+			else if (keyboardPress['g'] && coolDown2 <= 0) {
+				coolDown2 += 200;
+				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
+				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
+				createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 200, 0, TRUE);
+			}
+			else if (keyboardPress['l'] && coolDown2 <= 0) {
+				coolDown2 += 10;
+				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
+				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
+				createObjectMagicRain(&localMap, playerId, MAGIC_BLOB, destX, destY, 100, 20, 0.1, SPHERE_ICE, 0);
 			}
 			if (keyboardPress['~'])
 				debugVision = !debugVision;
@@ -254,7 +269,7 @@ int doGameLoop() {
 		scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
 		scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
 		drawLocalRegion(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
-		displayObjects(scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
+		displayObjects(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 		if (debugVision) drawLocalRegionBlocked(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 		displayCrossHair(mouseEvents.x, mouseEvents.y);
 		refresh();		// update the display in one go

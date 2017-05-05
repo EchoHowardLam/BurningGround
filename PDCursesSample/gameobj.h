@@ -19,7 +19,8 @@
 typedef struct {
 	int endurance;				// commonly known as HP
 	double x, y;				// current position
-	double dispX, dispY;		// displacement needed to move before fixing position
+	double dispX, dispY;		// For normal objects, displacement needed to move before fixing position
+								// For magics, dispX/Y are used as direction guidance
 	Vector vel;
 	Vector motiveVel;
 	ObjectType type;
@@ -33,6 +34,14 @@ typedef struct {
 	int facingDir;				// 0 left 1 right
 	CharacterImage* sprite;
 	int master;					// id of the object that spawns it, -1 for none
+
+	// usage depends on object type, basically private data
+	int attri;
+	int attri2;
+
+	// effects affecting the object, time remaining for the effect to disappear, lowest value = -1
+	// check for effect: (underEffect[EFFECT_ID] >= 0) --> under influence
+	int underEffect[TOTAL_EFFECT_COUNT];
 	
 	int *spawnRegionCount;
 } GameObject;
@@ -43,9 +52,11 @@ void initializeObjects(void);
 int createObject(Region *environment, int master, ObjectType type, double startX, double startY);
 int createObjectProjectileDir(Region *environment, int master, ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
 int createObjectProjectileDest(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
+int createObjectMagicProjectile(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int sphere, int enchant);
+int createObjectMagicRain(Region *environment, int master, ObjectType type, double CX, double CY, int W, int H, double speed, int sphere, int enchant);
 int defaultObjectsInit(Region *environment, int objId);
 void deleteObject(Region *environment, int id, BOOL silentDelete);
-void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH); // please call updateObjectsStatus before calling this function
+void displayObjects(Region *environment, Coordinate scrTopLeftPos, int scrW, int scrH); // please call updateObjectsStatus before calling this function
 void displayCrossHair(int X, int Y);
 void pushObjectDir(int id, double dirX, double dirY, double speed);
 void acceObjects(Region *environment); // please call updateObjectsStatus before calling this function

@@ -32,6 +32,18 @@
 #define GRAVITATIONAL_ACC 0.002
 #define FRICTION_TRIGGER 0.0001
 
+#define SPHERE_FIRE 1
+#define SPHERE_WATER 2
+#define SPHERE_EARTH 4
+#define SPHERE_WIND 8
+#define SPHERE_ICE 16
+
+#define ENCHANT_EFFECT_MASK 1
+#define ENCHANT_COLD_SLOW 1
+
+#define TOTAL_EFFECT_COUNT 1
+#define EFFECT_COLD_SLOW 0
+
 struct vector {
 	double x;
 	double y;
@@ -52,6 +64,7 @@ typedef enum { NOTHING = 0,
 			   DEMO_LIFE_CAN_FLY, DEMO_LIFE_CANNOT_FLY,
 			   DEMO_OBJ_USING_IMG_LOADER,
 			   LIFE_HUMANOID, LIFE_MUSHROOM, LIFE_EYEBALL, LIFE_MOSQUITOES,
+			   MAGIC_BLOB, MAGIC_SPIKE, MAGIC_LASER,
 			   BULLET, BOMB, FRAGMENT } ObjectType;
 typedef enum { UP, EAST, DOWN, WEST } Direction;
 extern double DIRECTION2X[4];
