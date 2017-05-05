@@ -9,9 +9,11 @@ int loadImageFiles(char *path) {
 #if defined(_WIN32) || defined(_WIN64)
 	filesToRead[0] = "\\graphics\\Player.txt";
 	filesToRead[1] = "\\graphics\\eyeballs.txt";
+	filesToRead[2] = "\\graphics\\mosquitoes.txt";
 #else
 	filesToRead[0] = "/graphics/Player.txt";
 	filesToRead[1] = "/graphics/eyeballs.txt";
+	filesToRead[2] = "/graphics/mosquitoes.txt";
 #endif
 	
 	int size = ((int) strlen(path)) + 1;
@@ -124,32 +126,28 @@ CharacterImage* getImage(ObjectType objType, int ID) {
 	if (allObjs == NULL)
 		return NULL;
 	
+	CharacterImage *temp = NULL;
 	switch (objType) {
-		case LIFE_HUMANOID: {
-			CharacterImage *temp = allObjs[0];
-			while (temp != NULL) {
-				if (temp->charaID == ID) {
-					return temp;
-				} else {
-					temp = temp->next;
-				}
-			}
-			return NULL;
-		}
-		case LIFE_EYEBALL: {
-			CharacterImage *temp = allObjs[1];
-			while (temp != NULL) {
-				if (temp->charaID == ID) {
-					return temp;
-				} else {
-					temp = temp->next;
-				}
-			}
-			return NULL;
-		}
+		case LIFE_HUMANOID:
+			temp = allObjs[0];
+			break;
+		case LIFE_EYEBALL:
+			temp = allObjs[1];
+			break;
+		case LIFE_MOSQUITOES:
+			temp = allObjs[2];
+			break;
 		default:
 			return NULL;
 	}
+	while (temp != NULL) {
+		if (temp->charaID == ID) {
+			return temp;
+		} else {
+			temp = temp->next;
+		}
+	}
+	return NULL;
 }
 
 int colorCodeToPair(char code) {

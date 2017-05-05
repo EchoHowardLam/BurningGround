@@ -51,6 +51,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 		gameObject[i].facingDir = 1;
 		gameObject[i].sprite = NULL;
 		gameObject[i].master = master;
+		gameObject[i].spawnRegionCount = NULL;
 		return defaultObjectsInit(environment, i);
 	}
 	return -1;
@@ -142,22 +143,30 @@ int defaultObjectsInit(Region *environment, int objId)
 	if (gameObject[objId].type == NOTHING) return -1;
 	switch (gameObject[objId].type)
 	{
-	case LIFE_HUMANOID:
-		gameObject[objId].sprite = getImage(LIFE_HUMANOID, 6 | (gameObject[objId].facingDir & 1));
-		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
-		break;
-	case LIFE_EYEBALL:
-		gameObject[objId].sprite = getImage(LIFE_EYEBALL, rand()%3);
-		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
-		break;
+		case LIFE_HUMANOID:
+			gameObject[objId].sprite = getImage(LIFE_HUMANOID, 6 | (gameObject[objId].facingDir & 1));
+			if (!registerEnvironmentObject(environment, objId))
+			{
+				deleteObject(environment, objId, TRUE);
+				return -1;
+			}
+			break;
+		case LIFE_EYEBALL:
+			gameObject[objId].sprite = getImage(LIFE_EYEBALL, rand()%3);
+			if (!registerEnvironmentObject(environment, objId))
+			{
+				deleteObject(environment, objId, TRUE);
+				return -1;
+			}
+			break;
+		case LIFE_MOSQUITOES:
+			gameObject[objId].sprite = getImage(LIFE_MOSQUITOES, rand()%4);
+			if (!registerEnvironmentObject(environment, objId))
+			{
+				deleteObject(environment, objId, TRUE);
+				return -1;
+			}
+			break;
 	default:
 		break;
 	}
@@ -194,6 +203,9 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 			break;
 		}
 	}
+	if (gameObject[id].spawnRegionCount != NULL) {
+		*(gameObject[id].spawnRegionCount) = *(gameObject[id].spawnRegionCount) - 1;
+	}
 	removeEnvironmentObject(environment, id, gameObject[id].x, gameObject[id].y, gameObject[id].sprite);
 	gameObject[id].type = NOTHING;		// destroy it!
 	return;
@@ -217,6 +229,7 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			case DEMO_OBJ_USING_IMG_LOADER:
 			case LIFE_HUMANOID:
 			case LIFE_EYEBALL:
+				case LIFE_MOSQUITOES:
 				{
 					if (gameObject[i].sprite == NULL) break;
 					int grx, gry;
@@ -573,6 +586,24 @@ void updateObjectsStatus(Region *environment)
 				}
 			}
 			break;
+		case LIFE_MOSQUITOES:
+			{
+				CharacterImage *oldImage = gameObject[i].sprite;
+				CharacterImage *newImage = getImage(LIFE_MOSQUITOES, gameObject[i].sprite->charaID);
+				if (oldImage != newImage)
+				{
+					gameObject[i].sprite = newImage;
+					if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+					{
+						removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+						registerEnvironmentObject(environment, i);
+					}
+					else {
+						gameObject[i].sprite = oldImage;
+					}
+				}
+			}
+				break;
 		case BULLET:
 			break;
 		case BOMB:
@@ -664,6 +695,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case DEMO_OBJ_USING_IMG_LOADER:
 	case LIFE_HUMANOID:
 	case LIFE_EYEBALL:
+	case LIFE_MOSQUITOES:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
@@ -858,16 +890,28 @@ double getRandomOfRange(int base) {
 void doInitialSpawn(Region *target) {
 	for (int i=0; i<target->numSpawns; i++) {
 		for (int j=0; j<target->spawns[i]->initial; j++) {
-			createObject(target, -1, target->spawns[i]->mob, target->spawns[i]->x+getRandomOfRange(target->spawns[i]->size), target->spawns[i]->y+getRandomOfRange(target->spawns[i]->size));
+			if (target->spawns[i]->currMobSpawned < target->spawns[i]->max) {
+				int tempID = createObject(target, -1, target->spawns[i]->mob, target->spawns[i]->x+getRandomOfRange(target->spawns[i]->size), target->spawns[i]->y+getRandomOfRange(target->spawns[i]->size));
+				if (tempID != -1) {
+					target->spawns[i]->currMobSpawned++;
+					gameObject[tempID].spawnRegionCount = &(target->spawns[i]->currMobSpawned);
+				}
+			}
 		}
 	}
 }
 
 void spawnCheck(Region *target) {
 	for (int i=0; i<target->numSpawns; i++) {
-		if (((double)rand())/RAND_MAX < target->spawns[i]->chance) {
-			// spawn
-			createObject(target, -1, target->spawns[i]->mob, target->spawns[i]->x+getRandomOfRange(target->spawns[i]->size), target->spawns[i]->y+getRandomOfRange(target->spawns[i]->size));
+		if (target->spawns[i]->currMobSpawned < target->spawns[i]->max) {
+			if (((double)rand())/RAND_MAX < target->spawns[i]->chance) {
+				// spawns
+				int tempID = createObject(target, -1, target->spawns[i]->mob, target->spawns[i]->x+getRandomOfRange(target->spawns[i]->size), target->spawns[i]->y+getRandomOfRange(target->spawns[i]->size));
+				if (tempID != -1) {
+					target->spawns[i]->currMobSpawned++;
+					gameObject[tempID].spawnRegionCount = &(target->spawns[i]->currMobSpawned);
+				}
+			}
 		}
 	}
 }

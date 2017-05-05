@@ -33,6 +33,8 @@ typedef struct {
 	int facingDir;				// 0 left 1 right
 	CharacterImage* sprite;
 	int master;					// id of the object that spawns it, -1 for none
+	
+	int *spawnRegionCount;
 } GameObject;
 
 extern GameObject gameObject[MAX_OBJECT];		// stores all game object!

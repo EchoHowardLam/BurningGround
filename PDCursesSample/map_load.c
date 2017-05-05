@@ -108,6 +108,7 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 								break;
 							case 7:
 								tempSpawn->max = atoi(param);
+								tempSpawn->currMobSpawned = 0;
 								temp.spawns[mobSpawnArea] = tempSpawn;
 								break;
 						}
@@ -204,6 +205,8 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 ObjectType codeToType(char *code) {
 	if (strcmp(code, "eye") == 0)
 		return LIFE_EYEBALL;
+	else if (strcmp(code, "mos") == 0)
+		return LIFE_MOSQUITOES;
 	else
 		return NOTHING;
 }

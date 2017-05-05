@@ -12,6 +12,7 @@ typedef struct {
 	ObjectType mob;
 	int initial;
 	int max;
+	int currMobSpawned;
 } SpawnRegion;
 
 typedef struct region {
