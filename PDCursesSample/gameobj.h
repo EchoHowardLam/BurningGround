@@ -55,3 +55,6 @@ BOOL checkObjectOnFeet(Region *environment, int objId);
 BOOL removeEnvironmentBlock(Region *environment, double x, double y);
 BOOL registerEnvironmentObject(Region *environment, int objId);
 BOOL removeEnvironmentObject(Region *environment, int objId, double oldX, double oldY, CharacterImage *oldImage);
+
+void doInitialSpawn(Region *target);
+void spawnCheck(Region *target);

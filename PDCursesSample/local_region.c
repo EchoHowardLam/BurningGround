@@ -1,15 +1,17 @@
 #include "local_region.h"
 
-Region generateEmptyLocalRegion(int w, int h)
+Region generateEmptyLocalRegion(int w, int h, int spawns)
 {
 	//Region *new_region = malloc(sizeof(Region));
 	Region new_region;
 	new_region.width = w;
 	new_region.height = h;
+	new_region.numSpawns = spawns;
 	new_region.appearance = malloc(h * sizeof(chtype *));
 	new_region.blocked = malloc(h * sizeof(BOOL *));
 	new_region.objId = malloc(h * sizeof(int *));
 	new_region.color = malloc(h * sizeof(int *));
+	new_region.spawns = malloc(spawns * sizeof(SpawnRegion *));
 	for (int i = 0; i < h; i++)
 	{
 		new_region.appearance[i] = malloc(w * sizeof(chtype));
@@ -36,6 +38,10 @@ void cleanUpLocalRegion(Region *target)
 		free(target->objId[i]);
 		free(target->color[i]);
 	}
+	for (int i=0; i<target->numSpawns; i++) {
+		free(target->spawns[i]);
+	}
+	free(target->spawns);
 	free(target->appearance);
 	free(target->blocked);
 	free(target->objId);
@@ -124,10 +130,6 @@ void localRegionAddUTriWithChar(Region *target, int cx, int cy, int width, int h
 					target->color[ry][rx] = color;
 				}
 			} else {
-				/*if (euclidean(cx-rx, cy-ry) <= radius && euclidean(cx-rx, cy-ry) >= radius-1) {
-					target->appearance[ry][rx] = display;
-					target->blocked[ry][rx] = block;
-				}*/
 			}
 		}
 	}

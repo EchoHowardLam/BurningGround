@@ -9,3 +9,5 @@
 typedef enum {TUTORIAL, TEST} LevelName;
 
 Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *executablePath);
+
+ObjectType codeToType(char *code);

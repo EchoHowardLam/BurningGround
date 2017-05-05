@@ -44,17 +44,20 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 		char line[100];
 		
 		int row = 0;
+		int mobSpawnArea = 0;
 		while (fgets(line, 100, raw) != NULL) {
 			if (row == 0) {
 				char *aInt = strtok(line, " ");
 				int num = 0;
-				int tempX = 0, tempY = 0;
+				int tempX = 0, tempY = 0, tempSpawn = 0;
 				while (aInt != NULL) {
 					if (num == 0) {
 						tempX = atoi(aInt);
 					} else if (num == 1) {
 						tempY = atoi(aInt);
-						temp = generateEmptyLocalRegion(tempX, tempY);
+					} else if (num == 2) {
+						tempSpawn = atoi(aInt);
+						temp = generateEmptyLocalRegion(tempX, tempY, tempSpawn);
 					}
 					num++;
 					aInt = strtok(NULL, " ");
@@ -78,7 +81,41 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 					aInt = strtok(NULL, " ");
 				}
 			} else {
-				if (line[0] != '/' && line[1] != '/') {
+				if (line[0] == '\\' && line[1] == 'm' && line[2] == 'o' && line[3] == 'b') {
+					// create mob spawning area
+					char *param = strtok(line, " ");
+					int num = 0;
+					SpawnRegion *tempSpawn = (SpawnRegion *) malloc(sizeof(SpawnRegion));
+					while (param != NULL) {
+						switch (num) {
+							case 1:
+								tempSpawn->x = atoi(param);
+								break;
+							case 2:
+								tempSpawn->y = atoi(param);
+								break;
+							case 3:
+								tempSpawn->size = atoi(param);
+								break;
+							case 4:
+								tempSpawn->mob = codeToType(param);
+								break;
+							case 5:
+								tempSpawn->chance = atoi(param)/1000.0;
+								break;
+							case 6:
+								tempSpawn->initial = atoi(param);
+								break;
+							case 7:
+								tempSpawn->max = atoi(param);
+								temp.spawns[mobSpawnArea] = tempSpawn;
+								break;
+						}
+						num++;
+						param = strtok(NULL, " ");
+					}
+					mobSpawnArea++;
+				} else if (line[0] != '/' && line[1] != '/') {
 					char *aInt = strtok(line, " ");
 					int num = 0;
 					BOOL del = 0;
@@ -162,4 +199,11 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 	}
 	free(newpath);
 	return temp;
+}
+
+ObjectType codeToType(char *code) {
+	if (strcmp(code, "eye") == 0)
+		return LIFE_EYEBALL;
+	else
+		return NOTHING;
 }

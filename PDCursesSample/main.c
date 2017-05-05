@@ -6,6 +6,7 @@
 #include "local_region.h"
 #include "image_load.h"
 #include "map_load.h"
+#include "ai.h"
 
 #include "event_handle.h"
 
@@ -179,10 +180,8 @@ int doGameLoop() {
 	playerId = createObject(&localMap, -1, LIFE_HUMANOID, start.x, start.y);
 	if (playerId == -1) return 0;
 	if (createObject(&localMap, -1, LIFE_HUMANOID, start.x + 10, start.y) == -1) return 0;
-
-	//Region localMap = generateEmptyLocalRegion(1000, 150);
-	//localRegionAddRect(&localMap, 0, 0, 1000, 50, 0);
 	
+	doInitialSpawn(&localMap);
 
 	Coordinate scrTopLeft = {0, 0};
 	BOOL keyboardPress[ACCEPTABLE_KEY_NUM] = { FALSE };
@@ -238,6 +237,9 @@ int doGameLoop() {
 			deleteObject(&localMap, playerId, TRUE);
 			restart = TRUE;
 		}
+		
+		aiRun(&localMap);
+		spawnCheck(&localMap);
 
 		// 3. update all game objects positions
 		updateObjectsStatus(&localMap);

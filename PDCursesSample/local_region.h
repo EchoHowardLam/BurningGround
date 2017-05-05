@@ -4,16 +4,28 @@
 
 #include "shared_definition.h"
 
+typedef struct {
+	int x;
+	int y;
+	int size;
+	double chance;
+	ObjectType mob;
+	int initial;
+	int max;
+} SpawnRegion;
+
 typedef struct region {
 	chtype **appearance;
 	BOOL **blocked;
 	int **objId;
 	int **color;
+	int numSpawns;
+	SpawnRegion **spawns;
 	int width;
 	int height;
 } Region;
 
-Region generateEmptyLocalRegion(int w, int h);
+Region generateEmptyLocalRegion(int w, int h, int spawns);
 void cleanUpLocalRegion(Region *target);
 
 

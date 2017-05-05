@@ -8,8 +8,10 @@ int loadImageFiles(char *path) {
 	char *filesToRead[IMAGE_FILES];
 #if defined(_WIN32) || defined(_WIN64)
 	filesToRead[0] = "\\graphics\\Player.txt";
+	filesToRead[1] = "\\graphics\\eyeballs.txt";
 #else
 	filesToRead[0] = "/graphics/Player.txt";
+	filesToRead[1] = "/graphics/eyeballs.txt";
 #endif
 	
 	int size = ((int) strlen(path)) + 1;
@@ -125,6 +127,17 @@ CharacterImage* getImage(ObjectType objType, int ID) {
 	switch (objType) {
 		case LIFE_HUMANOID: {
 			CharacterImage *temp = allObjs[0];
+			while (temp != NULL) {
+				if (temp->charaID == ID) {
+					return temp;
+				} else {
+					temp = temp->next;
+				}
+			}
+			return NULL;
+		}
+		case LIFE_EYEBALL: {
+			CharacterImage *temp = allObjs[1];
 			while (temp != NULL) {
 				if (temp->charaID == ID) {
 					return temp;

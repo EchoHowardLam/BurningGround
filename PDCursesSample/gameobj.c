@@ -123,14 +123,18 @@ int createObjectProjectileDest(Region *environment, int master, ObjectType type,
 // -1 fail, otherwise return objId
 int defaultObjectsInit(Region *environment, int objId)
 {
-	if (environment == NULL) return;
-	if (gameObject[objId].type == NOTHING) return;
+	if (environment == NULL) return -1;
+	if (gameObject[objId].type == NOTHING) return -1;
 	switch (gameObject[objId].type)
 	{
-	case LIFE_HUMANOID:
-		gameObject[objId].sprite = getImage(LIFE_HUMANOID, 6 | (gameObject[objId].facingDir & 1));
-		if (!registerEnvironmentObject(environment, objId)) return -1;
-		break;
+		case LIFE_HUMANOID:
+			gameObject[objId].sprite = getImage(LIFE_HUMANOID, 6 | (gameObject[objId].facingDir & 1));
+			if (!registerEnvironmentObject(environment, objId)) return -1;
+			break;
+		case LIFE_EYEBALL:
+			gameObject[objId].sprite = getImage(LIFE_EYEBALL, rand()%3);
+			if (!registerEnvironmentObject(environment, objId)) return -1;
+			break;
 	default:
 		break;
 	}
@@ -186,6 +190,7 @@ void displayObjects(Coordinate scrTopLeftPos, int scrW, int scrH)
 			switch (gameObject[i].type)
 			{
 			case LIFE_HUMANOID:
+			case LIFE_EYEBALL:
 				{
 					if (gameObject[i].sprite == NULL) break;
 					int grx, gry;
@@ -514,6 +519,24 @@ void updateObjectsStatus(Region *environment)
 				}
 			}
 			break;
+		case LIFE_EYEBALL:
+			{
+				CharacterImage *oldImage = gameObject[i].sprite;
+				CharacterImage *newImage = getImage(LIFE_EYEBALL, gameObject[i].sprite->charaID);
+				if (oldImage != newImage)
+				{
+					gameObject[i].sprite = newImage;
+					if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+					{
+						removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+						registerEnvironmentObject(environment, i);
+					}
+					else {
+						gameObject[i].sprite = oldImage;
+					}
+				}
+			}
+			break;
 		case BULLET:
 			break;
 		case BOMB:
@@ -538,6 +561,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	switch (gameObject[objId].type)
 	{
 	case LIFE_HUMANOID:
+	case LIFE_EYEBALL:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
@@ -724,4 +748,25 @@ BOOL removeEnvironmentObject(Region *environment, int objId, double oldX, double
 		}
 	}
 	return TRUE;
+}
+
+double getRandomOfRange(int base) {
+	return ((double)rand())/RAND_MAX * base * ((rand()%2==0)?1:-1);
+}
+
+void doInitialSpawn(Region *target) {
+	for (int i=0; i<target->numSpawns; i++) {
+		for (int j=0; j<target->spawns[i]->initial; j++) {
+			createObject(target, -1, target->spawns[i]->mob, target->spawns[i]->x+getRandomOfRange(target->spawns[i]->size), target->spawns[i]->y+getRandomOfRange(target->spawns[i]->size));
+		}
+	}
+}
+
+void spawnCheck(Region *target) {
+	for (int i=0; i<target->numSpawns; i++) {
+		if (((double)rand())/RAND_MAX < target->spawns[i]->chance) {
+			// spawn
+			createObject(target, -1, target->spawns[i]->mob, target->spawns[i]->x+getRandomOfRange(target->spawns[i]->size), target->spawns[i]->y+getRandomOfRange(target->spawns[i]->size));
+		}
+	}
 }
