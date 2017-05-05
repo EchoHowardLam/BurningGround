@@ -46,7 +46,7 @@ typedef struct mouseOutput MOutput;
 typedef int BOOL;
 
 typedef enum { NOTHING = 0,
-			   LIFE_HUMANOID,
+			   LIFE_HUMANOID, LIFE_MUSHROOM, LIFE_EYEBALL, LIFE_MOSQUITOES,
 			   BULLET, BOMB, FRAGMENT } ObjectType;
 typedef enum { UP, EAST, DOWN, WEST } Direction;
 extern double DIRECTION2X[4];
