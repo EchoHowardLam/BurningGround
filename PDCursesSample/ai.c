@@ -9,14 +9,14 @@ void aiRun(Region *environment, int playerId) {
 			case LIFE_EYEBALL: {
 				double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
 				double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
-				/*if (gameObject[i].attri <= 0)
+				if (gameObject[i].attri <= 0)
 				{
 					if (rand() % 10000 == 0)
 					{
 						gameObject[i].attri = 3600;
 						gameObject[i].attri2 = rand() % 3600;
 					}
-				}*/
+				}
 				if (gameObject[i].attri > 0)
 				{
 					gameObject[i].attri--;
