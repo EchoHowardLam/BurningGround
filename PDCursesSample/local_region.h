@@ -7,7 +7,8 @@
 typedef struct {
 	int x;
 	int y;
-	int size;
+	int width;
+	int height;
 	double chance;
 	ObjectType mob;
 	int initial;

@@ -64,6 +64,9 @@ void aiRun(Region *environment, int playerId) {
 					fabs(gameObject[playerId].y-gameObject[i].y) <= 2) {
 					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x-gameObject[i].x<0)?-1.5:1.5), 0.02); // + 0.5 is compulsory as it is the center of a grid
 				}
+				if (rand() % 400 == 0) {
+					controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
+				}
 				break;
 			}
 			case MIST: {

@@ -95,19 +95,47 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 								tempSpawn->y = atoi(param);
 								break;
 							case 3:
-								tempSpawn->size = atoi(param);
+								tempSpawn->width = atoi(param);
 								break;
 							case 4:
-								tempSpawn->mob = codeToType(param);
+								tempSpawn->height = atoi(param);
 								break;
 							case 5:
-								tempSpawn->chance = atoi(param)/1000.0;
+								tempSpawn->mob = codeToType(param);
 								break;
 							case 6:
-								tempSpawn->initial = atoi(param);
+								tempSpawn->chance = atoi(param)/1000.0;
 								break;
 							case 7:
+								tempSpawn->initial = atoi(param);
+								break;
+							case 8:
 								tempSpawn->max = atoi(param);
+								tempSpawn->currMobSpawned = 0;
+								temp.spawns[mobSpawnArea] = tempSpawn;
+								break;
+						}
+						num++;
+						param = strtok(NULL, " ");
+					}
+					mobSpawnArea++;
+				} else if (line[0] == '\\' && line[1] == 'g' && line[2] == 'r' && line[3] == 's') {
+					// add grass
+					char *param = strtok(line, " ");
+					int num = 0;
+					SpawnRegion *tempSpawn = (SpawnRegion *) malloc(sizeof(SpawnRegion));
+					while (param != NULL) {
+						switch (num) {
+							case 1:
+								tempSpawn->x = atoi(param);
+								break;
+							case 2:
+								tempSpawn->y = atoi(param);
+								break;
+							case 3:
+								tempSpawn->width = atoi(param);
+								tempSpawn->height = 1;
+								tempSpawn->mob = LIFE_GRASS;
 								tempSpawn->currMobSpawned = 0;
 								temp.spawns[mobSpawnArea] = tempSpawn;
 								break;

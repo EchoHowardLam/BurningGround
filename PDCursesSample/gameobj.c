@@ -63,6 +63,12 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
+		case LIFE_GRASS:
+			gameObject[i].endurance = 1;
+			gameObject[i].isBackground = TRUE;
+			gameObject[i].underGravity = TRUE;
+			gameObject[i].fixedFlight = FALSE;
+			break;
 		case LIFE_MUSHROOM:
 			gameObject[i].endurance = 1;
 			gameObject[i].destroyCriteria = DESTROY_CRITERIA_HIT;
@@ -399,6 +405,14 @@ int defaultObjectsInit(Region *environment, int objId)
 			return -1;
 		}
 		break;
+	case LIFE_GRASS:
+		gameObject[objId].sprite = getImage(LIFE_GRASS, rand() % 3);
+		if (!registerEnvironmentObject(environment, objId))
+		{
+			deleteObject(environment, objId, TRUE);
+			return -1;
+		}
+		break;
 	case MAGIC_FLAME:
 	case MAGIC_FRAGMENT:
 		if (environment->blocked[fY][fX])
@@ -546,6 +560,7 @@ void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPo
 		case LIFE_MUSHROOM:
 		case LIFE_RABBIT:
 		case LIFE_SLUDGE:
+		case LIFE_GRASS:
 			{
 				if (gameObject[i].sprite == NULL) break;
 				int grx, gry;
@@ -1126,6 +1141,24 @@ void updateObjectsStatus(Region *environment)
 			}
 		}
 			break;
+		case LIFE_GRASS:
+		{
+			CharacterImage *oldImage = gameObject[i].sprite;
+			CharacterImage *newImage = getImage(LIFE_GRASS, gameObject[i].sprite->charaID);
+			if (oldImage != newImage)
+			{
+				gameObject[i].sprite = newImage;
+				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+				{
+					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+					registerEnvironmentObject(environment, i);
+				}
+				else {
+					gameObject[i].sprite = oldImage;
+				}
+			}
+		}
+			break;
 		case MAGIC_LASER: // can use middle-line algorithm here for optimization
 			{
 				double curX = gameObject[i].x;
@@ -1293,6 +1326,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case LIFE_MUSHROOM:
 	case LIFE_RABBIT:
 	case LIFE_SLUDGE:
+	case LIFE_GRASS:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
@@ -1479,12 +1513,24 @@ double getRandomOfRange(int base) {
 
 void doInitialSpawn(Region *target) {
 	for (int i=0; i<target->numSpawns; i++) {
-		for (int j=0; j<target->spawns[i]->initial; j++) {
-			if (target->spawns[i]->currMobSpawned < target->spawns[i]->max) {
-				int tempID = createObject(target, -1, target->spawns[i]->mob, target->spawns[i]->x+getRandomOfRange(target->spawns[i]->size), target->spawns[i]->y+getRandomOfRange(target->spawns[i]->size));
-				if (tempID != -1) {
-					target->spawns[i]->currMobSpawned++;
-					gameObject[tempID].spawnRegionCount = &(target->spawns[i]->currMobSpawned);
+		if (target->spawns[i]->mob == LIFE_GRASS) {
+			for (int j=0; j<target->spawns[i]->width; j++) {
+				if (rand() % 5 == 0) {
+					int tempID = createObject(target, -1, LIFE_GRASS, target->spawns[i]->x+j, target->spawns[i]->y);
+					if (tempID != -1) {
+						target->spawns[i]->currMobSpawned++;
+						gameObject[tempID].spawnRegionCount = &(target->spawns[i]->currMobSpawned);
+					}
+				}
+			}
+		} else {
+			for (int j=0; j<target->spawns[i]->initial; j++) {
+				if (target->spawns[i]->currMobSpawned < target->spawns[i]->max) {
+					int tempID = createObject(target, -1, target->spawns[i]->mob, target->spawns[i]->x+getRandomOfRange(target->spawns[i]->width), target->spawns[i]->y+getRandomOfRange(target->spawns[i]->height));
+					if (tempID != -1) {
+						target->spawns[i]->currMobSpawned++;
+						gameObject[tempID].spawnRegionCount = &(target->spawns[i]->currMobSpawned);
+					}
 				}
 			}
 		}
@@ -1496,7 +1542,7 @@ void spawnCheck(Region *target) {
 		if (target->spawns[i]->currMobSpawned < target->spawns[i]->max) {
 			if (((double)rand())/RAND_MAX < target->spawns[i]->chance) {
 				// spawns
-				int tempID = createObject(target, -1, target->spawns[i]->mob, target->spawns[i]->x+getRandomOfRange(target->spawns[i]->size), target->spawns[i]->y+getRandomOfRange(target->spawns[i]->size));
+				int tempID = createObject(target, -1, target->spawns[i]->mob, target->spawns[i]->x+getRandomOfRange(target->spawns[i]->width), target->spawns[i]->y+getRandomOfRange(target->spawns[i]->height));
 				if (tempID != -1) {
 					target->spawns[i]->currMobSpawned++;
 					gameObject[tempID].spawnRegionCount = &(target->spawns[i]->currMobSpawned);

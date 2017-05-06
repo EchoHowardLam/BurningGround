@@ -13,6 +13,7 @@ int loadImageFiles(char *path) {
 	filesToRead[3] = "\\graphics\\mushrooms.txt";
 	filesToRead[4] = "\\graphics\\rabbit.txt";
 	filesToRead[5] = "\\graphics\\sludge.txt";
+	filesToRead[6] = "\\graphics\\grass.txt";
 #else
 	filesToRead[0] = "/graphics/Player.txt";
 	filesToRead[1] = "/graphics/eyeballs.txt";
@@ -20,6 +21,7 @@ int loadImageFiles(char *path) {
 	filesToRead[3] = "/graphics/mushrooms.txt";
 	filesToRead[4] = "/graphics/rabbit.txt";
 	filesToRead[5] = "/graphics/sludge.txt";
+	filesToRead[6] = "/graphics/grass.txt";
 #endif
 	
 	int size = ((int) strlen(path)) + 1;
@@ -151,6 +153,9 @@ CharacterImage* getImage(ObjectType objType, int ID) {
 			break;
 		case LIFE_SLUDGE:
 			temp = allObjs[5];
+			break;
+		case LIFE_GRASS:
+			temp = allObjs[6];
 			break;
 		default:
 			return NULL;
