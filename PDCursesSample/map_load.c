@@ -245,6 +245,12 @@ ObjectType codeToType(char *code) {
 		return SPAWN_BEE_HIVE;
 	else if (strcmp(code, "bee") == 0)
 		return LIFE_BEE;
+	else if (strcmp(code, "bat") == 0)
+		return LIFE_BAT;
+	else if (strcmp(code, "bird") == 0)
+		return LIFE_BIRD;
+	else if (strcmp(code, "dur") == 0)
+		return SPAWN_DURIAN_TREE;
 	else
 		return NOTHING;
 }

@@ -1,0 +1,32 @@
+0 18 14 8 13
+     ^            
+    ^^^^   ^^     
+  ^^ ^^^  ^^^  ^  
+^^^^   \ /^ ^ ^^^^
+  \  ^^^\|^^ ^^^^ 
+  ^^^^^^^|/^^^/   
+    ^^^^^ ^^  ^^^ 
+       ^^^^^      
+         ||       
+         ||       
+         ||       
+         ||       
+         | |      
+         | |      
+     G            
+    GGGG   GG     
+  GG GGG  GGG  G  
+GGGG   yyyGGGGGGGG
+  y  GGGyyGG GGGG 
+  GGGGGGGyyGGGy   
+    GGGGG GG  GGG 
+       GGGGG      
+         yy       
+         yy       
+         yy       
+         yy       
+         yyy      
+         yyy      
+1 2 1 0 0
+{}
+yy

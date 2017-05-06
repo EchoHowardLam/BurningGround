@@ -15,6 +15,9 @@ int loadImageFiles(char *path) {
 	filesToRead[5] = "\\graphics\\sludge.txt";
 	filesToRead[6] = "\\graphics\\grass.txt";
 	filesToRead[7] = "\\graphics\\bees.txt";
+	filesToRead[8] = "\\graphics\\bat.txt";
+	filesToRead[9] = "\\graphics\\birds.txt";
+	filesToRead[10] = "\\graphics\\durian.txt";
 #else
 	filesToRead[0] = "/graphics/Player.txt";
 	filesToRead[1] = "/graphics/eyeballs.txt";
@@ -24,6 +27,9 @@ int loadImageFiles(char *path) {
 	filesToRead[5] = "/graphics/sludge.txt";
 	filesToRead[6] = "/graphics/grass.txt";
 	filesToRead[7] = "/graphics/bees.txt";
+	filesToRead[8] = "/graphics/bat.txt";
+	filesToRead[9] = "/graphics/birds.txt";
+	filesToRead[10] = "/graphics/durian.txt";
 #endif
 	
 	int size = ((int) strlen(path)) + 1;
@@ -164,6 +170,18 @@ CharacterImage* getImage(ObjectType objType, int ID) {
 			break;
 		case SPAWN_BEE_HIVE:
 			temp = allObjs[7];
+			break;
+		case LIFE_BAT:
+			temp = allObjs[8];
+			break;
+		case LIFE_BIRD:
+			temp = allObjs[9];
+			break;
+		case SPAWN_DURIAN_TREE:
+			temp = allObjs[10];
+			break;
+		case LIFE_DURIAN:
+			temp = allObjs[10]->next;
 			break;
 		default:
 			return NULL;

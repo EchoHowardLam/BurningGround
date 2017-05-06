@@ -1,0 +1,36 @@
+0 5 3 2 2
+._()>
+`;,' 
+  ^  
+wwwww
+wwww 
+  w  
+1 5 3 3 2
+<()_.
+  `.;
+   ^ 
+wwwww
+ wwww
+   ww
+2 8 5 3 2
+  \\    
+  \ \   
+>::==()>
+  / /   
+  //    
+  wwww  
+  wwww  
+wwwwwwww
+  wwww  
+  ww    
+3 8 5 4 2
+    //  
+   / /  
+<()==::<
+   \ \  
+    \\  
+wwwwww  
+wwwwww  
+wwwwwwww
+wwwwww  
+    ww  
