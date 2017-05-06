@@ -40,8 +40,8 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case LIFE_HUMANOID:
-			gameObject[i].endurance = 10000;
-			gameObject[i].underGravity = FALSE;
+			gameObject[i].endurance = 1000;
+			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case LIFE_EYEBALL:
@@ -55,7 +55,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case LIFE_RABBIT:
-			gameObject[i].endurance = 30;
+			gameObject[i].endurance = 200;
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
@@ -461,6 +461,10 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x, gameObject[id].y - 1, 0.0, -1.0, 0.3, 15, 0, TRUE);
 			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x - 1, gameObject[id].y - 1, -1.0, -1.0, 0.3, 15, 0, TRUE);
 			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x + 1, gameObject[id].y - 1, 1.0, -1.0, 0.3, 15, 0, TRUE);
+			break;
+		case LIFE_SLUDGE:
+			createObject(environment, -1, LIFE_SLUDGE, gameObject[id].x - 3, gameObject[id].y);
+			createObject(environment, -1, LIFE_SLUDGE, gameObject[id].x + 3, gameObject[id].y);
 			break;
 		case MAGIC_BLOB:
 			if (gameObject[id].attri)
@@ -1212,6 +1216,35 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 	if (master == -1) master = -2;
 	switch (gameObject[objId].type)
 	{
+	case LIFE_MOSQUITOES:
+		if (gameObject[objId].sprite != NULL)
+		{
+			int gax, gay;
+			int lx, ly;
+			int topLeftgx = (int)floor(newX) - (int)floor(gameObject[objId].sprite->center->x);
+			int topLeftgy = (int)floor(newY) - (int)floor(gameObject[objId].sprite->center->y);
+			int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
+			int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+			for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+			{
+				for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+				{
+					if (gameObject[objId].sprite->solid[ly][lx] > 0)
+					{
+						if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+						{
+							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
+							{
+								int tId = environment->objId[gay][gax];
+								if (tId != -1 && (gameObject[tId].type != LIFE_MOSQUITOES))
+									interactObject(environment->objId[gay][gax], TRUE, 1, 0, 0);
+							}
+						}
+					}
+				}
+			}
+		}
+		break;
 	case LIFE_SLUDGE:
 		if (gameObject[objId].sprite != NULL)
 		{
@@ -1231,7 +1264,9 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 						{
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
-								interactObject(environment->objId[gay][gax], TRUE, 0, 0, ENCHANT_SLOW | ENCHANT_ENTANGLE);
+								int tId = environment->objId[gay][gax];
+								if (tId != -1 && (gameObject[tId].type != LIFE_SLUDGE))
+									interactObject(environment->objId[gay][gax], TRUE, 1, 0, ENCHANT_SLOW);
 							}
 						}
 					}
@@ -1241,7 +1276,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 		break;
 	case MAGIC_BLOB:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
-			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, 100, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, 500, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
 		deleteObject(environment, objId, FALSE);
 		break;
 	case MAGIC_SPIKE:
@@ -1253,7 +1288,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 		break;
 	case MAGIC_FLAME:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
-			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, 20, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, 50, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
 		break;
 	case MAGIC_FRAGMENT:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))

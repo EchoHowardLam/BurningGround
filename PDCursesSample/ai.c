@@ -42,10 +42,23 @@ void aiRun(Region *environment, int playerId) {
 				break;
 			}
 			case LIFE_MOSQUITOES: {
-				double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
-				double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
-				controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.2); // + 0.5 is compulsory as it is the center of a grid
-				controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.2);
+				if (fabs(gameObject[playerId].x - gameObject[i].x) < 30 && fabs(gameObject[playerId].y - gameObject[i].y) <= 30)
+				{
+					if (rand() % 10 < 3)
+						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.2);
+					else if (rand() % 10 < 3)
+						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? 1.5 : -1.5), 0.2);
+					if (rand() % 10 < 3)
+						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? -1.5 : 1.5), 0.2);
+					else if (rand() % 10 < 3)
+						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? 1.5 : -1.5), 0.2);
+				}
+				else {
+					double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+					double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+					controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.2); // + 0.5 is compulsory as it is the center of a grid
+					controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.2);
+				}
 				break;
 			}
 			case LIFE_RABBIT: {
@@ -60,15 +73,15 @@ void aiRun(Region *environment, int playerId) {
 				break;
 			}
 			case LIFE_SLUDGE: {
-				if (rand() % 2000 == 0)
-					createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 1.0, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_ENTANGLE);
-				if (fabs(gameObject[playerId].x-gameObject[i].x) < 20 &&
-					fabs(gameObject[playerId].x-gameObject[i].x) > 4 &&
-					fabs(gameObject[playerId].y-gameObject[i].y) <= 2) {
-					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x-gameObject[i].x<0)?-1.5:1.5), 0.02); // + 0.5 is compulsory as it is the center of a grid
-				}
-				if (rand() % 400 == 0) {
-					controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
+				if (fabs(gameObject[playerId].x-gameObject[i].x) < 30 &&
+				fabs(gameObject[playerId].x-gameObject[i].x) > 0 &&
+				fabs(gameObject[playerId].y-gameObject[i].y) <= 30) {
+					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.04); // + 0.5 is compulsory as it is the center of a grid
+					if (rand() % 400 == 0 || (gameObject[playerId].y + 1.0 < gameObject[i].y)) {
+						controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
+					}
+					if (rand() % 2000 == 0)
+						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 1.0, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_ENTANGLE);
 				}
 				break;
 			}
