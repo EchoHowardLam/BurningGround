@@ -1298,6 +1298,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case LIFE_MOSQUITOES:
 	case LIFE_MUSHROOM:
 	case LIFE_RABBIT:
+	case LIFE_SLUDGE:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
@@ -1429,7 +1430,7 @@ BOOL registerEnvironmentObject(Region *environment, int objId)
 			{
 				if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
 				{
-					if (environment->blocked[gay][gax] == FALSE)
+					if (!environment->blocked[gay][gax])
 					{
 						environment->blocked[gay][gax] = TRUE;
 						environment->objId[gay][gax] = objId;

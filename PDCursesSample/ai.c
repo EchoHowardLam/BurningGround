@@ -6,6 +6,10 @@ void aiRun(Region *environment, int playerId) {
 	for (int i = 0; i < MAX_OBJECT; i++)
 	{
 		switch (gameObject[i].type) {
+			case LIFE_HUMANOID:
+				if (i != playerId)
+					controlObjectX(i, floor(gameObject[i].x) - 0.5, 0.05);
+				break;
 			case LIFE_EYEBALL: {
 				double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
 				double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
