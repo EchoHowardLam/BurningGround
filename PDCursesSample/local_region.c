@@ -157,8 +157,8 @@ void drawLocalRegion(Region *target, int blind, Coordinate scrTopLeftPos, int sc
 			if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width))
 			{
 				attron(target->color[ry][rx]);
-				if ((blind < 0) && target->appearance[ry][rx] == (97 | A_ALTCHARSET))
-					addch(48 | A_ALTCHARSET);
+				if (blind >= 0 && (target->appearance[ry][rx] != ' '))
+					addch('.');
 				else
 					addch(target->appearance[ry][rx]);
 				attroff(target->color[ry][rx]);

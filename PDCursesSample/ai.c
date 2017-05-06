@@ -46,12 +46,6 @@ void aiRun(Region *environment, int playerId) {
 				} else if (fabs(gameObject[playerId].x-gameObject[i].x) <= 6 &&
 						   fabs(gameObject[playerId].y-gameObject[i].y) <= 2) {
 					deleteObject(environment, i, FALSE);
-					createObjectProjectileDest(environment, i, BOMB, gameObject[i].x, gameObject[i].y, gameObject[i].x, gameObject[i].y, 0, 0, 0, TRUE);
-					createObjectProjectileDest(environment, i, BOMB, gameObject[i].x-1, gameObject[i].y, gameObject[i].x, gameObject[i].y, 0, 0, 0, TRUE);
-					createObjectProjectileDest(environment, i, BOMB, gameObject[i].x+1, gameObject[i].y, gameObject[i].x, gameObject[i].y, 0, 0, 0, TRUE);
-					createObjectProjectileDest(environment, i, BOMB, gameObject[i].x, gameObject[i].y-1, gameObject[i].x, gameObject[i].y, 0, 0, 0, TRUE);
-					createObjectProjectileDest(environment, i, BOMB, gameObject[i].x-1, gameObject[i].y-1, gameObject[i].x, gameObject[i].y, 0, 0, 0, TRUE);
-					createObjectProjectileDest(environment, i, BOMB, gameObject[i].x+1, gameObject[i].y-1, gameObject[i].x, gameObject[i].y, 0, 0, 0, TRUE);
 				}
 				break;
 			}

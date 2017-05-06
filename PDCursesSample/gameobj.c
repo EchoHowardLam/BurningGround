@@ -434,6 +434,14 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 			}
 			break;
 		}
+		case LIFE_RABBIT:
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x, gameObject[id].y, 0.0, 0.0, 0.0, 0, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x - 1, gameObject[id].y, -1.0, 0.0, 0.0, 0, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x + 1, gameObject[id].y, 1.0, 0.0, 0.0, 0, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x, gameObject[id].y - 1, 0.0, -1.0, 0.0, 0, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x - 1, gameObject[id].y - 1, -1.0, -1.0, 0.0, 0, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x + 1, gameObject[id].y - 1, 1.0, -1.0, 0.0, 0, 0, TRUE);
+			break;
 		case MAGIC_BLOB:
 			if (gameObject[id].attri)
 			{
