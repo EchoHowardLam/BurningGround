@@ -81,7 +81,7 @@ void aiRun(Region *environment, int playerId) {
 						controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
 					}
 					if (rand() % 2000 == 0)
-						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 1.0, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_ENTANGLE);
+						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 1.0, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_ENTANGLE | ENCHANT_SILENT);
 				}
 				break;
 			}

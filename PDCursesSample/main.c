@@ -8,6 +8,7 @@
 #include "map_load.h"
 #include "ai.h"
 
+#include "ui.h"
 #include "event_handle.h"
 
 extern double DIRECTION2X[4];
@@ -178,9 +179,11 @@ int doGameLoop() {
 	if (!initializeInputEvents()) return 0;
 	Coordinate start, end;
 	Region localMap = loadLevel(TUTORIAL, &start, &end, executablePath);
-	playerId = createObject(&localMap, -1, LIFE_HUMANOID, start.x, start.y);
+	playerId = createHumanoid(&localMap, -1, HUMANOID_TYPE_HUMAN, start.x, start.y);
 	if (playerId == -1) return 0;
-	if (createObject(&localMap, -1, LIFE_HUMANOID, start.x + 10, start.y) == -1) return 0;
+	int playerAliveFlag = 1;
+	gameObject[playerId].spawnRegionCount = &playerAliveFlag;
+	if (createHumanoid(&localMap, -1, HUMANOID_TYPE_WIZARD, start.x + 10, start.y) == -1) return 0;
 	
 	doInitialSpawn(&localMap);
 
@@ -268,7 +271,7 @@ int doGameLoop() {
 		}
 		
 		// 4. render the display this turn
-		if (playerId != -1 && gameObject[playerId].type == LIFE_HUMANOID)
+		if (playerAliveFlag == 1)
 		{
 			scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
 			scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
@@ -276,6 +279,7 @@ int doGameLoop() {
 			displayObjects(&localMap, playerId, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			if (debugVision) drawLocalRegionBlocked(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			displayCrossHair(mouseEvents.x, mouseEvents.y);
+			drawUI(playerId);
 			refresh();		// update the display in one go
 		}
 
@@ -284,7 +288,7 @@ int doGameLoop() {
 		// you will need to get system time like clock() and calculate, but that is not necessary most of the time
 		threadSleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library
 
-		if (gameObject[playerId].type != LIFE_HUMANOID)
+		if (playerAliveFlag < 1)
 			break;
 	}
 	cleanUpLocalRegion(&localMap);

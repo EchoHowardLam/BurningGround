@@ -17,7 +17,10 @@
 #define TURNING_UNSETTLED 2
 
 typedef struct {
+	int max_endurance;
+	int max_mana;
 	int endurance;				// commonly known as HP
+	int mana;					// commonly known as MP
 	double x, y;				// current position
 	double dispX, dispY;		// For normal objects, displacement needed to move before fixing position
 								// For magics, dispX/Y are used as direction guidance
@@ -41,6 +44,8 @@ typedef struct {
 	int master;					// id of the object that spawns it, -1 for none
 
 	// usage depends on object type, basically private data
+	// For magic, attri = SPHERE, attri2 = ENCHANT
+	// For humanoid, attri = type of character
 	int attri;
 	int attri2;
 
@@ -54,6 +59,7 @@ typedef struct {
 extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
 
 void initializeObjects(void);
+int createHumanoid(Region *environment, int master, int humanoidType, double startX, double startY);
 int createObject(Region *environment, int master, ObjectType type, double startX, double startY);
 int createObjectProjectileDir(Region *environment, int master, ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
 int createObjectProjectileDest(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);

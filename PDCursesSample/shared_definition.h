@@ -31,6 +31,12 @@
 
 #define BG_MOUSE_BUTTON1_PRESSED 1
 
+#define HUMANOID_TYPE_MASK 6
+#define HUMANOID_TYPE_HUMAN 0
+#define HUMANOID_TYPE_WIZARD 2
+#define HUMANOID_TYPE_CORRUPTED_WINGMAN 4
+#define HUMANOID_TYPE_WINGMAN 6
+
 #define GRAVITATIONAL_ACC 0.002
 #define FRICTION_TRIGGER 0.0001
 
@@ -43,7 +49,7 @@
 #define SPHERE_MYTH 32
 
 // outside ENCHANT_EFFECT_MASK, it is the enchantments that only affect the object itself
-#define ENCHANT_EFFECT_MASK (128 - 1)
+#define ENCHANT_EFFECT_MASK (256 - 1)
 #define ENCHANT_COLD_SLOW 1
 #define ENCHANT_SLOW 2
 #define ENCHANT_BLIND 4
@@ -51,6 +57,7 @@
 #define ENCHANT_ENTANGLE 16
 #define ENCHANT_CONFUSE 32
 #define ENCHANT_CLOAK 64
+#define ENCHANT_SILENT 128
 #define ENCHANT_SHRAPNEL 1024
 
 // increment as array index

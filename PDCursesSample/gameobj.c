@@ -9,6 +9,38 @@ void initializeObjects(void)
 	return;
 }
 
+int createHumanoid(Region *environment, int master, int humanoidType, double startX, double startY)
+{
+	int ret = createObject(environment, master, LIFE_HUMANOID, startX, startY);
+	if (ret != -1)
+	{
+		gameObject[ret].attri = humanoidType;
+		switch (humanoidType)
+		{
+		case HUMANOID_TYPE_HUMAN:
+			gameObject[ret].max_endurance = 1000;
+			gameObject[ret].max_mana = 1000;
+			gameObject[ret].endurance = 1000;
+			gameObject[ret].mana = 1000;
+			break;
+		case HUMANOID_TYPE_WIZARD:
+			gameObject[ret].max_endurance = 10000;
+			gameObject[ret].max_mana = 100000;
+			gameObject[ret].endurance = 10000;
+			gameObject[ret].mana = 100000;
+			break;
+		case HUMANOID_TYPE_WINGMAN:
+		case HUMANOID_TYPE_CORRUPTED_WINGMAN:
+			gameObject[ret].max_endurance = 20000;
+			gameObject[ret].max_mana = 10000;
+			gameObject[ret].endurance = 20000;
+			gameObject[ret].mana = 10000;
+			break;
+		}
+	}
+	return ret;
+}
+
 int createObject(Region *environment, int master, ObjectType type, double startX, double startY)
 {
 	for (int i = MAX_OBJECT - 1; i >= 0; i--)
@@ -16,7 +48,10 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 		if (gameObject[i].type != NOTHING)
 			continue;		// if not empty, try next
 
+		gameObject[i].max_endurance = 100;
+		gameObject[i].max_mana = 0;
 		gameObject[i].endurance = 100;
+		gameObject[i].mana = 0;
 		gameObject[i].type = type;
 		gameObject[i].isBackground = FALSE;
 		//gameObject[i].isIntangible = FALSE;
@@ -40,7 +75,6 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case LIFE_HUMANOID:
-			gameObject[i].endurance = 1000;
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
@@ -103,7 +137,10 @@ int createObjectProjectileDir(Region *environment, int master, ObjectType type, 
 		if (gameObject[i].type != NOTHING)
 			continue;		// if not empty, try next
 
+		gameObject[i].max_endurance = 1;
+		gameObject[i].max_mana = 0;
 		gameObject[i].endurance = 1;
+		gameObject[i].mana = 0;
 		gameObject[i].type = type;
 		gameObject[i].isBackground = FALSE;
 		//gameObject[i].isIntangible = FALSE;
@@ -145,49 +182,7 @@ int createObjectProjectileDir(Region *environment, int master, ObjectType type, 
 
 int createObjectProjectileDest(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity)
 {
-	for (int i = MAX_OBJECT - 1; i >= 0; i--)
-	{
-		if (gameObject[i].type != NOTHING)
-			continue;		// if not empty, try next
-
-		gameObject[i].endurance = 1;
-		gameObject[i].type = type;
-		gameObject[i].isBackground = FALSE;
-		//gameObject[i].isIntangible = FALSE;
-		gameObject[i].magicConductivity = 100;
-		gameObject[i].x = startX;
-		gameObject[i].y = startY;
-		gameObject[i].dispX = destX - startX;
-		gameObject[i].dispY = destY - startY;
-		double disp = sqrt(gameObject[i].dispX * gameObject[i].dispX + gameObject[i].dispY * gameObject[i].dispY);
-		if (fabs(disp) < 0.01)
-		{
-			gameObject[i].vel.x = 0.0;
-			gameObject[i].vel.y = 0.0;
-		}
-		else {
-			gameObject[i].vel.x = gameObject[i].dispX / disp * speed;
-			gameObject[i].vel.y = gameObject[i].dispY / disp * speed;
-		}
-		gameObject[i].motiveVel.x = 0.0;
-		gameObject[i].motiveVel.y = 0.0;
-		gameObject[i].turnsAlive = -1;
-		gameObject[i].lifespan = lifespan;
-		gameObject[i].destroyCriteria = destroyCriteria;
-		gameObject[i].underMove = FALSE;
-		gameObject[i].underGravity = underGravity;
-		gameObject[i].fixedFlight = FALSE;
-		gameObject[i].facingDir = 1;
-		gameObject[i].sprite = NULL;
-		gameObject[i].master = master;
-
-		gameObject[i].attri = 0;
-		gameObject[i].attri2 = 0;
-
-		gameObject[i].spawnRegionCount = NULL;
-		return defaultObjectsInit(environment, i);
-	}
-	return -1;
+	return createObjectProjectileDir(environment, master, type, startX, startY, destX - startX, destY - startY, speed, lifespan, destroyCriteria, underGravity);
 }
 
 int createObjectMagicProjectileDir(Region *environment, int master, ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int sphere, int enchant)
@@ -197,7 +192,10 @@ int createObjectMagicProjectileDir(Region *environment, int master, ObjectType t
 		if (gameObject[i].type != NOTHING)
 			continue;		// if not empty, try next
 
+		gameObject[i].max_endurance = 1;
+		gameObject[i].max_mana = 0;
 		gameObject[i].endurance = 1;
+		gameObject[i].mana = 0;
 		gameObject[i].type = type;
 		gameObject[i].isBackground = FALSE;
 		//gameObject[i].isIntangible = FALSE;
@@ -307,7 +305,10 @@ int createObjectMist(Region *environment, int master, ObjectType type, double st
 		if (gameObject[i].type != NOTHING)
 			continue;		// if not empty, try next
 
+		gameObject[i].max_endurance = 1;
+		gameObject[i].max_mana = 0;
 		gameObject[i].endurance = 1;
+		gameObject[i].mana = 0;
 		gameObject[i].type = type;
 		gameObject[i].isBackground = TRUE;
 		//gameObject[i].isIntangible = TRUE;
@@ -364,7 +365,10 @@ int defaultObjectsInit(Region *environment, int objId)
 	switch (gameObject[objId].type)
 	{
 	case LIFE_HUMANOID:
-		gameObject[objId].sprite = getImage(LIFE_HUMANOID, 6 | (gameObject[objId].facingDir & 1));
+		if ((gameObject[objId].attri & HUMANOID_TYPE_MASK) == HUMANOID_TYPE_HUMAN)
+			gameObject[objId].sprite = getImage(LIFE_HUMANOID, gameObject[objId].attri);
+		else
+			gameObject[objId].sprite = getImage(LIFE_HUMANOID, gameObject[objId].attri | (gameObject[objId].facingDir & 1));
 		if (!registerEnvironmentObject(environment, objId))
 		{
 			deleteObject(environment, objId, TRUE);
@@ -978,9 +982,15 @@ void rotateObjects(Region *environment)
 			if (gameObject[i].facingDir & TURNING_UNSETTLED)
 			{
 				CharacterImage *oldImage = gameObject[i].sprite;
-				gameObject[i].sprite = getImage(LIFE_HUMANOID, 6 | ((gameObject[i].facingDir & 1) ^ 1));
-				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+				if ((gameObject[i].attri & HUMANOID_TYPE_MASK) == HUMANOID_TYPE_HUMAN)
+					gameObject[i].sprite = getImage(LIFE_HUMANOID, gameObject[i].attri);
+				else
+					gameObject[i].sprite = getImage(LIFE_HUMANOID, gameObject[i].attri | ((gameObject[i].facingDir & 1) ^ 1));
+				if (gameObject[i].sprite == oldImage)
 				{
+					gameObject[i].facingDir ^= (TURNING_UNSETTLED | 1);
+				}
+				else if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y)) {
 					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
 					registerEnvironmentObject(environment, i);
 					gameObject[i].facingDir ^= (TURNING_UNSETTLED | 1);
@@ -1050,7 +1060,11 @@ void updateObjectsStatus(Region *environment)
 		case LIFE_HUMANOID:
 			{
 				CharacterImage *oldImage = gameObject[i].sprite;
-				CharacterImage *newImage = getImage(LIFE_HUMANOID, 6 | (gameObject[i].facingDir & 1));
+				CharacterImage *newImage;
+				if ((gameObject[i].attri & HUMANOID_TYPE_MASK) == HUMANOID_TYPE_HUMAN)
+					newImage = getImage(LIFE_HUMANOID, gameObject[i].attri);
+				else
+					newImage = getImage(LIFE_HUMANOID, gameObject[i].attri | (gameObject[i].facingDir & 1));
 				if (oldImage != newImage)
 				{
 					gameObject[i].sprite = newImage;
@@ -1198,6 +1212,8 @@ void updateObjectsStatus(Region *environment)
 			break;
 		}
 		gameObject[i].turnsAlive++;
+		if (gameObject[i].mana < gameObject[i].max_mana)
+			gameObject[i].mana++;
 		for (int index = 0; index < TOTAL_EFFECT_COUNT; index++)
 		{
 			if (gameObject[i].underEffect[index] >= 0)
@@ -1237,7 +1253,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							{
 								int tId = environment->objId[gay][gax];
 								if (tId != -1 && (gameObject[tId].type != LIFE_MOSQUITOES))
-									interactObject(environment->objId[gay][gax], TRUE, 1, 0, 0);
+									interactObject(environment->objId[gay][gax], FALSE, 1, 0, 0);
 							}
 						}
 					}
@@ -1342,6 +1358,11 @@ BOOL interactObject(int objId, BOOL physicalTouch, int damage, int sphere, int e
 {
 	if (objId == -1) return FALSE; // this is one of the few functions that may receive an enquiry about invalid objId
 	if (gameObject[objId].type == NOTHING) return FALSE;
+	// this function is called in moveObjects, the bumped object may still haven't executed its hitEvent
+	// so we cannot directly call deleteObject()
+	if (physicalTouch || (damage > 1))
+		if (gameObject[objId].destroyCriteria & DESTROY_CRITERIA_HIT)
+			gameObject[objId].endurance = 0;
 	if (damage > 0) // No healing by negative number
 	{
 		if (sphere)
@@ -1383,12 +1404,9 @@ BOOL interactObject(int objId, BOOL physicalTouch, int damage, int sphere, int e
 		if (effect & ENCHANT_CLOAK)
 			if (gameObject[objId].underEffect[EFFECT_INVISIBLE] < (1000 * gameObject[objId].magicConductivity / 100))
 				gameObject[objId].underEffect[EFFECT_INVISIBLE] = (1000 * gameObject[objId].magicConductivity / 100);
+		if (effect & ENCHANT_SILENT)
+			gameObject[objId].mana = 0;
 	}
-	// this function is called in moveObjects, the bumped object may still haven't executed its hitEvent
-	// so we cannot directly call deleteObject()
-	if (physicalTouch || (damage > 0))
-		if (gameObject[objId].destroyCriteria & DESTROY_CRITERIA_HIT)
-			gameObject[objId].endurance = 0;
 	return TRUE;
 }
 
@@ -1511,6 +1529,7 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 
 BOOL removeEnvironmentBlock(Region *environment, double x, double y)
 {
+	return FALSE;
 	if (environment == NULL) return FALSE;
 	int fX = (int)floor(x);
 	int fY = (int)floor(y);
