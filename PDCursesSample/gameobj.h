@@ -24,6 +24,10 @@ typedef struct {
 	Vector vel;
 	Vector motiveVel;
 	ObjectType type;
+	BOOL isBackground;			// whether this object will influence others directly, not related to whether it is affected by others
+								// turn this on for plants
+	//BOOL isIntangibleToAttacks;	// whether this object is immune to attacks
+								// turn this on for trees
 	int turnsAlive;				// how long this object has lived
 	int lifespan;				// how long this object can live
 	int destroyCriteria;		// what criteria trigger destruction, masked by DESTROY_CRITERIA_...
@@ -54,9 +58,10 @@ int createObjectProjectileDir(Region *environment, int master, ObjectType type, 
 int createObjectProjectileDest(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
 int createObjectMagicProjectile(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int sphere, int enchant);
 int createObjectMagicRain(Region *environment, int master, ObjectType type, double CX, double CY, int W, int H, double speed, int sphere, int enchant);
+int createObjectMist(Region *environment, int master, ObjectType type, double startX, double startY, int lifespan, int sphere, int enchant);
 int defaultObjectsInit(Region *environment, int objId);
 void deleteObject(Region *environment, int id, BOOL silentDelete);
-void displayObjects(Region *environment, Coordinate scrTopLeftPos, int scrW, int scrH); // please call updateObjectsStatus before calling this function
+void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPos, int scrW, int scrH); // please call updateObjectsStatus before calling this function
 void displayCrossHair(int X, int Y);
 void pushObjectDir(int id, double dirX, double dirY, double speed);
 void acceObjects(Region *environment); // please call updateObjectsStatus before calling this function
@@ -66,7 +71,7 @@ void moveObjects(Region *environment); // please call updateObjectsStatus before
 void rotateObjects(Region *environment);
 void updateObjectsStatus(Region *environment);
 BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double newY);
-BOOL interactObject(int objId, int damage, int effect);
+BOOL interactObject(int objId, BOOL physicalTouch, int damage, int effect);
 BOOL checkObjectCollision(Region *environment, int objId, double x, double y); // please call updateObjectsStatus before calling this function, 0 miss 1 hit
 BOOL checkObjectOnFeet(Region *environment, int objId);
 BOOL removeEnvironmentBlock(Region *environment, double x, double y);

@@ -41,5 +41,5 @@ void localRegionAddUTriWithChar(Region *target, int cx, int cy, int width, int h
 void localRegionDelUTri(Region *target, int cx, int cy, int width, int height, int fill);
 
 
-void drawLocalRegion(Region *target, Coordinate scrTopLeftPos, int scrW, int scrH); // x, y refer to the global coordinates of screen's top left corner
-void drawLocalRegionBlocked(Region *target, Coordinate scrTopLeftPos, int scrW, int scrH); // x, y refer to the global coordinates of screen's top left corner
+void drawLocalRegion(Region *target, int blind, Coordinate scrTopLeftPos, int scrW, int scrH); // x, y refer to the global coordinates of screen's top left corner
+void drawLocalRegionBlocked(Region *target, int blind, Coordinate scrTopLeftPos, int scrW, int scrH); // x, y refer to the global coordinates of screen's top left corner

@@ -32,17 +32,32 @@
 #define GRAVITATIONAL_ACC 0.002
 #define FRICTION_TRIGGER 0.0001
 
+// increment as bit mask
 #define SPHERE_FIRE 1
 #define SPHERE_WATER 2
 #define SPHERE_EARTH 4
 #define SPHERE_WIND 8
 #define SPHERE_ICE 16
+#define SPHERE_MYTH 32
 
-#define ENCHANT_EFFECT_MASK 1
+// outside ENCHANT_EFFECT_MASK, it is the enchantments that only affect the object itself
+#define ENCHANT_EFFECT_MASK (64 - 1)
 #define ENCHANT_COLD_SLOW 1
+#define ENCHANT_BLIND 2
+#define ENCHANT_STUN 4
+#define ENCHANT_ENTANGLE 8
+#define ENCHANT_CONFUSE 16
+#define ENCHANT_CLOAK 32
 
-#define TOTAL_EFFECT_COUNT 1
+// increment as array index
+#define TOTAL_EFFECT_COUNT 6
 #define EFFECT_COLD_SLOW 0
+// only useful for player
+#define EFFECT_BLIND 1
+#define EFFECT_STUN 2
+#define EFFECT_ENTANGLE 3
+#define EFFECT_CONFUSE 4
+#define EFFECT_INVISIBLE 5
 
 struct vector {
 	double x;
@@ -63,8 +78,10 @@ typedef int BOOL;
 typedef enum { NOTHING = 0,
 			   DEMO_LIFE_CAN_FLY, DEMO_LIFE_CANNOT_FLY,
 			   DEMO_OBJ_USING_IMG_LOADER,
-			   LIFE_HUMANOID, LIFE_MUSHROOM, LIFE_EYEBALL, LIFE_MOSQUITOES,
+			   LIFE_HUMANOID, LIFE_EYEBALL, LIFE_MOSQUITOES,
+			   LIFE_MUSHROOM,
 			   MAGIC_BLOB, MAGIC_SPIKE, MAGIC_LASER,
+			   MIST, CORRUPTING_MIST,
 			   BULLET, BOMB, FRAGMENT } ObjectType;
 typedef enum { UP, EAST, DOWN, WEST } Direction;
 extern double DIRECTION2X[4];

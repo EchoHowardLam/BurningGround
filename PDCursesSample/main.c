@@ -245,7 +245,8 @@ int doGameLoop() {
 				coolDown2 += 10;
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				createObjectMagicRain(&localMap, playerId, MAGIC_BLOB, destX, destY, 100, 20, 0.1, SPHERE_ICE, 0);
+				createObjectMagicRain(&localMap, -1, MAGIC_BLOB, destX, destY, 100, 20, 0.1, SPHERE_MYTH, ENCHANT_CLOAK);
+				//createObjectMist(&localMap, playerId, MIST, gameObject[playerId].x, gameObject[playerId].y, 1000, SPHERE_ICE, 0);
 			}
 			if (keyboardPress['~'])
 				debugVision = !debugVision;
@@ -266,13 +267,16 @@ int doGameLoop() {
 		}
 		
 		// 4. render the display this turn
-		scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
-		scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
-		drawLocalRegion(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
-		displayObjects(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
-		if (debugVision) drawLocalRegionBlocked(&localMap, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
-		displayCrossHair(mouseEvents.x, mouseEvents.y);
-		refresh();		// update the display in one go
+		if (playerId != -1 && gameObject[playerId].type == LIFE_HUMANOID)
+		{
+			scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
+			scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
+			drawLocalRegion(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
+			displayObjects(&localMap, playerId, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
+			if (debugVision) drawLocalRegionBlocked(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
+			displayCrossHair(mouseEvents.x, mouseEvents.y);
+			refresh();		// update the display in one go
+		}
 
 		// 5. stop running for some time to prevent using up all CPU power;
 		// if you want to compensate for computational time and sleep non-fixed amount of time,

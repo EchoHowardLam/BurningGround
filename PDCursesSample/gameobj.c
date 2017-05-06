@@ -18,6 +18,8 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 
 		gameObject[i].endurance = 1;
 		gameObject[i].type = type;
+		gameObject[i].isBackground = FALSE;
+		//gameObject[i].isIntangible = FALSE;
 		gameObject[i].x = startX;
 		gameObject[i].y = startY;
 		gameObject[i].dispX = 0.0;
@@ -36,6 +38,11 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].underGravity = FALSE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
+		case LIFE_HUMANOID:
+			gameObject[i].endurance = 100;
+			gameObject[i].underGravity = TRUE;
+			gameObject[i].fixedFlight = TRUE;
+			break;
 		case LIFE_EYEBALL:
 			gameObject[i].endurance = 10;
 			gameObject[i].underGravity = FALSE;
@@ -46,13 +53,12 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].underGravity = FALSE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
-		case LIFE_HUMANOID:
-			gameObject[i].endurance = 100;
+		case LIFE_MUSHROOM:
+			gameObject[i].destroyCriteria = DESTROY_CRITERIA_HIT;
 			gameObject[i].underGravity = TRUE;
-			gameObject[i].fixedFlight = TRUE;
+			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
 			break;
 		case DEMO_LIFE_CANNOT_FLY:
-		case LIFE_MUSHROOM:
 		default:
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
@@ -80,6 +86,8 @@ int createObjectProjectileDir(Region *environment, int master, ObjectType type, 
 
 		gameObject[i].endurance = 1;
 		gameObject[i].type = type;
+		gameObject[i].isBackground = FALSE;
+		//gameObject[i].isIntangible = FALSE;
 		gameObject[i].x = startX;
 		gameObject[i].y = startY;
 		gameObject[i].dispX = 0.0;
@@ -124,6 +132,8 @@ int createObjectProjectileDest(Region *environment, int master, ObjectType type,
 
 		gameObject[i].endurance = 1;
 		gameObject[i].type = type;
+		gameObject[i].isBackground = FALSE;
+		//gameObject[i].isIntangible = FALSE;
 		gameObject[i].x = startX;
 		gameObject[i].y = startY;
 		gameObject[i].dispX = destX - startX;
@@ -168,6 +178,8 @@ int createObjectMagicProjectile(Region *environment, int master, ObjectType type
 
 		gameObject[i].endurance = 1;
 		gameObject[i].type = type;
+		gameObject[i].isBackground = FALSE;
+		//gameObject[i].isIntangible = FALSE;
 		gameObject[i].x = startX;
 		gameObject[i].y = startY;
 		gameObject[i].dispX = destX - startX;
@@ -247,6 +259,56 @@ int createObjectMagicRain(Region *environment, int master, ObjectType type, doub
 	return (createObjectMagicProjectile(environment, master, type, sX, sY, sX, sY + 1.0, speed, -1, sphere, enchant));
 }
 
+int createObjectMist(Region *environment, int master, ObjectType type, double startX, double startY, int lifespan, int sphere, int enchant)
+{
+	for (int i = MAX_OBJECT - 1; i >= 0; i--)
+	{
+		if (gameObject[i].type != NOTHING)
+			continue;		// if not empty, try next
+
+		gameObject[i].endurance = 1;
+		gameObject[i].type = type;
+		gameObject[i].isBackground = TRUE;
+		//gameObject[i].isIntangible = TRUE;
+		gameObject[i].x = startX;
+		gameObject[i].y = startY;
+		gameObject[i].dispX = 0.0;
+		gameObject[i].dispY = 0.0;
+		gameObject[i].vel.x = 0.0;
+		gameObject[i].vel.y = 0.0;
+		gameObject[i].motiveVel.x = 0.0;
+		gameObject[i].motiveVel.y = 0.0;
+		gameObject[i].turnsAlive = -1;
+		gameObject[i].lifespan = lifespan;
+
+		gameObject[i].destroyCriteria = 0;
+
+		switch (type)
+		{
+		case MIST:
+			gameObject[i].destroyCriteria = 0;
+			gameObject[i].underMove = FALSE;
+			gameObject[i].underGravity = FALSE;
+			gameObject[i].fixedFlight = TRUE;
+			break;
+		default:
+			return -1;
+		}
+		gameObject[i].facingDir = 1;
+		gameObject[i].sprite = NULL;
+		gameObject[i].master = master;
+
+		gameObject[i].attri = sphere;
+		gameObject[i].attri2 = enchant;
+		if (gameObject[i].attri & SPHERE_ICE)
+			gameObject[i].attri2 |= ENCHANT_COLD_SLOW;
+
+		gameObject[i].spawnRegionCount = NULL;
+		return defaultObjectsInit(environment, i);
+	}
+	return -1;
+}
+
 // This function is for loading sprites
 // -1 fail, otherwise return objId
 int defaultObjectsInit(Region *environment, int objId)
@@ -290,6 +352,10 @@ int defaultObjectsInit(Region *environment, int objId)
 	default:
 		break;
 	}
+	for (int index = 0; index < TOTAL_EFFECT_COUNT; index++)
+	{
+		gameObject[objId].underEffect[index] = -1;
+	}
 	return objId;
 }
 
@@ -303,6 +369,13 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 	{
 		switch (gameObject[id].type)
 		{
+		case LIFE_MUSHROOM: {
+			for (int k = 0; k < 8; k++)
+			{
+				createObjectMist(environment, -1, MIST, gameObject[id].x, gameObject[id].y, 1000, SPHERE_MYTH, ENCHANT_BLIND);
+			}
+			break;
+		}
 		case MAGIC_BLOB:
 			//if (gameObject[id].attri & SPHERE_ICE)
 				//createObjectMagicProjectile(environment, gameObject[id].master, MAGIC_SPIKE, gameObject[id].x, gameObject[id].y, 0.0, 0.0, 0.0, 1000, SPHERE_ICE, 0);
@@ -324,8 +397,8 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 				createObjectProjectileDir(environment, -1, FRAGMENT, gameObject[id].x, gameObject[id].y, -dirX, -dirY, shrapnelV, 250, 0, TRUE);
 				removeEnvironmentBlock(environment, gameObject[id].x + DIRECTION2X[k], gameObject[id].y + DIRECTION2Y[k]);
 				removeEnvironmentBlock(environment, gameObject[id].x + DIAGONALX[k], gameObject[id].y + DIAGONALY[k]);
-				interactObject(environment->objId[(int)floor(gameObject[id].y + DIRECTION2Y[k])][(int)floor(gameObject[id].x + DIRECTION2X[k])], 1, 0);
-				interactObject(environment->objId[(int)floor(gameObject[id].y + DIAGONALY[k])][(int)floor(gameObject[id].x + DIAGONALX[k])], 1, 0);
+				interactObject(environment->objId[(int)floor(gameObject[id].y + DIRECTION2Y[k])][(int)floor(gameObject[id].x + DIRECTION2X[k])], TRUE, 1, 0);
+				interactObject(environment->objId[(int)floor(gameObject[id].y + DIAGONALY[k])][(int)floor(gameObject[id].x + DIAGONALX[k])], TRUE, 1, 0);
 			}
 			break;
 		}
@@ -340,12 +413,20 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 	return;
 }
 
-void displayObjects(Region *environment, Coordinate scrTopLeftPos, int scrW, int scrH)
+void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPos, int scrW, int scrH)
 {
+	if (environment == NULL) return;
+	if (observerId != -1)
+		if (gameObject[observerId].underEffect[EFFECT_BLIND] >= 0)
+			return;
 	for (int i = 0; i < MAX_OBJECT; i++)
 	{
 		if (gameObject[i].type == NOTHING)
 			continue;
+
+		if (i != observerId)
+			if (gameObject[i].underEffect[EFFECT_INVISIBLE] >= 0)
+				continue;
 
 		int screenX = (int)floor(gameObject[i].x - scrTopLeftPos.x);
 		int screenY = (int)floor(gameObject[i].y - scrTopLeftPos.y);
@@ -376,7 +457,12 @@ void displayObjects(Region *environment, Coordinate scrTopLeftPos, int scrW, int
 								if (move(screenY + gry, screenX + grx) != ERR)
 								{
 									fcolor = gameObject[i].sprite->color[ly][lx];
-									if (gameObject[i].underEffect[EFFECT_COLD_SLOW] >= 0)
+									// KEYWORD: effectcolor enchantcolor
+									if (gameObject[i].underEffect[EFFECT_INVISIBLE] >= 0)
+										fcolor = COLOR_PAIR(COLOR_B_BLACK);
+									else if (gameObject[i].underEffect[EFFECT_STUN] >= 0)
+										fcolor = COLOR_PAIR(COLOR_WHITE);
+									else if (gameObject[i].underEffect[EFFECT_COLD_SLOW] >= 0)
 										fcolor = COLOR_PAIR(COLOR_B_BLUE);
 									attron(fcolor);
 									addch(gameObject[i].sprite->display[ly][lx]);
@@ -399,6 +485,9 @@ void displayObjects(Region *environment, Coordinate scrTopLeftPos, int scrW, int
 					else if (gameObject[i].attri & SPHERE_ICE) {
 						fcolor = COLOR_B_BLUE;
 						outchar = 'O';
+					}
+					else if (gameObject[i].attri & SPHERE_MYTH) {
+						outchar = '?';
 					}
 					attron(COLOR_PAIR(fcolor));
 					addch(outchar);
@@ -443,6 +532,16 @@ void displayObjects(Region *environment, Coordinate scrTopLeftPos, int scrW, int
 						curX += gameObject[i].dispX;
 						curY += gameObject[i].dispY;
 					}
+					attroff(COLOR_PAIR(fcolor));
+				}
+				break;
+			case MIST:
+				{
+					int fcolor = COLOR_B_BLACK;
+					if (gameObject[i].attri & SPHERE_ICE)
+						fcolor = COLOR_B_BLUE;
+					attron(COLOR_PAIR(fcolor));
+					addch(97 | A_ALTCHARSET);
 					attroff(COLOR_PAIR(fcolor));
 				}
 				break;
@@ -522,7 +621,8 @@ void acceObjects(Region *environment)
 			continue;
 
 		BOOL onFeet = FALSE;
-		if (gameObject[i].underGravity)
+		BOOL underGravity = (gameObject[i].underGravity || (gameObject[i].underEffect[EFFECT_ENTANGLE] >= 0));
+		if (underGravity)
 		{
 			gameObject[i].vel.y += GRAVITATIONAL_ACC;
 			if ((gameObject[i].vel.y > FRICTION_TRIGGER) && checkObjectOnFeet(environment, i)) // friction and normal force only works if you press it against the surface
@@ -542,14 +642,14 @@ void acceObjects(Region *environment)
 		if (gameObject[i].underMove)
 		{
 			// exception of physics to make player easier to control the character in flight
-			if (gameObject[i].underGravity && (!onFeet))
+			if (underGravity && (!onFeet))
 			{
 				if (fabs(gameObject[i].vel.x + gameObject[i].motiveVel.x * 0.8) <= fabs(gameObject[i].motiveVel.x * 0.8))
 					gameObject[i].vel.x += gameObject[i].motiveVel.x * 0.8;
 			}
 
 			BOOL cancelMove = (fabs(gameObject[i].dispX) + fabs(gameObject[i].dispY) <= 0.01); // finish moving
-			cancelMove |= (gameObject[i].underGravity && (!onFeet)); // unable to move on free will
+			cancelMove |= (underGravity && (!onFeet)); // unable to move on free will
 			if (cancelMove)
 			{
 				gameObject[i].underMove = FALSE;
@@ -593,8 +693,12 @@ void controlObjectX(int id, double destX, double speed)
 {
 	if (gameObject[id].type == NOTHING)
 		return;
+	if (gameObject[id].underEffect[EFFECT_STUN] >= 0)
+		return;
 
 	gameObject[id].dispX = destX - gameObject[id].x;
+	if (gameObject[id].underEffect[EFFECT_CONFUSE] >= 0)
+		gameObject[id].dispX = -gameObject[id].dispX;
 	if (gameObject[id].dispX > 0)
 	{
 		gameObject[id].motiveVel.x = speed;
@@ -607,6 +711,11 @@ void controlObjectX(int id, double destX, double speed)
 			gameObject[id].facingDir |= TURNING_UNSETTLED;
 	}
 	gameObject[id].underMove = TRUE;
+	if (gameObject[id].underEffect[EFFECT_COLD_SLOW] >= 0)
+	{
+		gameObject[id].motiveVel.x *= 0.5;
+		gameObject[id].motiveVel.y *= 0.5;
+	}
 	return;
 }
 
@@ -614,13 +723,22 @@ void controlObjectY(int id, double destY, double speed)
 {
 	if (gameObject[id].type == NOTHING)
 		return;
+	if (gameObject[id].underEffect[EFFECT_STUN] >= 0)
+		return;
 
 	gameObject[id].dispY = destY - gameObject[id].y;
+	if (gameObject[id].underEffect[EFFECT_CONFUSE] >= 0)
+		gameObject[id].dispY = -gameObject[id].dispY;
 	if (gameObject[id].dispY > 0)
 		gameObject[id].motiveVel.y = speed;
 	else
 		gameObject[id].motiveVel.y = -speed;
 	gameObject[id].underMove = TRUE;
+	if (gameObject[id].underEffect[EFFECT_COLD_SLOW] >= 0)
+	{
+		gameObject[id].motiveVel.x *= 0.5;
+		gameObject[id].motiveVel.y *= 0.5;
+	}
 	return;
 }
 
@@ -650,11 +768,6 @@ void moveObjects(Region *environment)
 					toDelete = TRUE;
 			}
 
-			if (gameObject[i].underEffect[EFFECT_COLD_SLOW] >= 0)
-			{
-				gameObject[i].vel.x *= 0.5;
-				gameObject[i].vel.y *= 0.5;
-			}
 			double newX = gameObject[i].x + gameObject[i].vel.x;
 			double newY = gameObject[i].y + gameObject[i].vel.y;
 			int fnewX = (int)floor(newX);
@@ -827,7 +940,7 @@ void updateObjectsStatus(Region *environment)
 						break;
 					if (environment->blocked[fY][fX] && (environment->objId[fY][fX] != gameObject[i].master))
 					{
-						interactObject(environment->objId[fY][fX], 1, gameObject[i].attri2 & ENCHANT_EFFECT_MASK);
+						interactObject(environment->objId[fY][fX], FALSE, 1, gameObject[i].attri2 & ENCHANT_EFFECT_MASK);
 						break;
 					}
 					curX += gameObject[i].dispX;
@@ -863,9 +976,32 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 	if (master == -1) master = -2;
 	switch (gameObject[objId].type)
 	{
+	case MAGIC_BLOB:
+		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
+			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, 1, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+		deleteObject(environment, objId, FALSE);
+		break;
+	case MAGIC_SPIKE:
+		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
+			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, 1, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+		deleteObject(environment, objId, FALSE);
+		break;
+	case MAGIC_LASER:
+		break;
+	case MIST:
+		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
+			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, 0, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+		break;
+	case BULLET:
+	case FRAGMENT:
+		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
+			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], TRUE, 1, 0);
+		deleteObject(environment, objId, FALSE);
+		break;
 	case DEMO_OBJ_USING_IMG_LOADER:
+	default:
+		if (gameObject[objId].sprite != NULL)
 		{
-			/*if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
 			int lx, ly;
 			int topLeftgx = (int)floor(newX) - (int)floor(gameObject[objId].sprite->center->x);
@@ -882,40 +1018,20 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 						{
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
-								return TRUE;
+								interactObject(environment->objId[gay][gax], TRUE, 0, 0);
 							}
 						}
 					}
 				}
-			}*/
+			}
 		}
-		break;
-	case MAGIC_BLOB:
-		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
-			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], 1, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
-		deleteObject(environment, objId, FALSE);
-		break;
-	case MAGIC_SPIKE:
-		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
-			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], 1, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
-		deleteObject(environment, objId, FALSE);
-		break;
-	case MAGIC_LASER:
-		break;
-	case BULLET:
-	case FRAGMENT:
-		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
-			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], 1, 0);
-		deleteObject(environment, objId, FALSE);
-		break;
-	default:
 		break;
 	}
 	return TRUE;
 }
 
 // 0 error 1 interaction triggered(may not work though)
-BOOL interactObject(int objId, int damage, int effect)
+BOOL interactObject(int objId, BOOL physicalTouch, int damage, int effect)
 {
 	if (objId == -1) return FALSE; // this is one of the few functions that may receive an enquiry about invalid objId
 	if (gameObject[objId].type == NOTHING) return FALSE;
@@ -926,9 +1042,32 @@ BOOL interactObject(int objId, int damage, int effect)
 		else
 			gameObject[objId].endurance = 0;
 	}
-	if (effect & ENCHANT_COLD_SLOW)
-		if (gameObject[objId].underEffect[EFFECT_COLD_SLOW] < 500)
-			gameObject[objId].underEffect[EFFECT_COLD_SLOW] = 500;
+	if (effect) // KEYWORD: hit effect addeffect addenchant effectduration enchantduration
+	{
+		if (effect & ENCHANT_COLD_SLOW)
+			if (gameObject[objId].underEffect[EFFECT_COLD_SLOW] < 500)
+				gameObject[objId].underEffect[EFFECT_COLD_SLOW] = 500;
+		if (effect & ENCHANT_BLIND)
+			if (gameObject[objId].underEffect[EFFECT_BLIND] < 500)
+				gameObject[objId].underEffect[EFFECT_BLIND] = 500;
+		if (effect & ENCHANT_STUN)
+			if (gameObject[objId].underEffect[EFFECT_STUN] < 50)
+				gameObject[objId].underEffect[EFFECT_STUN] = 50;
+		if (effect & ENCHANT_ENTANGLE)
+			if (gameObject[objId].underEffect[EFFECT_ENTANGLE] < 100)
+				gameObject[objId].underEffect[EFFECT_ENTANGLE] = 100;
+		if (effect & ENCHANT_CONFUSE)
+			if (gameObject[objId].underEffect[EFFECT_CONFUSE] < 500)
+				gameObject[objId].underEffect[EFFECT_CONFUSE] = 500;
+		if (effect & ENCHANT_CLOAK)
+			if (gameObject[objId].underEffect[EFFECT_INVISIBLE] < 1000)
+				gameObject[objId].underEffect[EFFECT_INVISIBLE] = 1000;
+	}
+	// this function is called in moveObjects, the bumped object may still haven't executed its hitEvent
+	// so we cannot directly call deleteObject()
+	if (physicalTouch || (damage > 0))
+		if (gameObject[objId].destroyCriteria & DESTROY_CRITERIA_HIT)
+			gameObject[objId].endurance = 0;
 	return TRUE;
 }
 
@@ -974,6 +1113,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 		break;
 	case MAGIC_BLOB:
 	case MAGIC_SPIKE:
+	case MIST:
 	case BULLET:
 	case BOMB:
 	case FRAGMENT:
@@ -1000,6 +1140,7 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 	// add special cases that has no sprite
 	case MAGIC_BLOB:
 	case MAGIC_SPIKE:
+	case MIST:
 	case BULLET:
 	case BOMB:
 	case FRAGMENT:
@@ -1056,6 +1197,7 @@ BOOL registerEnvironmentObject(Region *environment, int objId)
 {
 	if (environment == NULL) return FALSE;
 	if (gameObject[objId].sprite == NULL) return FALSE;
+	if (gameObject[objId].isBackground) return TRUE;
 	int gax, gay;
 	int lx, ly;
 	int topLeftgx = (int)floor(gameObject[objId].x) - (int)floor(gameObject[objId].sprite->center->x);
@@ -1089,6 +1231,7 @@ BOOL removeEnvironmentObject(Region *environment, int objId, double oldX, double
 {
 	if (environment == NULL) return FALSE;
 	if (oldImage == NULL) return FALSE;
+	if (gameObject[objId].isBackground) return TRUE;
 	int gax, gay;
 	int lx, ly;
 	int topLeftgx = (int)floor(oldX) - (int)floor(oldImage->center->x);
