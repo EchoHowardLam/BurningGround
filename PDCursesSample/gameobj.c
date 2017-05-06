@@ -435,12 +435,12 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 			break;
 		}
 		case LIFE_RABBIT:
-			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x, gameObject[id].y, 0.0, 0.0, 0.0, 0, 0, TRUE);
-			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x - 1, gameObject[id].y, -1.0, 0.0, 0.0, 0, 0, TRUE);
-			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x + 1, gameObject[id].y, 1.0, 0.0, 0.0, 0, 0, TRUE);
-			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x, gameObject[id].y - 1, 0.0, -1.0, 0.0, 0, 0, TRUE);
-			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x - 1, gameObject[id].y - 1, -1.0, -1.0, 0.0, 0, 0, TRUE);
-			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x + 1, gameObject[id].y - 1, 1.0, -1.0, 0.0, 0, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x, gameObject[id].y, 0.0, 0.0, 0.3, 15, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x - 1, gameObject[id].y, -1.0, 0.0, 0.3, 15, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x + 1, gameObject[id].y, 1.0, 0.0, 0.3, 15, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x, gameObject[id].y - 1, 0.0, -1.0, 0.3, 15, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x - 1, gameObject[id].y - 1, -1.0, -1.0, 0.3, 15, 0, TRUE);
+			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x + 1, gameObject[id].y - 1, 1.0, -1.0, 0.3, 15, 0, TRUE);
 			break;
 		case MAGIC_BLOB:
 			if (gameObject[id].attri)
@@ -653,7 +653,7 @@ void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPo
 		case MIST:
 			{
 				if (move(screenY, screenX) == ERR) break;
-				fcolor = COLOR_B_BLACK;
+				fcolor = COLOR_YELLOW;
 				if (gameObject[i].attri & SPHERE_ICE)
 					fcolor = COLOR_B_BLUE;
 				attron(COLOR_PAIR(fcolor));
@@ -847,10 +847,7 @@ void controlObjectX(int id, double destX, double speed)
 	}
 	gameObject[id].underMove = TRUE;
 	if (gameObject[id].underEffect[EFFECT_COLD_SLOW] >= 0)
-	{
-		gameObject[id].motiveVel.x *= 0.5;
-		gameObject[id].motiveVel.y *= 0.5;
-	}
+		gameObject[id].motiveVel.x *= 0.8;
 	return;
 }
 
@@ -870,10 +867,7 @@ void controlObjectY(int id, double destY, double speed)
 		gameObject[id].motiveVel.y = -speed;
 	gameObject[id].underMove = TRUE;
 	if (gameObject[id].underEffect[EFFECT_COLD_SLOW] >= 0)
-	{
-		gameObject[id].motiveVel.x *= 0.5;
-		gameObject[id].motiveVel.y *= 0.5;
-	}
+		gameObject[id].motiveVel.y *= 0.8;
 	return;
 }
 
@@ -1305,8 +1299,8 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 			int lx, ly;
 			int topLeftgx = (int)floor(x) - (int)floor(gameObject[objId].sprite->center->x);
 			int topLeftgy = (int)floor(y) - (int)floor(gameObject[objId].sprite->center->y);
-			int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
-			int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+			int fdimx = (int)round(gameObject[objId].sprite->dimension->x);
+			int fdimy = (int)round(gameObject[objId].sprite->dimension->y);
 			for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
 			{
 				for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
@@ -1406,8 +1400,11 @@ BOOL removeEnvironmentBlock(Region *environment, double x, double y)
 	int fY = (int)floor(y);
 	if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
 		return FALSE;
-	environment->appearance[fY][fX] = ' ';
-	environment->blocked[fY][fX] = 0;
+	if (environment->objId[fY][fX] == -1)
+	{
+		environment->appearance[fY][fX] = ' ';
+		environment->blocked[fY][fX] = 0;
+	}
 	return TRUE;
 }
 
