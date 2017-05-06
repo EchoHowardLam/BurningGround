@@ -245,7 +245,7 @@ int doGameLoop() {
 				coolDown2 += 10;
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				createObjectMagicRain(&localMap, -1, MAGIC_BLOB, destX, destY, 100, 20, 0.1, SPHERE_MYTH, ENCHANT_CLOAK);
+				createObjectMagicRain(&localMap, -1, MAGIC_BLOB, destX, destY, 20, 20, 0.1, SPHERE_MYTH, ENCHANT_STUN | ENCHANT_ENTANGLE);
 				//createObjectMist(&localMap, playerId, MIST, gameObject[playerId].x, gameObject[playerId].y, 1000, SPHERE_ICE, 0);
 			}
 			if (keyboardPress['~'])

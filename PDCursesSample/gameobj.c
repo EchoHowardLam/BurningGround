@@ -16,7 +16,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 		if (gameObject[i].type != NOTHING)
 			continue;		// if not empty, try next
 
-		gameObject[i].endurance = 1;
+		gameObject[i].endurance = 100;
 		gameObject[i].type = type;
 		gameObject[i].isBackground = FALSE;
 		//gameObject[i].isIntangible = FALSE;
@@ -39,12 +39,12 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case LIFE_HUMANOID:
-			gameObject[i].endurance = 100;
+			gameObject[i].endurance = 10000;
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case LIFE_EYEBALL:
-			gameObject[i].endurance = 10;
+			gameObject[i].endurance = 100;
 			gameObject[i].underGravity = FALSE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
@@ -54,6 +54,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case LIFE_MUSHROOM:
+			gameObject[i].endurance = 1;
 			gameObject[i].destroyCriteria = DESTROY_CRITERIA_HIT;
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
@@ -432,147 +433,150 @@ void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPo
 		int screenX = (int)floor(gameObject[i].x - scrTopLeftPos.x);
 		int screenY = (int)floor(gameObject[i].y - scrTopLeftPos.y);
 
-		if (move(screenY, screenX) != ERR)
+		double tmp;
+		switch (gameObject[i].type)
 		{
-			double tmp;
-			switch (gameObject[i].type)
+		case DEMO_OBJ_USING_IMG_LOADER:
+		case LIFE_HUMANOID:
+		case LIFE_EYEBALL:
+		case LIFE_MOSQUITOES:
+		case LIFE_MUSHROOM:
 			{
-			case DEMO_OBJ_USING_IMG_LOADER:
-			case LIFE_HUMANOID:
-			case LIFE_EYEBALL:
-			case LIFE_MOSQUITOES:
-			case LIFE_MUSHROOM:
+				if (gameObject[i].sprite == NULL) break;
+				int grx, gry;
+				int lx, ly;
+				int fdimx = (int)floor(gameObject[i].sprite->dimension->x);
+				int fdimy = (int)floor(gameObject[i].sprite->dimension->y);
+				int fcolor;
+				for (ly = 0, gry = -(int)floor(gameObject[i].sprite->center->y); ly < fdimy; gry++, ly++)
 				{
-					if (gameObject[i].sprite == NULL) break;
-					int grx, gry;
-					int lx, ly;
-					int fdimx = (int)floor(gameObject[i].sprite->dimension->x);
-					int fdimy = (int)floor(gameObject[i].sprite->dimension->y);
-					int fcolor;
-					for (ly = 0, gry = -(int)floor(gameObject[i].sprite->center->y); ly < fdimy; gry++, ly++)
+					for (lx = 0, grx = -(int)floor(gameObject[i].sprite->center->x); lx < fdimx; grx++, lx++)
 					{
-						for (lx = 0, grx = -(int)floor(gameObject[i].sprite->center->x); lx < fdimx; grx++, lx++)
+						if (gameObject[i].sprite->solid[ly][lx] > 0)
 						{
-							if (gameObject[i].sprite->solid[ly][lx] > 0)
+							if (move(screenY + gry, screenX + grx) != ERR)
 							{
-								if (move(screenY + gry, screenX + grx) != ERR)
-								{
-									fcolor = gameObject[i].sprite->color[ly][lx];
-									// KEYWORD: effectcolor enchantcolor
-									if (gameObject[i].underEffect[EFFECT_INVISIBLE] >= 0)
-										fcolor = COLOR_PAIR(COLOR_B_BLACK);
-									else if (gameObject[i].underEffect[EFFECT_STUN] >= 0)
-										fcolor = COLOR_PAIR(COLOR_WHITE);
-									else if (gameObject[i].underEffect[EFFECT_COLD_SLOW] >= 0)
-										fcolor = COLOR_PAIR(COLOR_B_BLUE);
-									attron(fcolor);
-									addch(gameObject[i].sprite->display[ly][lx]);
-									attroff(fcolor);
-								}
+								fcolor = gameObject[i].sprite->color[ly][lx];
+								// KEYWORD: effectcolor enchantcolor
+								if (gameObject[i].underEffect[EFFECT_INVISIBLE] >= 0)
+									fcolor = COLOR_PAIR(COLOR_B_BLACK);
+								else if (gameObject[i].underEffect[EFFECT_STUN] >= 0)
+									fcolor = COLOR_PAIR(COLOR_WHITE);
+								else if (gameObject[i].underEffect[EFFECT_COLD_SLOW] >= 0)
+									fcolor = COLOR_PAIR(COLOR_B_BLUE);
+								attron(fcolor);
+								addch(gameObject[i].sprite->display[ly][lx]);
+								attroff(fcolor);
 							}
 						}
 					}
 				}
-				break;
-			case MAGIC_BLOB:
-				{
-					int fcolor = COLOR_WHITE;
-					char outchar = '|';
-					if (gameObject[i].attri & SPHERE_FIRE)
-					{
-						fcolor = COLOR_B_RED;
-						outchar = '@';
-					}
-					else if (gameObject[i].attri & SPHERE_ICE) {
-						fcolor = COLOR_B_BLUE;
-						outchar = 'O';
-					}
-					else if (gameObject[i].attri & SPHERE_MYTH) {
-						outchar = '?';
-					}
-					attron(COLOR_PAIR(fcolor));
-					addch(outchar);
-					attroff(COLOR_PAIR(fcolor));
-				}
-				break;
-			case MAGIC_SPIKE:
-				{
-					int fcolor = COLOR_WHITE;
-					char outchar = 'v';
-					if (gameObject[i].attri & SPHERE_ICE)
-						fcolor = COLOR_B_CYAN;
-					attron(COLOR_PAIR(fcolor));
-					addch(outchar);
-					attroff(COLOR_PAIR(fcolor));
-				}
-				break;
-			case MAGIC_LASER: // can use middle-line algorithm here for optimization
-				{
-					int fcolor = COLOR_WHITE;
-					if (gameObject[i].attri & SPHERE_FIRE)
-					{
-						fcolor = COLOR_B_RED;
-					}
-					else if (gameObject[i].attri & SPHERE_ICE) {
-						fcolor = COLOR_B_CYAN;
-					}
-					double curX = gameObject[i].x;
-					double curY = gameObject[i].y;
-					int fX, fY;
-					attron(COLOR_PAIR(fcolor));
-					while (1)
-					{
-						fX = (int)floor(curX);
-						fY = (int)floor(curY);
-						if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
-							break;
-						if (environment->blocked[fY][fX] && (environment->objId[fY][fX] != gameObject[i].master))
-							break;
-						if (move((int)floor(curY - scrTopLeftPos.y), (int)floor(curX - scrTopLeftPos.x)) != ERR)
-							addch('*');
-						curX += gameObject[i].dispX;
-						curY += gameObject[i].dispY;
-					}
-					attroff(COLOR_PAIR(fcolor));
-				}
-				break;
-			case MIST:
-				{
-					int fcolor = COLOR_B_BLACK;
-					if (gameObject[i].attri & SPHERE_ICE)
-						fcolor = COLOR_B_BLUE;
-					attron(COLOR_PAIR(fcolor));
-					addch(97 | A_ALTCHARSET);
-					attroff(COLOR_PAIR(fcolor));
-				}
-				break;
-			case BULLET:
-				attron(COLOR_PAIR(COLOR_WHITE));
-				addch('*');
-				attroff(COLOR_PAIR(COLOR_WHITE));
-				break;
-			case BOMB:
-				addch('@');
-				break;
-			case FRAGMENT:
-				tmp = (gameObject[i].y - floor(gameObject[i].y));
-				if (tmp <= 0.5)
-				{
-					if (tmp <= 0.25)
-						addch('`');
-					else
-						addch('\'');
-				}
-				else {
-					if (tmp <= 0.75)
-						addch('.');
-					else
-						addch(',');
-				}
-				break;
-			default:
-				break;
 			}
+			break;
+		case MAGIC_BLOB:
+			{
+				if (move(screenY, screenX) == ERR) break;
+				int fcolor = COLOR_WHITE;
+				char outchar = '|';
+				if (gameObject[i].attri & SPHERE_FIRE)
+				{
+					fcolor = COLOR_B_RED;
+					outchar = '@';
+				}
+				else if (gameObject[i].attri & SPHERE_ICE) {
+					fcolor = COLOR_B_BLUE;
+					outchar = 'O';
+				}
+				else if (gameObject[i].attri & SPHERE_MYTH) {
+					outchar = '?';
+				}
+				attron(COLOR_PAIR(fcolor));
+				addch(outchar);
+				attroff(COLOR_PAIR(fcolor));
+			}
+			break;
+		case MAGIC_SPIKE:
+			{
+				if (move(screenY, screenX) == ERR) break;
+				int fcolor = COLOR_WHITE;
+				char outchar = 'v';
+				if (gameObject[i].attri & SPHERE_ICE)
+					fcolor = COLOR_B_CYAN;
+				attron(COLOR_PAIR(fcolor));
+				addch(outchar);
+				attroff(COLOR_PAIR(fcolor));
+			}
+			break;
+		case MAGIC_LASER: // can use middle-line algorithm here for optimization
+			{
+				int fcolor = COLOR_WHITE;
+				if (gameObject[i].attri & SPHERE_FIRE)
+				{
+					fcolor = COLOR_B_RED;
+				}
+				else if (gameObject[i].attri & SPHERE_ICE) {
+					fcolor = COLOR_B_CYAN;
+				}
+				double curX = gameObject[i].x;
+				double curY = gameObject[i].y;
+				int fX, fY;
+				attron(COLOR_PAIR(fcolor));
+				while (1)
+				{
+					fX = (int)floor(curX);
+					fY = (int)floor(curY);
+					if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
+						break;
+					if (environment->blocked[fY][fX] && (environment->objId[fY][fX] != gameObject[i].master))
+						break;
+					if (move((int)floor(curY - scrTopLeftPos.y), (int)floor(curX - scrTopLeftPos.x)) != ERR)
+						addch('*');
+					curX += gameObject[i].dispX;
+					curY += gameObject[i].dispY;
+				}
+				attroff(COLOR_PAIR(fcolor));
+			}
+			break;
+		case MIST:
+			{
+				if (move(screenY, screenX) == ERR) break;
+				int fcolor = COLOR_B_BLACK;
+				if (gameObject[i].attri & SPHERE_ICE)
+					fcolor = COLOR_B_BLUE;
+				attron(COLOR_PAIR(fcolor));
+				addch(97 | A_ALTCHARSET);
+				attroff(COLOR_PAIR(fcolor));
+			}
+			break;
+		case BULLET:
+			if (move(screenY, screenX) == ERR) break;
+			attron(COLOR_PAIR(COLOR_WHITE));
+			addch('*');
+			attroff(COLOR_PAIR(COLOR_WHITE));
+			break;
+		case BOMB:
+			if (move(screenY, screenX) == ERR) break;
+			addch('@');
+			break;
+		case FRAGMENT:
+			if (move(screenY, screenX) == ERR) break;
+			tmp = (gameObject[i].y - floor(gameObject[i].y));
+			if (tmp <= 0.5)
+			{
+				if (tmp <= 0.25)
+					addch('`');
+				else
+					addch('\'');
+			}
+			else {
+				if (tmp <= 0.75)
+					addch('.');
+				else
+					addch(',');
+			}
+			break;
+		default:
+			break;
 		}
 	}
 	return;
@@ -1056,7 +1060,11 @@ BOOL interactObject(int objId, BOOL physicalTouch, int damage, int effect)
 				gameObject[objId].underEffect[EFFECT_STUN] = 50;
 		if (effect & ENCHANT_ENTANGLE)
 			if (gameObject[objId].underEffect[EFFECT_ENTANGLE] < 100)
+			{
+				gameObject[objId].vel.x = 0.0;
+				gameObject[objId].vel.y = 0.0;
 				gameObject[objId].underEffect[EFFECT_ENTANGLE] = 100;
+			}
 		if (effect & ENCHANT_CONFUSE)
 			if (gameObject[objId].underEffect[EFFECT_CONFUSE] < 500)
 				gameObject[objId].underEffect[EFFECT_CONFUSE] = 500;
