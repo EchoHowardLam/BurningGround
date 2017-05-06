@@ -103,13 +103,23 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].endurance = 1;
 			gameObject[i].isBackground = TRUE;
 			gameObject[i].underGravity = TRUE;
-			gameObject[i].fixedFlight = FALSE;
+			gameObject[i].fixedFlight = TRUE;
 			break;
 		case LIFE_MUSHROOM:
 			gameObject[i].endurance = 1;
 			gameObject[i].destroyCriteria = DESTROY_CRITERIA_HIT;
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
+			break;
+		case SPAWN_BEE_HIVE:
+			gameObject[i].endurance = 100;
+			gameObject[i].underGravity = FALSE;
+			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
+			break;
+		case LIFE_BEE:
+			gameObject[i].endurance = 20;
+			gameObject[i].underGravity = FALSE;
+			gameObject[i].fixedFlight = TRUE;
 			break;
 		case DEMO_LIFE_CANNOT_FLY:
 		default:
@@ -423,6 +433,22 @@ int defaultObjectsInit(Region *environment, int objId)
 			return -1;
 		}
 		break;
+	case SPAWN_BEE_HIVE:
+		gameObject[objId].sprite = getImage(SPAWN_BEE_HIVE, rand()%2);
+		if (!registerEnvironmentObject(environment, objId))
+		{
+			deleteObject(environment, objId, TRUE);
+			return -1;
+		}
+		break;
+	case LIFE_BEE:
+		gameObject[objId].sprite = getImage(LIFE_BEE, 2+rand()%2);
+		if (!registerEnvironmentObject(environment, objId))
+		{
+			deleteObject(environment, objId, TRUE);
+			return -1;
+		}
+		break;
 	case MAGIC_FLAME:
 	case MAGIC_FRAGMENT:
 		if (environment->blocked[fY][fX])
@@ -458,7 +484,7 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 			}
 			break;
 		}
-		case LIFE_RABBIT:
+		case LIFE_RABBIT: {
 			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x, gameObject[id].y, 0.0, 0.0, 0.3, 15, 0, TRUE);
 			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x - 1, gameObject[id].y, -1.0, 0.0, 0.3, 15, 0, TRUE);
 			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x + 1, gameObject[id].y, 1.0, 0.0, 0.3, 15, 0, TRUE);
@@ -466,11 +492,20 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x - 1, gameObject[id].y - 1, -1.0, -1.0, 0.3, 15, 0, TRUE);
 			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x + 1, gameObject[id].y - 1, 1.0, -1.0, 0.3, 15, 0, TRUE);
 			break;
-		case LIFE_SLUDGE:
+		}
+		case LIFE_SLUDGE: {
 			createObject(environment, -1, LIFE_SLUDGE, gameObject[id].x - 3, gameObject[id].y);
 			createObject(environment, -1, LIFE_SLUDGE, gameObject[id].x + 3, gameObject[id].y);
 			break;
-		case MAGIC_BLOB:
+		}
+		case SPAWN_BEE_HIVE: {
+			// TODO fix this problem
+			for (int k=0; k<5; k++) {
+				createObject(environment, -1, LIFE_BEE, gameObject[id].x + getRandomOfRange(3), gameObject[id].y + getRandomOfRange(3));
+			}
+			break;
+		}
+		case MAGIC_BLOB: {
 			if (gameObject[id].attri)
 			{
 				if (gameObject[id].attri & SPHERE_FIRE)
@@ -509,6 +544,7 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 			//if (gameObject[id].attri & SPHERE_ICE)
 				//createObjectMagicProjectile(environment, gameObject[id].master, MAGIC_SPIKE, gameObject[id].x, gameObject[id].y, 0.0, 0.0, 0.0, 1000, SPHERE_ICE, 0);
 			break;
+		}
 		case MAGIC_LASER:
 		case MAGIC_SPIKE:
 			break;
@@ -575,6 +611,8 @@ void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPo
 		case LIFE_RABBIT:
 		case LIFE_SLUDGE:
 		case LIFE_GRASS:
+		case SPAWN_BEE_HIVE:
+		case LIFE_BEE:
 			{
 				if (gameObject[i].sprite == NULL) break;
 				int grx, gry;
@@ -1187,6 +1225,42 @@ void updateObjectsStatus(Region *environment)
 			}
 		}
 			break;
+		case SPAWN_BEE_HIVE:
+		{
+			CharacterImage *oldImage = gameObject[i].sprite;
+			CharacterImage *newImage = getImage(SPAWN_BEE_HIVE, gameObject[i].sprite->charaID);
+			if (oldImage != newImage)
+			{
+				gameObject[i].sprite = newImage;
+				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+				{
+					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+					registerEnvironmentObject(environment, i);
+				}
+				else {
+					gameObject[i].sprite = oldImage;
+				}
+			}
+		}
+			break;
+		case LIFE_BEE:
+		{
+			CharacterImage *oldImage = gameObject[i].sprite;
+			CharacterImage *newImage = getImage(LIFE_BEE, gameObject[i].sprite->charaID);
+			if (oldImage != newImage)
+			{
+				gameObject[i].sprite = newImage;
+				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+				{
+					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+					registerEnvironmentObject(environment, i);
+				}
+				else {
+					gameObject[i].sprite = oldImage;
+				}
+			}
+		}
+			break;
 		case MAGIC_LASER: // can use middle-line algorithm here for optimization
 			{
 				double curX = gameObject[i].x;
@@ -1427,6 +1501,8 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case LIFE_RABBIT:
 	case LIFE_SLUDGE:
 	case LIFE_GRASS:
+	case SPAWN_BEE_HIVE:
+	case LIFE_BEE:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
@@ -1606,10 +1682,6 @@ BOOL removeEnvironmentObject(Region *environment, int objId, double oldX, double
 		}
 	}
 	return TRUE;
-}
-
-double getRandomOfRange(int base) {
-	return ((double)rand())/RAND_MAX * base * ((rand()%2==0)?1:-1);
 }
 
 void doInitialSpawn(Region *target) {

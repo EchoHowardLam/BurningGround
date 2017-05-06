@@ -92,7 +92,7 @@ typedef enum { NOTHING = 0,
 			   DEMO_OBJ_USING_IMG_LOADER,
 			   LIFE_HUMANOID, LIFE_EYEBALL, LIFE_MOSQUITOES,
 			   LIFE_MUSHROOM, LIFE_RABBIT, LIFE_SLUDGE,
-			   LIFE_GRASS,
+			   LIFE_GRASS, LIFE_BEE, SPAWN_BEE_HIVE,
 			   MAGIC_BLOB, MAGIC_SPIKE, MAGIC_LASER, MAGIC_FLAME, MAGIC_FRAGMENT,
 			   SOLID_DURIAN,
 			   MIST, CORRUPTING_MIST,
@@ -110,3 +110,4 @@ void threadSleep(unsigned ms);
 int lastIndexOf(char *str, char needle);
 int indexNotOf(char *str, char needle);
 int lastIndexNotOf(char *str, char needle);
+double getRandomOfRange(int base);

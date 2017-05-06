@@ -47,3 +47,8 @@ int lastIndexNotOf(char *str, char needle) {
 	}
 	return -1;
 }
+
+
+double getRandomOfRange(int base) {
+	return ((double)rand())/RAND_MAX * base * ((rand()%2==0)?1:-1);
+}
