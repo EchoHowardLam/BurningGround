@@ -412,7 +412,7 @@ int defaultObjectsInit(Region *environment, int objId)
 		}
 		break;
 	case LIFE_GRASS:
-		gameObject[objId].sprite = getImage(LIFE_GRASS, rand() % 3);
+		gameObject[objId].sprite = getImage(LIFE_GRASS, (rand()%8==0)?(3+rand()%2):rand()%3);
 		if (!registerEnvironmentObject(environment, objId))
 		{
 			deleteObject(environment, objId, TRUE);

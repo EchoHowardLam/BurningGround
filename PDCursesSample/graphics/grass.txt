@@ -1,9 +1,23 @@
 0 4 1 0 0
 \.,)
-GGGG
+gggg
 1 5 1 0 0
 /..(\
-GGGGG
+ggggg
 2 4 1 0 0
 )\,,
-GGGG
+gggg
+3 3 3 0 2
+ '*
+|  
+:* 
+ gR
+g  
+gR 
+4 4 3 2 2
+   *
+*. :
+\*.)
+  RM
+RgRg
+gYgg
