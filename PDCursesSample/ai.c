@@ -55,6 +55,14 @@ void aiRun(Region *environment, int playerId) {
 				}
 				break;
 			}
+			case LIFE_SLUDGE: {
+				if (fabs(gameObject[playerId].x-gameObject[i].x) < 20 &&
+					fabs(gameObject[playerId].x-gameObject[i].x) > 4 &&
+					fabs(gameObject[playerId].y-gameObject[i].y) <= 2) {
+					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x-gameObject[i].x<0)?-1.5:1.5), 0.02); // + 0.5 is compulsory as it is the center of a grid
+				}
+				break;
+			}
 			case MIST: {
 				double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
 				double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));

@@ -58,6 +58,11 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
+		case LIFE_SLUDGE:
+			gameObject[i].endurance = 20;
+			gameObject[i].underGravity = TRUE;
+			gameObject[i].fixedFlight = TRUE;
+			break;
 		case LIFE_MUSHROOM:
 			gameObject[i].endurance = 1;
 			gameObject[i].destroyCriteria = DESTROY_CRITERIA_HIT;
@@ -363,6 +368,14 @@ int defaultObjectsInit(Region *environment, int objId)
 			return -1;
 		}
 		break;
+	case LIFE_SLUDGE:
+		gameObject[objId].sprite = getImage(LIFE_SLUDGE, gameObject[objId].facingDir & 1);
+		if (!registerEnvironmentObject(environment, objId))
+		{
+			deleteObject(environment, objId, TRUE);
+			return -1;
+		}
+		break;
 	default:
 		break;
 	}
@@ -455,6 +468,7 @@ void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPo
 		case LIFE_MOSQUITOES:
 		case LIFE_MUSHROOM:
 		case LIFE_RABBIT:
+		case LIFE_SLUDGE:
 			{
 				if (gameObject[i].sprite == NULL) break;
 				int grx, gry;
@@ -869,6 +883,23 @@ void rotateObjects(Region *environment)
 				}
 			}
 			break;
+		case LIFE_SLUDGE:
+			if (gameObject[i].facingDir & TURNING_UNSETTLED)
+			{
+				CharacterImage *oldImage = gameObject[i].sprite;
+				gameObject[i].sprite = getImage(LIFE_SLUDGE, ~gameObject[i].facingDir);
+				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+				{
+					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+					registerEnvironmentObject(environment, i);
+					gameObject[i].facingDir ^= (TURNING_UNSETTLED | 1);
+				}
+				else {
+					gameObject[i].sprite = oldImage;
+					gameObject[i].facingDir ^= TURNING_UNSETTLED;
+				}
+			}
+			break;
 		default:
 			break;
 		}
@@ -967,6 +998,24 @@ void updateObjectsStatus(Region *environment)
 		{
 			CharacterImage *oldImage = gameObject[i].sprite;
 			CharacterImage *newImage = getImage(LIFE_RABBIT, gameObject[i].facingDir & 1);
+			if (oldImage != newImage)
+			{
+				gameObject[i].sprite = newImage;
+				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+				{
+					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+					registerEnvironmentObject(environment, i);
+				}
+				else {
+					gameObject[i].sprite = oldImage;
+				}
+			}
+		}
+			break;
+		case LIFE_SLUDGE:
+		{
+			CharacterImage *oldImage = gameObject[i].sprite;
+			CharacterImage *newImage = getImage(LIFE_SLUDGE, gameObject[i].facingDir & 1);
 			if (oldImage != newImage)
 			{
 				gameObject[i].sprite = newImage;
