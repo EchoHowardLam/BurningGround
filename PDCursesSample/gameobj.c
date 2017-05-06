@@ -416,17 +416,18 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPos, int scrW, int scrH)
 {
 	if (environment == NULL) return;
-	if (observerId != -1)
-		if (gameObject[observerId].underEffect[EFFECT_BLIND] >= 0)
-			return;
 	for (int i = 0; i < MAX_OBJECT; i++)
 	{
 		if (gameObject[i].type == NOTHING)
 			continue;
 
 		if (i != observerId)
+		{
+			if (gameObject[observerId].underEffect[EFFECT_BLIND] >= 0)
+				continue;
 			if (gameObject[i].underEffect[EFFECT_INVISIBLE] >= 0)
 				continue;
+		}
 
 		int screenX = (int)floor(gameObject[i].x - scrTopLeftPos.x);
 		int screenY = (int)floor(gameObject[i].y - scrTopLeftPos.y);

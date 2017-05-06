@@ -143,7 +143,7 @@ void localRegionDelUTri(Region *target, int cx, int cy, int radius, int height, 
 void drawLocalRegion(Region *target, int blind, Coordinate scrTopLeftPos, int scrW, int scrH)
 {
 	if (target == NULL) return;
-	if (blind >= 0) return;
+	//if (blind >= 0) return;
 	scrW = SCREEN_WIDTH;
 	scrH = SCREEN_HEIGHT;
 	int x = (int)floor(scrTopLeftPos.x);
@@ -157,9 +157,10 @@ void drawLocalRegion(Region *target, int blind, Coordinate scrTopLeftPos, int sc
 			if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width))
 			{
 				attron(target->color[ry][rx]);
-				if (target->appearance[ry][rx] == (97 | A_ALTCHARSET))
-					target->appearance[ry][rx] = (48 | A_ALTCHARSET);
-				addch(target->appearance[ry][rx]);
+				if ((blind < 0) && target->appearance[ry][rx] == (97 | A_ALTCHARSET))
+					addch(48 | A_ALTCHARSET);
+				else
+					addch(target->appearance[ry][rx]);
 				attroff(target->color[ry][rx]);
 			}
 			else
@@ -198,8 +199,8 @@ void drawLocalRegionBlocked(Region *target, int blind, Coordinate scrTopLeftPos,
 			{
 				if (move(i, j) == ERR) return;
 				bool showLand = FALSE;
-				if (blind >= 0)
-					showLand = TRUE;
+				/*if (blind >= 0)
+					showLand = TRUE;*/
 				if (target->blocked[ry][rx] && (showLand || target->objId[ry][rx] != -1))
 				{
 					attron(COLOR_PAIR(COLOR_WHITE));
