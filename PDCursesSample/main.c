@@ -255,8 +255,8 @@ int doGameLoop() {
 				deleteObject(&localMap, playerId, TRUE);
 				restart = TRUE;
 			}
-
-			aiRun(&localMap);
+			
+			aiRun(&localMap, playerId);
 			spawnCheck(&localMap);
 
 			// 3. update all game objects positions

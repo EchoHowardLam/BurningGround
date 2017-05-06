@@ -4,4 +4,4 @@
 #include "local_region.h"
 #include "gameobj.h"
 
-void aiRun(Region *environment);
+void aiRun(Region *environment, int playerId);
