@@ -28,6 +28,7 @@ typedef struct {
 								// turn this on for plants
 	//BOOL isIntangibleToAttacks;	// whether this object is immune to attacks
 								// turn this on for trees
+	int magicConductivity;		// damages and effects received from magic is scaled by magicConductivity / 100
 	int turnsAlive;				// how long this object has lived
 	int lifespan;				// how long this object can live
 	int destroyCriteria;		// what criteria trigger destruction, masked by DESTROY_CRITERIA_...
@@ -72,7 +73,7 @@ void moveObjects(Region *environment); // please call updateObjectsStatus before
 void rotateObjects(Region *environment);
 void updateObjectsStatus(Region *environment);
 BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double newY);
-BOOL interactObject(int objId, BOOL physicalTouch, int damage, int effect);
+BOOL interactObject(int objId, BOOL physicalTouch, int damage, int sphere, int effect);
 BOOL checkObjectCollision(Region *environment, int objId, double x, double y); // please call updateObjectsStatus before calling this function, 0 miss 1 hit
 BOOL checkObjectOnFeet(Region *environment, int objId);
 BOOL removeEnvironmentBlock(Region *environment, double x, double y);

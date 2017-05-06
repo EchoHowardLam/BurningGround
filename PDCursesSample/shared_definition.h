@@ -43,24 +43,26 @@
 #define SPHERE_MYTH 32
 
 // outside ENCHANT_EFFECT_MASK, it is the enchantments that only affect the object itself
-#define ENCHANT_EFFECT_MASK (64 - 1)
+#define ENCHANT_EFFECT_MASK (128 - 1)
 #define ENCHANT_COLD_SLOW 1
-#define ENCHANT_BLIND 2
-#define ENCHANT_STUN 4
-#define ENCHANT_ENTANGLE 8
-#define ENCHANT_CONFUSE 16
-#define ENCHANT_CLOAK 32
+#define ENCHANT_SLOW 2
+#define ENCHANT_BLIND 4
+#define ENCHANT_STUN 8
+#define ENCHANT_ENTANGLE 16
+#define ENCHANT_CONFUSE 32
+#define ENCHANT_CLOAK 64
 #define ENCHANT_SHRAPNEL 1024
 
 // increment as array index
-#define TOTAL_EFFECT_COUNT 6
+#define TOTAL_EFFECT_COUNT 7
 #define EFFECT_COLD_SLOW 0
-// only useful for player
-#define EFFECT_BLIND 1
-#define EFFECT_STUN 2
-#define EFFECT_ENTANGLE 3
-#define EFFECT_CONFUSE 4
-#define EFFECT_INVISIBLE 5
+#define EFFECT_SLOW 1
+// blind is only useful for player
+#define EFFECT_BLIND 2
+#define EFFECT_STUN 3
+#define EFFECT_ENTANGLE 4
+#define EFFECT_CONFUSE 5
+#define EFFECT_INVISIBLE 6
 
 struct vector {
 	double x;
