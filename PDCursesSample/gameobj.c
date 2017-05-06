@@ -255,7 +255,6 @@ int defaultObjectsInit(Region *environment, int objId)
 	if (gameObject[objId].type == NOTHING) return -1;
 	switch (gameObject[objId].type)
 	{
-<<<<<<< HEAD
 	case LIFE_HUMANOID:
 		gameObject[objId].sprite = getImage(LIFE_HUMANOID, 6 | (gameObject[objId].facingDir & 1));
 		if (!registerEnvironmentObject(environment, objId))
