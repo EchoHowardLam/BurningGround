@@ -137,6 +137,36 @@ void gameOver(void) {
 	return;
 }
 
+void helpMenu(void) {
+
+	while (1) {
+		// 1. get buffered user input
+		int ch = getch();
+		if (ch == ' ')
+			break;
+		// 2. render the display this turn
+		clear();		// clear what's on screen last time
+
+		printInMiddle(7, COLOR_WHITE, "Controls");
+		printInMiddle(9, COLOR_WHITE, "WASD/Arrow keys: Movement");
+		printInMiddle(10, COLOR_WHITE, "[1] ~ [3]: Select Magic");
+		printInMiddle(11, COLOR_WHITE, "[Q] Health Potion");
+		printInMiddle(12, COLOR_WHITE, "[E] Mana Potion");
+		printInMiddle(13, COLOR_WHITE, "[R] Reset Game");
+		printInMiddle(14, COLOR_WHITE, "[H] Help Menu");
+		//printInMiddle(16, COLOR_WHITE, "[A]: Allocate magic slot");
+		
+
+		printInMiddle(20, COLOR_WHITE, "[Space] Resume gameplay");
+
+		refresh();		// update the display in one go, very important
+
+						// 3. stop running for some time to prevent using up all CPU power;
+		threadSleep(10);			// want to sleep for roughly 10ms
+	}
+	return;
+}
+
 void error(void) {
 
 	while (1) {
@@ -179,7 +209,7 @@ int doGameLoop() {
 	if (!initializeInputEvents()) return 0;
 	Coordinate start, end;
 	Region localMap = loadLevel(TUTORIAL, &start, &end, executablePath);
-	int playerLv = 1;
+	int playerLv = 10;
 	playerId = createHumanoid(&localMap, -1, HUMANOID_TYPE_HUMAN, start.x, start.y, playerLv);
 	if (playerId == -1) return 0;
 	int playerAliveFlag = 1;
@@ -197,22 +227,21 @@ int doGameLoop() {
 	BOOL playerFlying = FALSE;
 	int skillSet[UI_SKILL_SLOT] = { ARCANE_FIREBALL, ARCANE_ICELASER, ARCANE_ICERAIN };
 	int selectedSkillIndex = 0;
+	int potions[2] = { 8, 8 };
 	BOOL debugVision = FALSE;
 	int coolDown = 0;
 
+	BOOL holdKey[2] = {FALSE, FALSE}; // corresponds to qQ, eE
+
 	// main game loop...
 	while (1) {
-		// 1. draw background...
-		//drawBackground();
-		clear();
-
 		for (int L = 0; L < 5; L++)
 		{
 			// Auto-cancel flying state
 			if (checkObjectOnFeet(&localMap, playerId))
 				playerFlying = FALSE;
 
-			// 2. get buffered user input and determine player action
+			// 1. get buffered user input and determine player action
 			if (coolDown > 0) coolDown--;
 			for (int i = 0; i < ACCEPTABLE_KEY_NUM; i++)
 				keyboardPress[i] = FALSE;
@@ -224,7 +253,7 @@ int doGameLoop() {
 			{
 				playerFlying = TRUE;
 				if (playerFlying)
-					controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.075);
+					controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.1);
 				else
 					controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.15);
 			}
@@ -232,20 +261,20 @@ int doGameLoop() {
 				if (playerFlying)
 					controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.15);
 				else
-					controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.1);
+					controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.15);
 			}
 			if (keyboardPress[KB_LEFT_KEY])
 			{
 				if (playerFlying)
-					controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.15);
+					controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.2);
 				else
-					controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.1);
+					controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.15);
 			}
 			else if (keyboardPress[KB_RIGHT_KEY]) {
 				if (playerFlying)
-					controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.15);
+					controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.2);
 				else
-					controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.1);
+					controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.15);
 			}
 			for (int k = 1; k <= UI_SKILL_SLOT; k++)
 				if (keyboardPress['0' + k])
@@ -255,21 +284,27 @@ int doGameLoop() {
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
 				coolDown += castMagic(&localMap, playerId, skillSet[selectedSkillIndex], destX, destY);
 			}
-			if (keyboardPress[' '])
+			if (keyboardPress['q'] || keyboardPress['Q'])
 			{
-				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
-				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				castMagic(&localMap, playerId, ARCANE_FIRELASER, destX, destY);
+				if (!holdKey[0])
+				{
+					holdKey[0] = TRUE;
+					drinkHPPotion(playerId, &potions[0]);
+				}
 			}
-			if (keyboardPress['l'])
+			else holdKey[0] = FALSE;
+			if (keyboardPress['e'] || keyboardPress['E'])
 			{
-				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
-				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				castMagic(&localMap, playerId, ARCANE_ICERAIN, destX, destY);
+				if (!holdKey[1])
+				{
+					holdKey[1] = TRUE;
+					drinkMPPotion(playerId, &potions[1]);
+				}
 			}
+			else holdKey[1] = FALSE;
 			if (keyboardPress['~'])
 				debugVision = !debugVision;
-			if (keyboardPress['r'])
+			if (keyboardPress['r'] || keyboardPress['R'])
 			{
 				deleteObject(&localMap, playerId, TRUE);
 				restart = TRUE;
@@ -279,27 +314,34 @@ int doGameLoop() {
 			aiRun(&localMap, playerId);
 			spawnCheck(&localMap);
 
-			// 3. update all game objects positions
+			// 2. update all game objects positions
 			updateObjectsStatus(&localMap);
 			acceObjects(&localMap);
 			moveObjects(&localMap);
 			rotateObjects(&localMap);
 		}
+
+		if (keyboardPress['h'] || keyboardPress['H'])
+		{
+			helpMenu();
+			if (!initializeInputEvents()) return 0;
+		}
 		
-		// 4. render the display this turn
+		// 3. render the display this turn
 		if (playerAliveFlag >= 1)
 		{
+			clear();
 			scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
 			scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
 			drawLocalRegion(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			displayObjects(&localMap, playerId, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			if (debugVision) drawLocalRegionObjId(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			displayCrossHair(mouseEvents.x, mouseEvents.y);
-			drawUI(playerId, playerLv, skillSet, selectedSkillIndex);
+			drawUI(playerId, playerLv, skillSet, selectedSkillIndex, potions[0], potions[1]);
 			refresh();		// update the display in one go
 		}
 
-		// 5. stop running for some time to prevent using up all CPU power;
+		// 4. stop running for some time to prevent using up all CPU power;
 		// if you want to compensate for computational time and sleep non-fixed amount of time,
 		// you will need to get system time like clock() and calculate, but that is not necessary most of the time
 		threadSleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library

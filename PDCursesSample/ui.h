@@ -18,8 +18,13 @@
 #include "gameobj.h"
 #include "magic_interface.h"
 
-void drawUI(int observerId, int lv, int *skillSet, int selectedSkillIndex);
-void drawHPBar(int coloredBarLen);
-void drawMPBar(int coloredBarLen);
-void drawLv(int lv);
-void drawSkillBar(int *skillSet, int selectedSkillIndex);
+void drawUI(int observerId, int lv, int *skillSet, int selectedSkillIndex, int hpPotionNum, int mpPotionNum);
+void drawUIHPBar(int coloredBarLen);
+void drawUIMPBar(int coloredBarLen);
+void drawUILv(int lv);
+void drawUISkillBar(int *skillSet, int selectedSkillIndex);
+void drawUIPotions(int hpPotionNum, int mpPotionNum);
+void drawUIMenuItem();
+
+void drinkHPPotion(int userId, int *hpPotionNum);
+void drinkMPPotion(int userId, int *mpPotionNum);

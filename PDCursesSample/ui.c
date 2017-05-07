@@ -1,22 +1,30 @@
 #include "ui.h"
 
-void drawUI(int observerId, int lv, int *skillSet, int selectedSkillIndex)
+void drawUI(int observerId, int lv, int *skillSet, int selectedSkillIndex, int hpPotionNum, int mpPotionNum)
 {
 	if (observerId == -1) return;
 	if (move(UI_HP_POS_Y, UI_HP_POS_X) == ERR) return;
 	printw("                                                                              ");
 	if (move(UI_SKILL_POS_Y, UI_SKILL_POS_X) == ERR) return;
 	printw("                                                                              ");
-	drawHPBar(UI_HP_BAR_LEN * gameObject[observerId].endurance / gameObject[observerId].max_endurance);
-	drawMPBar(UI_MP_BAR_LEN * gameObject[observerId].mana / gameObject[observerId].max_mana);
-	drawLv(lv);
-	drawSkillBar(skillSet, selectedSkillIndex);
+	drawUIHPBar(UI_HP_BAR_LEN * gameObject[observerId].endurance / gameObject[observerId].max_endurance);
+	drawUIMPBar(UI_MP_BAR_LEN * gameObject[observerId].mana / gameObject[observerId].max_mana);
+	drawUILv(lv);
+	drawUISkillBar(skillSet, selectedSkillIndex);
+	drawUIPotions(hpPotionNum, mpPotionNum);
+	drawUIMenuItem();
 	return;
 }
 
-void drawHPBar(int coloredBarLen)
+void drawUIHPBar(int coloredBarLen)
 {
 	if (move(UI_HP_POS_Y, UI_HP_POS_X) == ERR) return;
+	char dispChar = '+';
+	if (coloredBarLen > UI_HP_BAR_LEN)
+	{
+		coloredBarLen = UI_HP_BAR_LEN;
+		dispChar = '!';
+	}
 	attron(COLOR_PAIR(COLOR_RED));
 	addch('|');
 	int i;
@@ -26,23 +34,29 @@ void drawHPBar(int coloredBarLen)
 	attroff(COLOR_PAIR(COLOR_RED));
 	attron(COLOR_PAIR(COLOR_B_RED));
 	for (; i < UI_HP_BAR_LEN; i++)
-		addch('+');
+		addch(dispChar);
 	attroff(COLOR_PAIR(COLOR_B_RED));
 	attron(COLOR_PAIR(COLOR_RED));
 	addch('|');
 	attroff(COLOR_PAIR(COLOR_RED));
 	return;
 }
-void drawMPBar(int coloredBarLen)
+void drawUIMPBar(int coloredBarLen)
 {
 	if (move(UI_MP_POS_Y, UI_MP_POS_X) == ERR) return;
+	char dispChar = '+';
+	if (coloredBarLen > UI_MP_BAR_LEN)
+	{
+		coloredBarLen = UI_MP_BAR_LEN;
+		dispChar = '!';
+	}
 	attron(COLOR_PAIR(COLOR_BLUE));
 	addch('|');
 	attroff(COLOR_PAIR(COLOR_BLUE));
 	attron(COLOR_PAIR(COLOR_B_BLUE));
 	int i;
 	for (i = 0; i < coloredBarLen; i++)
-		addch('+');
+		addch(dispChar);
 	attroff(COLOR_PAIR(COLOR_B_BLUE));
 	attron(COLOR_PAIR(COLOR_BLUE));
 	for (; i < UI_HP_BAR_LEN; i++)
@@ -52,7 +66,7 @@ void drawMPBar(int coloredBarLen)
 	return;
 }
 
-void drawLv(int lv)
+void drawUILv(int lv)
 {
 	int lvNumLen;
 	if (lv > 99) lvNumLen = 3;
@@ -67,7 +81,7 @@ void drawLv(int lv)
 	return;
 }
 
-void drawSkillBar(int *skillSet, int selectedSkillIndex)
+void drawUISkillBar(int *skillSet, int selectedSkillIndex)
 {
 	if (skillSet == NULL) return;
 	for (int i = 0; i < UI_SKILL_SLOT; i++)
@@ -84,6 +98,69 @@ void drawSkillBar(int *skillSet, int selectedSkillIndex)
 		attron(COLOR_PAIR(fcolor));
 		printw("[%d] %s", i + 1, magicNameString[skillSet[i]].string);
 		attroff(COLOR_PAIR(fcolor));
+	}
+	return;
+}
+
+void drawUIPotions(int hpPotionNum, int mpPotionNum)
+{
+	if (hpPotionNum > 8) hpPotionNum = 8;
+	if (mpPotionNum > 8) mpPotionNum = 8;
+	if (move(UI_SKILL_POS_Y, UI_SKILL_POS_X + 3 * 18) == ERR) return;
+	attron(COLOR_PAIR(COLOR_B_RED));
+	for (int i = 0; i < hpPotionNum; i++)
+	{
+		addch(240 | A_ALTCHARSET);
+	}
+	attroff(COLOR_PAIR(COLOR_B_RED));
+	attron(COLOR_PAIR(COLOR_B_BLUE));
+	for (int i = 0; i < mpPotionNum; i++)
+	{
+		addch(240 | A_ALTCHARSET);
+	}
+	attroff(COLOR_PAIR(COLOR_B_BLUE));
+	return;
+}
+
+void drawUIMenuItem()
+{
+	if (move(UI_SKILL_POS_Y, 73) == ERR) return;
+	attron(COLOR_PAIR(COLOR_WHITE));
+	addch('[');
+	attroff(COLOR_PAIR(COLOR_WHITE));
+	attron(COLOR_PAIR(COLOR_B_YELLOW));
+	printw("H");
+	attroff(COLOR_PAIR(COLOR_B_YELLOW));
+	attron(COLOR_PAIR(COLOR_WHITE));
+	printw("]elp");
+	attroff(COLOR_PAIR(COLOR_WHITE));
+	return;
+}
+
+void drinkHPPotion(int userId, int *hpPotionNum)
+{
+	if (userId == -1) return;
+	if ((*hpPotionNum) > 0)
+	{
+		if (gameObject[userId].endurance < gameObject[userId].max_endurance / 2)
+			gameObject[userId].endurance += gameObject[userId].max_endurance / 2;
+		else
+			gameObject[userId].endurance = gameObject[userId].max_endurance;
+		(*hpPotionNum)--;
+	}
+	return;
+}
+
+void drinkMPPotion(int userId, int *mpPotionNum)
+{
+	if (userId == -1) return;
+	if ((*mpPotionNum) > 0)
+	{
+		if (gameObject[userId].mana < gameObject[userId].max_mana / 2)
+			gameObject[userId].mana += gameObject[userId].max_mana / 2;
+		else
+			gameObject[userId].mana = gameObject[userId].max_mana;
+		(*mpPotionNum)--;
 	}
 	return;
 }
