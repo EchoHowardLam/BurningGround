@@ -324,8 +324,11 @@ int doGameLoop() {
 			while (gameObject[playerId].attri2 >= EXP_NEEDED_TO_LV_UP[playerLv - 1])
 			{
 				gameObject[playerId].attri2 -= EXP_NEEDED_TO_LV_UP[playerLv - 1];
-				updateHumanoidStatistic(playerId, playerLv, playerLv + 1);
-				playerLv++;
+				if (playerLv < 30)
+				{
+					updateHumanoidStatistic(playerId, playerLv, playerLv + 1);
+					playerLv++;
+				}
 			}
 		}
 
