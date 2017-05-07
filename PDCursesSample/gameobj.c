@@ -260,6 +260,7 @@ int createObjectMagicProjectileDir(Region *environment, int master, ObjectType t
 			gameObject[i].fixedFlight = FALSE;
 			break;
 		case MAGIC_SPIKE:
+			gameObject[i].lifespan = 1000;
 			gameObject[i].destroyCriteria = 0;
 			gameObject[i].underMove = FALSE;
 			gameObject[i].underGravity = TRUE;
@@ -1349,7 +1350,6 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 	case MAGIC_SPIKE:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
 			interactObject(gameObject[objId].master, environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
-		deleteObject(environment, objId, FALSE);
 		break;
 	case MAGIC_LASER:
 		break;
@@ -1429,23 +1429,23 @@ BOOL interactObject(int sourceId, int targetId, BOOL physicalTouch, int damage, 
 			gameObject[targetId].endurance = 0;
 			if (sourceId != -1 && gameObject[sourceId].type == LIFE_HUMANOID)
 			{
-				switch (gameObject[targetId].type) // Earn EXP
+				switch (gameObject[targetId].type) // KEYWORD: Earn EXP
 				{
 				case LIFE_EYEBALL:
-					gameObject[sourceId].attri2 += 1; break;
+					gameObject[sourceId].attri2 += 10; break;
 				case LIFE_MOSQUITOES:
 				case LIFE_MUSHROOM:
-					gameObject[sourceId].attri2 += 0; break;
-				case LIFE_RABBIT:
-					gameObject[sourceId].attri2 += 2; break;
-				case LIFE_SLUDGE:
-					gameObject[sourceId].attri2 += 2; break;
-				case LIFE_SLIME:
-					gameObject[sourceId].attri2 += 2; break;
-				case LIFE_BEE:
 					gameObject[sourceId].attri2 += 1; break;
+				case LIFE_RABBIT:
+					gameObject[sourceId].attri2 += 5; break;
+				case LIFE_SLUDGE:
+					gameObject[sourceId].attri2 += 20; break;
+				case LIFE_SLIME:
+					gameObject[sourceId].attri2 += 20; break;
+				case LIFE_BEE:
+					gameObject[sourceId].attri2 += 3; break;
 				case SPAWN_BEE_HIVE:
-					gameObject[sourceId].attri2 += 10; break;
+					gameObject[sourceId].attri2 += 20; break;
 				default:
 					break;
 				}

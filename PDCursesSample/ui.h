@@ -13,7 +13,6 @@
 #define UI_LV_BAR_LEN 6
 #define UI_SKILL_POS_X 1
 #define UI_SKILL_POS_Y 22
-#define UI_SKILL_SLOT 3
 
 #include <string.h>
 

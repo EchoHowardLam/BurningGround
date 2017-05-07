@@ -1,14 +1,24 @@
 #include "magic_interface.h"
 
 MagicNameString magicNameString[100] = {
-	{ "--", COLOR_B_BLACK },
+	{ "-NO SKILL-", COLOR_B_BLACK },
 	{ "Fire Ball", COLOR_RED },
 	{ "Ice Ball", COLOR_CYAN },
 	{ "Dirt Ball", COLOR_YELLOW },
 	{ "Fire Rain", COLOR_RED },
 	{ "Ice Rain", COLOR_CYAN },
+	{ "Hail", COLOR_CYAN },
 	{ "Fire Ray", COLOR_RED },
 	{ "Freezing Ray", COLOR_CYAN },
+};
+
+ArcaneType magicUnlockedAtLevel[MAX_LV] = {
+	ARCANE_ICEBALL, 0, ARCANE_FIRERAIN, ARCANE_ICERAIN, 0,
+	ARCANE_ICESPIKERAIN, 0, ARCANE_FIRELASER, ARCANE_ICELASER, 0,
+	0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0,
 };
 
 int castMagic(Region *environment, int casterId, ArcaneType magic, double destX, double destY)
@@ -44,15 +54,23 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 		break;
 	case ARCANE_FIRERAIN:
 		if (gameObject[casterId].mana >= 80)
-			if (createObjectMagicRain(environment, -1, MAGIC_BLOB, destX, destY, 30, 20, 0.1, SPHERE_FIRE, ENCHANT_SHRAPNEL, DMG_STANDARD_FIRERAIN_DAMAGE) != -1)
+			if (createObjectMagicRain(environment, casterId, MAGIC_BLOB, destX, destY, 30, 20, 0.1, SPHERE_FIRE, ENCHANT_SHRAPNEL, DMG_STANDARD_FIRERAIN_DAMAGE) != -1)
 			{
-				gameObject[casterId].mana -= 100;
+				gameObject[casterId].mana -= 80;
 				cooldown = 10;
 			}
 		break;
 	case ARCANE_ICERAIN:
 		if (gameObject[casterId].mana >= 80)
-			if (createObjectMagicRain(environment, -1, MAGIC_BLOB, destX, destY, 30, 20, 0.1, SPHERE_ICE, ENCHANT_SHRAPNEL, DMG_STANDARD_ICERAIN_DAMAGE) != -1)
+			if (createObjectMagicRain(environment, casterId, MAGIC_BLOB, destX, destY, 30, 20, 0.1, SPHERE_ICE, ENCHANT_SHRAPNEL, DMG_STANDARD_ICERAIN_DAMAGE) != -1)
+			{
+				gameObject[casterId].mana -= 80;
+				cooldown = 10;
+			}
+		break;
+	case ARCANE_ICESPIKERAIN:
+		if (gameObject[casterId].mana >= 100)
+			if (createObjectMagicRain(environment, casterId, MAGIC_SPIKE, destX, destY, 30, 20, 0.0, SPHERE_ICE, 0, DMG_STANDARD_ICESPIKE_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 100;
 				cooldown = 10;
@@ -79,7 +97,6 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 	}
 	return cooldown;
 }
-//createObjectMagicProjectile(environment, gameObject[id].master, MAGIC_SPIKE, gameObject[id].x, gameObject[id].y, 0.0, 0.0, 0.0, 1000, SPHERE_ICE, 0);
 
 BOOL castFlying(int casterId, BOOL enableFlying)
 {

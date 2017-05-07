@@ -7,7 +7,7 @@
 typedef enum {
 	NOMAGIC = 0,
 	ARCANE_FIREBALL, ARCANE_ICEBALL, ARCANE_DIRTBALL,
-	ARCANE_FIRERAIN, ARCANE_ICERAIN,
+	ARCANE_FIRERAIN, ARCANE_ICERAIN, ARCANE_ICESPIKERAIN,
 	ARCANE_FIRELASER, ARCANE_ICELASER,
 } ArcaneType;
 
@@ -18,6 +18,7 @@ typedef struct {
 
 // WARNING: the index of magicNameString MUST correspond to the ArcaneType
 extern MagicNameString magicNameString[100];
+extern ArcaneType magicUnlockedAtLevel[MAX_LV]; // index 0 is for level up from lv1 to lv2
 
 
 // return cooldown

@@ -4,8 +4,7 @@ double DIRECTION2X[4] = { 0, 1, 0, -1 };
 double DIRECTION2Y[4] = { -1, 0, 1, 0 };
 double DIAGONALX[4] = { 1, 1, -1, -1 };
 double DIAGONALY[4] = { 1, -1, 1, -1 };
-int EXP_NEEDED_TO_LV_UP[30] = { 1 };
-const int MAX_LV = 30;
+int EXP_NEEDED_TO_LV_UP[MAX_LV] = { 1 };
 
 void setupDisplay() {
 #if defined(_WIN32) || defined(_WIN64)

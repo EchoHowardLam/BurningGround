@@ -17,7 +17,8 @@ extern double DIRECTION2Y[4];
 extern double DIAGONALX[4];
 extern double DIAGONALY[4];
 
-void clearScreen(void) {
+void clearScreen(void)
+{
 	// this creates less flicker than standard "clear()"
 	move(0, 0);
 	for (int i = 0; i < SCREEN_HEIGHT;i++)
@@ -25,7 +26,8 @@ void clearScreen(void) {
 	
 }
 
-void printInMiddle(int y, int colorPair, char *string) {
+void printInMiddle(int y, int colorPair, char *string)
+{
 	int length = (int) strlen(string);
 	
 	int x = (SCREEN_WIDTH - length)/2;
@@ -34,9 +36,23 @@ void printInMiddle(int y, int colorPair, char *string) {
 	attroff(COLOR_PAIR(colorPair));
 }
 
+void printInMiddleSkillDisplay(int y, int colorPair, char *string, int colorPair2, char *string2)
+{
+	int length = (int)strlen(string) + (int)strlen(string2);
+
+	int x = (SCREEN_WIDTH - length) / 2;
+	attron(COLOR_PAIR(colorPair));
+	mvprintw(y, x, "%s", string);
+	attroff(COLOR_PAIR(colorPair));
+	attron(COLOR_PAIR(colorPair2));
+	printw("%s", string2);
+	attroff(COLOR_PAIR(colorPair2));
+}
+
 char *executablePath;
 
-int doMenu(void) {
+int doMenu(void)
+{
 	int selectedItem = 0;
 	int totalItem = 3;
 
@@ -83,7 +99,8 @@ int doMenu(void) {
 	return 1;
 }
 
-void doCredit(void) {
+void doCredit(void)
+{
 
 	while (1) {
 		// 1. get buffered user input
@@ -107,7 +124,31 @@ void doCredit(void) {
 	return;
 }
 
-void gameOver(void) {
+void error(void)
+{
+
+	while (1) {
+		// 1. get buffered user input
+		int ch = getch();
+		if (ch == ' ')
+			break;
+		// 2. render the display this turn
+		clear();		// clear what's on screen last time
+
+		printInMiddle(7, 0, "We encounter a fatal error");
+
+		printInMiddle(20, 0, "Press space to command suicide... ");
+
+		refresh();		// update the display in one go, very important
+
+						// 3. stop running for some time to prevent using up all CPU power;
+		threadSleep(10);			// want to sleep for roughly 10ms
+	}
+	return;
+}
+
+void gameOver(void)
+{
 
 	while (1) {
 		// 1. get buffered user input
@@ -130,7 +171,8 @@ void gameOver(void) {
 	return;
 }
 
-void helpMenu(void) {
+void helpMenu(void)
+{
 
 	while (1) {
 		// 1. get buffered user input
@@ -147,7 +189,6 @@ void helpMenu(void) {
 		printInMiddle(12, COLOR_WHITE, "[E] Mana Potion");
 		printInMiddle(13, COLOR_WHITE, "[R] Reset Game");
 		printInMiddle(14, COLOR_WHITE, "[H] Help Menu");
-		//printInMiddle(16, COLOR_WHITE, "[A]: Allocate magic slot");
 		
 
 		printInMiddle(20, COLOR_WHITE, "[Space] Resume gameplay");
@@ -160,25 +201,49 @@ void helpMenu(void) {
 	return;
 }
 
-void error(void) {
+void chooseSkill(int skillSet[UI_SKILL_SLOT], int oldLv)
+{
+	if (magicUnlockedAtLevel[oldLv - 1] == NOMAGIC) return;
+	int selectedItem = 0;
+	int totalItem = UI_SKILL_SLOT + 1;
 
 	while (1) {
 		// 1. get buffered user input
 		int ch = getch();
-		if (ch == ' ')
+		if (ch == KEY_UP || ch == 'w' || ch == 'W')
+			selectedItem = (selectedItem - 1 + totalItem) % totalItem;
+		else if (ch == KEY_DOWN || ch == 's' || ch == 'S')
+			selectedItem = (selectedItem + 1) % totalItem;
+		else if (ch == ' ') {
 			break;
+		}
+
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 
-		printInMiddle(7, 0, "We encounter a fatal error");
+		printInMiddle(7, COLOR_B_YELLOW, "Level Up");
+		printInMiddleSkillDisplay(9, COLOR_WHITE, "You can learn ", magicNameString[magicUnlockedAtLevel[oldLv - 1]].color, magicNameString[magicUnlockedAtLevel[oldLv - 1]].string);
+		printInMiddle(10, COLOR_WHITE, "Which of the following known skills would you abandon?");
+		int firstOptionY = 11;
+		for (int k = 0; k < UI_SKILL_SLOT; k++)
+			printInMiddle(firstOptionY + k, COLOR_B_BLACK, magicNameString[skillSet[k]].string);
+		printInMiddle(firstOptionY + UI_SKILL_SLOT + 1, COLOR_RED, "Abandon the new skill");
 
-		printInMiddle(20, 0, "Press space to command suicide... ");
+		for (int k = 0; k < UI_SKILL_SLOT; k++)
+			if (selectedItem == k)
+				printInMiddle(firstOptionY + k, COLOR_WHITE, magicNameString[skillSet[k]].string);
+		if (selectedItem == UI_SKILL_SLOT)
+			printInMiddle(firstOptionY + UI_SKILL_SLOT + 1, COLOR_B_RED, "Abandon the new skill");
+
+		printInMiddle(20, 7, "                  Press space to select ...                  ");
 
 		refresh();		// update the display in one go, very important
 
 						// 3. stop running for some time to prevent using up all CPU power;
 		threadSleep(10);			// want to sleep for roughly 10ms
 	}
+	if (selectedItem == UI_SKILL_SLOT) return;
+	skillSet[selectedItem] = magicUnlockedAtLevel[oldLv - 1];
 	return;
 }
 
@@ -222,7 +287,9 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 
 	BOOL restart = FALSE;
 	BOOL playerFlying = FALSE;
-	int skillSet[UI_SKILL_SLOT] = { ARCANE_FIREBALL, ARCANE_ICELASER, ARCANE_ICERAIN };
+	int skillSet[UI_SKILL_SLOT];
+	for (int k = 0; k < UI_SKILL_SLOT; k++)
+		skillSet[k] = playerStat->skillSet[k];
 	int selectedSkillIndex = 0;
 	int potions[2] = { playerStat->potions[0], playerStat->potions[1] };
 	BOOL debugVision = FALSE;
@@ -326,6 +393,8 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 					if (playerLv < 30)
 					{
 						updateHumanoidStatistic(playerId, playerLv, playerLv + 1);
+						chooseSkill(skillSet, playerLv);
+						if (!initializeInputEvents()) return 0;
 						playerLv++;
 					}
 				}
@@ -366,6 +435,8 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 		return 2;
 	playerStat->lv = playerLv;
 	playerStat->exp = lastKnownExp;
+	for (int k = 0; k < UI_SKILL_SLOT; k++)
+		playerStat->skillSet[k] = skillSet[k];
 	playerStat->potions[0] = potions[0];
 	playerStat->potions[1] = potions[1];
 	return 1;
@@ -412,7 +483,14 @@ int main(int argc, char *argv[])
 		selectedMenu = doMenu();
 		if (selectedMenu == 0)
 		{
-			PlayerState playerStat = { .lv = 1,.hp = 1000,.mp = 1000,.exp = 0,.potions = { 8, 8 } };
+			PlayerState playerStat = {
+				.lv = 1,
+				.hp = 1000,
+				.mp = 1000,
+				.exp = 0,
+				.skillSet = { ARCANE_FIREBALL, 0, 0 },
+				.potions = { 8, 8 }
+			};
 			BOOL restart;
 			do {
 				restart = FALSE;

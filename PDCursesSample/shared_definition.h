@@ -81,12 +81,15 @@
 #define DMG_STANDARD_DIRTBALL_DAMAGE 100
 #define DMG_STANDARD_FIRERAIN_DAMAGE 100
 #define DMG_STANDARD_ICERAIN_DAMAGE 90
+#define DMG_STANDARD_ICESPIKE_DAMAGE 90
 #define DMG_STANDARD_FIRELASER_DAMAGE 20
 #define DMG_STANDARD_ICELASER_DAMAGE 18
 
 #define DMG_STANDARD_BOMB_DAMAGE 500
 
 #define DMG_STANDARD_DURIAN_DAMAGE 550
+
+#define UI_SKILL_SLOT 3
 
 struct vector {
 	double x;
@@ -101,6 +104,7 @@ struct mouseOutput {
 typedef struct {
 	int lv;
 	int hp, mp, exp;
+	int skillSet[UI_SKILL_SLOT];
 	int potions[2];
 } PlayerState;
 
@@ -127,8 +131,8 @@ extern double DIRECTION2X[4];
 extern double DIRECTION2Y[4];
 extern double DIAGONALX[4];
 extern double DIAGONALY[4];
-extern int EXP_NEEDED_TO_LV_UP[30];
-extern const int MAX_LV;
+#define MAX_LV 30
+extern int EXP_NEEDED_TO_LV_UP[MAX_LV];
 
 void setupDisplay();
 void threadSleep(unsigned ms);
