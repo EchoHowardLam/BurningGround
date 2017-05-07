@@ -86,6 +86,8 @@
 
 #define DMG_STANDARD_BOMB_DAMAGE 500
 
+#define DMG_STANDARD_DURIAN_DAMAGE 550
+
 struct vector {
 	double x;
 	double y;

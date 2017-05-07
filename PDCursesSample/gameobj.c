@@ -422,7 +422,7 @@ int defaultObjectsInit(Region *environment, int objId)
 		gameObject[objId].sprite = getImage(LIFE_SLUDGE, 2 + (gameObject[objId].facingDir & 1));
 		break;
 	case LIFE_GRASS:
-		gameObject[objId].sprite = getImage(LIFE_GRASS, (rand()%8==0)?(3+rand()%2):rand()%3);
+		gameObject[objId].sprite = getImage(LIFE_GRASS, (rand()%8==0)?(4+rand()%2):rand()%4);
 		break;
 	case SPAWN_BEE_HIVE:
 		gameObject[objId].sprite = getImage(SPAWN_BEE_HIVE, rand()%2);
@@ -1309,37 +1309,37 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 				}
 			}
 		}
-		break;
-		case LIFE_DURIAN: {
-			if (gameObject[objId].sprite != NULL)
+	break;
+	case LIFE_DURIAN: {
+		if (gameObject[objId].sprite != NULL)
+		{
+			int gax, gay;
+			int lx, ly;
+			int topLeftgx = (int)floor(newX) - (int)floor(gameObject[objId].sprite->center->x);
+			int topLeftgy = (int)floor(newY) - (int)floor(gameObject[objId].sprite->center->y);
+			int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
+			int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+			for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
 			{
-				int gax, gay;
-				int lx, ly;
-				int topLeftgx = (int)floor(newX) - (int)floor(gameObject[objId].sprite->center->x);
-				int topLeftgy = (int)floor(newY) - (int)floor(gameObject[objId].sprite->center->y);
-				int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
-				int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
-				for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+				for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
 				{
-					for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+					if (gameObject[objId].sprite->solid[ly][lx] > 0)
 					{
-						if (gameObject[objId].sprite->solid[ly][lx] > 0)
+						if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
 						{
-							if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
-								if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
-								{
-									int tId = environment->objId[gay][gax];
-									if (tId != -1 && (gameObject[tId].type != gameObject[objId].type))
-										interactObject(gameObject[objId].master, environment->objId[gay][gax], FALSE, 100, 0, ENCHANT_CONFUSE);
-								}
+								int tId = environment->objId[gay][gax];
+								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type))
+									interactObject(gameObject[objId].master, environment->objId[gay][gax], FALSE, DMG_STANDARD_DURIAN_DAMAGE, 0, ENCHANT_CONFUSE);
 							}
 						}
 					}
 				}
 			}
-		deleteObject(environment, objId, FALSE);
-		break;
+		}
+	deleteObject(environment, objId, FALSE);
+	break;
 	}
 	case MAGIC_BLOB:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
