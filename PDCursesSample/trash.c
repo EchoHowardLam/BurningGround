@@ -40,6 +40,10 @@ double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing] - 0.4;
 */
 
 /*
+createObjectMagicProjectile(&localMap, playerId, MAGIC_BLOB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.2, -1, SPHERE_FIRE, ENCHANT_SHRAPNEL);
+createObjectProjectileDest(&localMap, playerId, BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.2, -1, DESTROY_CRITERIA_HIT, FALSE);
+createObjectMagicRain(&localMap, -1, MAGIC_BLOB, destX, destY, 20, 20, 0.1, SPHERE_MYTH, ENCHANT_STUN | ENCHANT_ENTANGLE);
+createObjectMist(&localMap, playerId, MIST, gameObject[playerId].x, gameObject[playerId].y, 1000, SPHERE_ICE, 0);
 createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 200, 0, TRUE);
 createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 500, DESTROY_CRITERIA_STOP, TRUE);
 */

@@ -32,8 +32,7 @@ void aiRun(Region *environment, int playerId) {
 					gameObject[i].attri2 = (++gameObject[i].attri2) % 3600;
 					dx = cos((gameObject[i].attri2 / 10.0 / 180.0) * M_PI);
 					dy = sin((gameObject[i].attri2 / 10.0 / 180.0) * M_PI);
-					createObjectMagicProjectileDir(environment, i, MAGIC_LASER, gameObject[i].x, gameObject[i].y, dx, dy, 0.0, -1, SPHERE_ICE, 0);
-					//createObjectMagicProjectile(environment, i, MAGIC_LASER, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 0.0, -1, SPHERE_ICE, 0);
+					createObjectMagicProjectileDir(environment, i, MAGIC_LASER, gameObject[i].x, gameObject[i].y, dx, dy, 0.0, -1, SPHERE_ICE, 0, DMG_STANDARD_ICELASER_DAMAGE);
 				}
 				else {
 					controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.2); // + 0.5 is compulsory as it is the center of a grid
@@ -80,20 +79,20 @@ void aiRun(Region *environment, int playerId) {
 						controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
 					}
 					if (rand() % 1000 == 0)
-						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 0.2, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_ENTANGLE | ENCHANT_SILENT);
+						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 0.2, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_STUN | ENCHANT_ENTANGLE | ENCHANT_SILENT, DMG_STANDARD_DIRTBALL_DAMAGE);
 				}
 				break;
 			}
 			case LIFE_BEE: {
 				if (fabs(gameObject[playerId].x - gameObject[i].x) < 40 && fabs(gameObject[playerId].y - gameObject[i].y) <= 40)
 				{
-					if (rand() % 2 == 0)
+					if (rand() % 2)
 						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.2);
-					else if (rand() % 2)
+					else if (rand() % 3)
 						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? 1.5 : -1.5), 0.2);
-					if (rand() % 2 == 0)
+					if (rand() % 2)
 						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? -1.5 : 1.5), 0.2);
-					else if (rand() % 2)
+					else if (rand() % 3)
 						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? 1.5 : -1.5), 0.2);
 				}
 				else {

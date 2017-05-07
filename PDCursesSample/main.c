@@ -9,6 +9,7 @@
 #include "ai.h"
 
 #include "ui.h"
+#include "magic_interface.h"
 #include "event_handle.h"
 
 extern double DIRECTION2X[4];
@@ -222,14 +223,13 @@ int doGameLoop() {
 				coolDown += 50;
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				createObjectMagicProjectile(&localMap, playerId, MAGIC_BLOB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.2, -1, SPHERE_FIRE, ENCHANT_SHRAPNEL);
-					//createObjectProjectileDest(&localMap, playerId, BULLET, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.2, -1, DESTROY_CRITERIA_HIT, FALSE);
+				castMagic(&localMap, playerId, ARCANE_FIREBALL, destX, destY);
 			}
 			if (keyboardPress[' '])
 			{
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				createObjectMagicProjectile(&localMap, playerId, MAGIC_LASER, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.0, -1, SPHERE_ICE, 0);
+				castMagic(&localMap, playerId, ARCANE_FIRELASER, destX, destY);
 			}
 			if (keyboardPress['e'] && coolDown2 <= 0)
 			{
@@ -246,9 +246,7 @@ int doGameLoop() {
 				coolDown2 += 10;
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				createObjectMagicRain(&localMap, -1, MAGIC_BLOB, destX, destY, 20, 20, 0.1, SPHERE_ICE, ENCHANT_SHRAPNEL);
-				//createObjectMagicRain(&localMap, -1, MAGIC_BLOB, destX, destY, 20, 20, 0.1, SPHERE_MYTH, ENCHANT_STUN | ENCHANT_ENTANGLE);
-				//createObjectMist(&localMap, playerId, MIST, gameObject[playerId].x, gameObject[playerId].y, 1000, SPHERE_ICE, 0);
+				castMagic(&localMap, playerId, ARCANE_ICERAIN, destX, destY);
 			}
 			if (keyboardPress['~'])
 				debugVision = !debugVision;

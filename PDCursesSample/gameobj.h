@@ -20,7 +20,7 @@ typedef struct {
 	int max_endurance;
 	int max_mana;
 	int endurance;				// commonly known as HP
-	int mana;					// commonly known as MP
+	int mana;					// commonly known as MP, for magics, it is their damage
 	double x, y;				// current position
 	double dispX, dispY;		// For normal objects, displacement needed to move before fixing position
 								// For magics, dispX/Y are used as direction guidance
@@ -63,9 +63,9 @@ int createHumanoid(Region *environment, int master, int humanoidType, double sta
 int createObject(Region *environment, int master, ObjectType type, double startX, double startY);
 int createObjectProjectileDir(Region *environment, int master, ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
 int createObjectProjectileDest(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
-int createObjectMagicProjectileDir(Region *environment, int master, ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int sphere, int enchant);
-int createObjectMagicProjectile(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int sphere, int enchant);
-int createObjectMagicRain(Region *environment, int master, ObjectType type, double CX, double CY, int W, int H, double speed, int sphere, int enchant);
+int createObjectMagicProjectileDir(Region *environment, int master, ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int sphere, int enchant, int damage);
+int createObjectMagicProjectile(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int sphere, int enchant, int damage);
+int createObjectMagicRain(Region *environment, int master, ObjectType type, double CX, double CY, int W, int H, double speed, int sphere, int enchant, int damage);
 int createObjectMist(Region *environment, int master, ObjectType type, double startX, double startY, int lifespan, int sphere, int enchant);
 int defaultObjectsInit(Region *environment, int objId);
 void deleteObject(Region *environment, int id, BOOL silentDelete);
