@@ -62,10 +62,10 @@ void aiRun(Region *environment, int playerId) {
 			}
 			case LIFE_RABBIT: {
 				if (fabs(gameObject[playerId].x-gameObject[i].x) < 40 &&
-					fabs(gameObject[playerId].x-gameObject[i].x) > 6 &&
+					fabs(gameObject[playerId].x-gameObject[i].x) > 2 &&
 					fabs(gameObject[playerId].y-gameObject[i].y) <= 2) {
 					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x-gameObject[i].x<0)?-1.5:1.5), 0.1); // + 0.5 is compulsory as it is the center of a grid
-				} else if (fabs(gameObject[playerId].x-gameObject[i].x) <= 6 &&
+				} else if (fabs(gameObject[playerId].x-gameObject[i].x) <= 2 &&
 						   fabs(gameObject[playerId].y-gameObject[i].y) <= 2) {
 					deleteObject(environment, i, FALSE);
 				}
@@ -83,14 +83,15 @@ void aiRun(Region *environment, int playerId) {
 			}
 			case LIFE_SLUDGE: {
 				if (fabs(gameObject[playerId].x-gameObject[i].x) < 30 &&
-				fabs(gameObject[playerId].y-gameObject[i].y) < 30) {
+					fabs(gameObject[playerId].y-gameObject[i].y) < 30) {
 					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.04); // + 0.5 is compulsory as it is the center of a grid
 					if (rand() % 400 == 0 || (gameObject[playerId].y + 1.0 < gameObject[i].y)) {
-						controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
+						controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.08);
 					}
-					if (rand() % 1000 == 0)
-						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 0.2, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_STUN | ENCHANT_ENTANGLE | ENCHANT_SILENT, DMG_STANDARD_DIRTBALL_DAMAGE);
 				}
+				if (fabs(gameObject[playerId].x - gameObject[i].x) < 50 && fabs(gameObject[playerId].y - gameObject[i].y) < 100)
+					if (rand() % 500 == 0)
+						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 0.2, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_STUN | ENCHANT_ENTANGLE | ENCHANT_SILENT, DMG_STANDARD_DIRTBALL_DAMAGE);
 				break;
 			}
 			case SPAWN_BEE_HIVE: {

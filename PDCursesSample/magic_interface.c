@@ -1,5 +1,16 @@
 #include "magic_interface.h"
 
+MagicNameString magicNameString[100] = {
+	{ "--", COLOR_B_BLACK },
+	{ "Fire Ball", COLOR_RED },
+	{ "Ice Ball", COLOR_CYAN },
+	{ "Dirt Ball", COLOR_YELLOW },
+	{ "Fire Rain", COLOR_RED },
+	{ "Ice Rain", COLOR_CYAN },
+	{ "Fire Ray", COLOR_RED },
+	{ "Freezing Ray", COLOR_CYAN },
+};
+
 int castMagic(Region *environment, int casterId, ArcaneType magic, double destX, double destY)
 {
 	if (casterId == -1) return 0;
@@ -32,7 +43,7 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 			}
 		break;
 	case ARCANE_FIRERAIN:
-		if (gameObject[casterId].mana >= 100)
+		if (gameObject[casterId].mana >= 80)
 			if (createObjectMagicRain(environment, -1, MAGIC_BLOB, destX, destY, 30, 20, 0.1, SPHERE_FIRE, ENCHANT_SHRAPNEL, DMG_STANDARD_FIRERAIN_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 100;
@@ -40,7 +51,7 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 			}
 		break;
 	case ARCANE_ICERAIN:
-		if (gameObject[casterId].mana >= 100)
+		if (gameObject[casterId].mana >= 80)
 			if (createObjectMagicRain(environment, -1, MAGIC_BLOB, destX, destY, 30, 20, 0.1, SPHERE_ICE, ENCHANT_SHRAPNEL, DMG_STANDARD_ICERAIN_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 100;

@@ -195,6 +195,8 @@ int doGameLoop() {
 
 	BOOL restart = FALSE;
 	BOOL playerFlying = FALSE;
+	int skillSet[UI_SKILL_SLOT] = { ARCANE_FIREBALL, ARCANE_ICELASER, ARCANE_ICERAIN };
+	int selectedSkillIndex = 0;
 	BOOL debugVision = FALSE;
 	int coolDown = 0;
 
@@ -245,10 +247,13 @@ int doGameLoop() {
 				else
 					controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.1);
 			}
+			for (int k = 1; k <= UI_SKILL_SLOT; k++)
+				if (keyboardPress['0' + k])
+					selectedSkillIndex = k - 1;
 			if (mouseEvents.buttonState && coolDown <= 0) {
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				coolDown += castMagic(&localMap, playerId, ARCANE_FIREBALL, destX, destY);
+				coolDown += castMagic(&localMap, playerId, skillSet[selectedSkillIndex], destX, destY);
 			}
 			if (keyboardPress[' '])
 			{
@@ -290,7 +295,7 @@ int doGameLoop() {
 			displayObjects(&localMap, playerId, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			if (debugVision) drawLocalRegionObjId(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			displayCrossHair(mouseEvents.x, mouseEvents.y);
-			drawUI(playerId, playerLv);
+			drawUI(playerId, playerLv, skillSet, selectedSkillIndex);
 			refresh();		// update the display in one go
 		}
 

@@ -487,7 +487,7 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 						{
 							if ((ox - cx) * (ox - cx) + (oy - cy) * (oy - cy) > rsq) continue;
 							if (ox < 0 || ox >= environment->width || oy < 0 || oy >= environment->height) continue;
-							createObjectMagicProjectile(environment, gameObject[id].master, MAGIC_FLAME, ox, oy, 0.0, 0.0, 0.0, 10, SPHERE_FIRE, 0, gameObject[id].mana / 10);
+							createObjectMagicProjectile(environment, gameObject[id].master, MAGIC_FLAME, ox, oy, 0.0, 0.0, 0.0, 10, SPHERE_FIRE, 0, gameObject[id].mana / 10 + 1);
 						}
 					}
 				}
@@ -501,8 +501,8 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 					int dirX = rand() % 101 - 50;
 					int dirY = rand() % 101 - 50;
 					// conservation of momentum -> there must be a shrapnel going in the opposite direction
-					createObjectMagicProjectileDir(environment, -1, MAGIC_FRAGMENT, cx, cy, dirX, dirY, 0.2, 250, gameObject[id].attri, gameObject[id].attri2 & ENCHANT_EFFECT_MASK, 1);
-					createObjectMagicProjectileDir(environment, -1, MAGIC_FRAGMENT, cx, cy, -dirX, -dirY, 0.2, 250, gameObject[id].attri, gameObject[id].attri2 & ENCHANT_EFFECT_MASK, 1);
+					createObjectMagicProjectileDir(environment, -1, MAGIC_FRAGMENT, cx, cy, dirX, dirY, 0.2, 250, gameObject[id].attri, gameObject[id].attri2 & ENCHANT_EFFECT_MASK, gameObject[id].mana / 20 + 1);
+					createObjectMagicProjectileDir(environment, -1, MAGIC_FRAGMENT, cx, cy, -dirX, -dirY, 0.2, 250, gameObject[id].attri, gameObject[id].attri2 & ENCHANT_EFFECT_MASK, gameObject[id].mana / 20 + 1);
 				}
 			}
 			break;
@@ -1238,6 +1238,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 			}
 		}
 		break;
+	case LIFE_SLUDGE:
 	case LIFE_SLIME:
 		if (gameObject[objId].sprite != NULL)
 		{
@@ -1258,7 +1259,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
 								int tId = environment->objId[gay][gax];
-								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type))
+								if (tId != -1 && (gameObject[tId].type != LIFE_SLUDGE) && (gameObject[tId].type != LIFE_SLIME))
 									interactObject(environment->objId[gay][gax], TRUE, DMG_STANDARD_SLUDGE_MELEE_DAMAGE, 0, ENCHANT_SLOW);
 							}
 						}
@@ -1295,7 +1296,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 	case BULLET:
 	case FRAGMENT:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
-			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], TRUE, 5, 0, 0);
+			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], TRUE, 10, 0, 0);
 		deleteObject(environment, objId, FALSE);
 		break;
 	case DEMO_OBJ_USING_IMG_LOADER:

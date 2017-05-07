@@ -1,11 +1,16 @@
 #include "ui.h"
 
-void drawUI(int observerId, int lv)
+void drawUI(int observerId, int lv, int *skillSet, int selectedSkillIndex)
 {
 	if (observerId == -1) return;
+	if (move(UI_HP_POS_Y, UI_HP_POS_X) == ERR) return;
+	printw("                                                                              ");
+	if (move(UI_SKILL_POS_Y, UI_SKILL_POS_X) == ERR) return;
+	printw("                                                                              ");
 	drawHPBar(UI_HP_BAR_LEN * gameObject[observerId].endurance / gameObject[observerId].max_endurance);
 	drawMPBar(UI_MP_BAR_LEN * gameObject[observerId].mana / gameObject[observerId].max_mana);
 	drawLv(lv);
+	drawSkillBar(skillSet, selectedSkillIndex);
 	return;
 }
 
@@ -59,5 +64,26 @@ void drawLv(int lv)
 	attron(COLOR_PAIR(COLOR_B_YELLOW));
 	printw("LV-%d", lv);
 	attroff(COLOR_PAIR(COLOR_B_YELLOW));
+	return;
+}
+
+void drawSkillBar(int *skillSet, int selectedSkillIndex)
+{
+	if (skillSet == NULL) return;
+	for (int i = 0; i < UI_SKILL_SLOT; i++)
+	{
+		if (move(UI_SKILL_POS_Y, UI_SKILL_POS_X + i * 18) == ERR) continue;
+		int fcolor = magicNameString[skillSet[i]].color;
+		if (i == selectedSkillIndex)
+		{
+			if (fcolor < COLOR_WHITE)
+				fcolor += 8;
+			else if (fcolor == COLOR_B_BLACK)
+				fcolor = COLOR_WHITE;
+		}
+		attron(COLOR_PAIR(fcolor));
+		printw("[%d] %s", i + 1, magicNameString[skillSet[i]].string);
+		attroff(COLOR_PAIR(fcolor));
+	}
 	return;
 }

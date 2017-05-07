@@ -11,6 +11,15 @@ typedef enum {
 	ARCANE_FIRELASER, ARCANE_ICELASER,
 } ArcaneType;
 
+typedef struct {
+	char *string;
+	int color;
+} MagicNameString;
+
+// WARNING: the index of magicNameString MUST correspond to the ArcaneType
+extern MagicNameString magicNameString[100];
+
+
 // return cooldown
 int castMagic(Region *environment, int casterId, ArcaneType magic, double destX, double destY);
 // return state of flight: 0 not flying 1 flying
