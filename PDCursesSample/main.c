@@ -119,13 +119,6 @@ void gameOver(void) {
 
 		printInMiddle(7, COLOR_B_RED, "Game Over");
 		printInMiddle(9, COLOR_RED, "You died");
-		printInMiddle(12, COLOR_WHITE, "Hint");
-		printInMiddle(13, COLOR_WHITE, "[Mouse 1] ice blob");
-		printInMiddle(14, COLOR_WHITE, "[Space] freeze ray");
-		printInMiddle(15, COLOR_WHITE, "[e] impact bomb");
-		printInMiddle(16, COLOR_WHITE, "[g] grenade");
-		printInMiddle(17, COLOR_WHITE, "[r] restart");
-		printInMiddle(18, COLOR_WHITE, "[~] debug vision");
 
 		printInMiddle(20, COLOR_WHITE, "Press space to return to menu ... ");
 
@@ -197,8 +190,8 @@ extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
 
 int playerId;
 
-// 0 fatal error 1 gameover 2 restart
-int doGameLoop() {
+// 0 fatal error 1 gameover 2 restart 3 finished level
+int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 	// Extended characters table: http://melvilletheatre.com/articles/ncurses-extended-characters/index.html
 	// e.g. addch(97 | A_ALTCHARSET) will print out a "brick" character
 	//      addch(96 | A_ALTCHARSET) will print out a diamond
@@ -207,12 +200,16 @@ int doGameLoop() {
 	clear();
 	initializeObjects();
 	if (!initializeInputEvents()) return 0;
+	int playerLv = playerStat->lv;
+	int lastKnownExp = playerStat->exp;
 	Coordinate start, end;
-	Region localMap = loadLevel(FOREST, &start, &end, executablePath);
-	int playerLv = 10;
+	Region localMap = loadLevel(gameLevel, &start, &end, executablePath);
 	playerId = createHumanoid(&localMap, -1, HUMANOID_TYPE_HUMAN, start.x, start.y, playerLv);
 	if (playerId == -1) return 0;
 	int playerAliveFlag = 1;
+	gameObject[playerId].endurance = playerStat->hp;
+	gameObject[playerId].mana = playerStat->mp;
+	gameObject[playerId].attri2 = playerStat->exp;
 	gameObject[playerId].spawnRegionCount = &playerAliveFlag;
 	if (createHumanoid(&localMap, -1, HUMANOID_TYPE_WIZARD, start.x + 10, start.y, 1) == -1) return 0;
 	
@@ -227,7 +224,7 @@ int doGameLoop() {
 	BOOL playerFlying = FALSE;
 	int skillSet[UI_SKILL_SLOT] = { ARCANE_FIREBALL, ARCANE_ICELASER, ARCANE_ICERAIN };
 	int selectedSkillIndex = 0;
-	int potions[2] = { 8, 8 };
+	int potions[2] = { playerStat->potions[0], playerStat->potions[1] };
 	BOOL debugVision = FALSE;
 	int coolDown = 0;
 
@@ -321,14 +318,18 @@ int doGameLoop() {
 			rotateObjects(&localMap);
 
 			// 3. Update player lv
-			while (gameObject[playerId].attri2 >= EXP_NEEDED_TO_LV_UP[playerLv - 1])
+			if (playerAliveFlag >= 1)
 			{
-				gameObject[playerId].attri2 -= EXP_NEEDED_TO_LV_UP[playerLv - 1];
-				if (playerLv < 30)
+				while (gameObject[playerId].attri2 >= EXP_NEEDED_TO_LV_UP[playerLv - 1])
 				{
-					updateHumanoidStatistic(playerId, playerLv, playerLv + 1);
-					playerLv++;
+					gameObject[playerId].attri2 -= EXP_NEEDED_TO_LV_UP[playerLv - 1];
+					if (playerLv < 30)
+					{
+						updateHumanoidStatistic(playerId, playerLv, playerLv + 1);
+						playerLv++;
+					}
 				}
+				lastKnownExp = gameObject[playerId].attri2;
 			}
 		}
 
@@ -361,7 +362,12 @@ int doGameLoop() {
 			break;
 	}
 	cleanUpLocalRegion(&localMap);
-	if (restart) return 2;
+	if (restart) // You keep nothing if you are not paying anything and retry
+		return 2;
+	playerStat->lv = playerLv;
+	playerStat->exp = lastKnownExp;
+	playerStat->potions[0] = potions[0];
+	playerStat->potions[1] = potions[1];
 	return 1;
 }
 
@@ -406,10 +412,11 @@ int main(int argc, char *argv[])
 		selectedMenu = doMenu();
 		if (selectedMenu == 0)
 		{
+			PlayerState playerStat = { .lv = 1,.hp = 1000,.mp = 1000,.exp = 0,.potions = { 8, 8 } };
 			BOOL restart;
 			do {
 				restart = FALSE;
-				switch (doGameLoop())
+				switch (doGameLoop(&playerStat, TUTORIAL))
 				{
 				case 0:
 					error();

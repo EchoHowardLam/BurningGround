@@ -98,6 +98,12 @@ struct mouseOutput {
 	int buttonState;
 };
 
+typedef struct {
+	int lv;
+	int hp, mp, exp;
+	int potions[2];
+} PlayerState;
+
 typedef struct vector Vector;
 typedef struct vector Coordinate;
 typedef struct vector Dimension;
