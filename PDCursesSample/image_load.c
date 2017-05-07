@@ -159,8 +159,12 @@ CharacterImage* getImage(ObjectType objType, int ID) {
 		case LIFE_RABBIT:
 			temp = allObjs[4];
 			break;
-		case LIFE_SLUDGE:
+		case LIFE_SLIME:
 			temp = allObjs[5];
+			break;
+		case LIFE_SLUDGE:
+			//temp = allObjs[5];
+			temp = allObjs[5]->next->next;
 			break;
 		case LIFE_GRASS:
 			temp = allObjs[6];

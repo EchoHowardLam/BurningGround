@@ -8,3 +8,13 @@ GGGG
 (__)
  GG 
 GGGG
+2 4 2 1 1
+ .: 
+(__)
+ yy 
+yyyy
+3 4 2 2 1
+ :. 
+(__)
+ yy 
+yyyy

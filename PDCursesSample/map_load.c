@@ -240,6 +240,8 @@ ObjectType codeToType(char *code) {
 	else if (strcmp(code, "rab") == 0)
 		return LIFE_RABBIT;
 	else if (strcmp(code, "slime") == 0)
+		return LIFE_SLIME;
+	else if (strcmp(code, "slu") == 0)
 		return LIFE_SLUDGE;
 	else if (strcmp(code, "hive") == 0)
 		return SPAWN_BEE_HIVE;

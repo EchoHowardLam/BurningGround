@@ -71,9 +71,19 @@ void aiRun(Region *environment, int playerId) {
 				}
 				break;
 			}
+			case LIFE_SLIME: {
+				if (fabs(gameObject[playerId].x-gameObject[i].x) < 30 &&
+					fabs(gameObject[playerId].y-gameObject[i].y) < 30) {
+					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.04); // + 0.5 is compulsory as it is the center of a grid
+					if (rand() % 400 == 0 || (gameObject[playerId].y + 1.0 < gameObject[i].y)) {
+						controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
+					}
+				}
+				break;
+			}
 			case LIFE_SLUDGE: {
 				if (fabs(gameObject[playerId].x-gameObject[i].x) < 30 &&
-				fabs(gameObject[playerId].y-gameObject[i].y) <= 30) {
+				fabs(gameObject[playerId].y-gameObject[i].y) < 30) {
 					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.04); // + 0.5 is compulsory as it is the center of a grid
 					if (rand() % 400 == 0 || (gameObject[playerId].y + 1.0 < gameObject[i].y)) {
 						controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
@@ -83,8 +93,13 @@ void aiRun(Region *environment, int playerId) {
 				}
 				break;
 			}
+			case SPAWN_BEE_HIVE: {
+				if (fabs(gameObject[playerId].x - gameObject[i].x) < 50 && fabs(gameObject[playerId].y - gameObject[i].y) <= 50 && rand() % 100 == 0)
+					createObject(environment, -1, LIFE_BEE, gameObject[i].x + getRandomOfRange(3), gameObject[i].y + getRandomOfRange(3));
+				break;
+			}
 			case LIFE_BEE: {
-				if (fabs(gameObject[playerId].x - gameObject[i].x) < 40 && fabs(gameObject[playerId].y - gameObject[i].y) <= 40)
+				if (fabs(gameObject[playerId].x - gameObject[i].x) < 40 && fabs(gameObject[playerId].y - gameObject[i].y) < 40)
 				{
 					if (rand() % 2)
 						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.2);
