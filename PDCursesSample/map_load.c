@@ -25,6 +25,12 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 		case FOREST:
 			strcat(newpath, "\\maps\\forest.txt");
 			break;
+		case PLATFORM:
+			strcat(newpath, "\\maps\\platform.txt");
+			break;
+		case HELL:
+			strcat(newpath, "\\maps\\hell.txt");
+			break;
 		default:
 			return temp;
 	}
@@ -38,6 +44,12 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 			break;
 		case FOREST:
 			strcat(newpath, "/maps/forest.txt");
+			break;
+		case PLATFORM:
+			strcat(newpath, "/maps/platform.txt");
+			break;
+		case HELL:
+			strcat(newpath, "/maps/hell.txt");
 			break;
 		default:
 			return temp;

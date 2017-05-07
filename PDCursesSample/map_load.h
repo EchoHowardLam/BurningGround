@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-typedef enum {TUTORIAL, TEST, FOREST} LevelName;
+typedef enum {TUTORIAL, TEST, FOREST, PLATFORM, HELL} LevelName;
 
 Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *executablePath);
 
