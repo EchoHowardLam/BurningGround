@@ -74,14 +74,13 @@ void aiRun(Region *environment, int playerId) {
 			}
 			case LIFE_SLUDGE: {
 				if (fabs(gameObject[playerId].x-gameObject[i].x) < 30 &&
-				fabs(gameObject[playerId].x-gameObject[i].x) > 6 &&
 				fabs(gameObject[playerId].y-gameObject[i].y) <= 30) {
 					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.04); // + 0.5 is compulsory as it is the center of a grid
 					if (rand() % 400 == 0 || (gameObject[playerId].y + 1.0 < gameObject[i].y)) {
 						controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
 					}
-					if (rand() % 2000 == 0)
-						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 1.0, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_ENTANGLE | ENCHANT_SILENT);
+					if (rand() % 1000 == 0)
+						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 0.2, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_ENTANGLE | ENCHANT_SILENT);
 				}
 				break;
 			}
@@ -90,11 +89,11 @@ void aiRun(Region *environment, int playerId) {
 				{
 					if (rand() % 2 == 0)
 						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.2);
-					else if (rand() % 5 == 0)
+					else if (rand() % 2)
 						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? 1.5 : -1.5), 0.2);
 					if (rand() % 2 == 0)
 						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? -1.5 : 1.5), 0.2);
-					else if (rand() % 5 == 0)
+					else if (rand() % 2)
 						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? 1.5 : -1.5), 0.2);
 				}
 				else {

@@ -117,7 +117,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case LIFE_BEE:
-			gameObject[i].endurance = 200;
+			gameObject[i].endurance = 20;
 			gameObject[i].underGravity = FALSE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
@@ -878,7 +878,7 @@ void controlObjectX(int id, double destX, double speed)
 	}
 	gameObject[id].underMove = TRUE;
 	if ((gameObject[id].underEffect[EFFECT_COLD_SLOW] >= 0) || (gameObject[id].underEffect[EFFECT_SLOW] >= 0))
-		gameObject[id].motiveVel.x *= 0.8;
+		gameObject[id].motiveVel.x *= 0.7;
 	return;
 }
 
@@ -898,7 +898,7 @@ void controlObjectY(int id, double destY, double speed)
 		gameObject[id].motiveVel.y = -speed;
 	gameObject[id].underMove = TRUE;
 	if ((gameObject[id].underEffect[EFFECT_COLD_SLOW] >= 0) || (gameObject[id].underEffect[EFFECT_SLOW] >= 0))
-		gameObject[id].motiveVel.y *= 0.8;
+		gameObject[id].motiveVel.y *= 0.7;
 	return;
 }
 
@@ -984,18 +984,15 @@ void rotateObjects(Region *environment)
 					gameObject[i].sprite = getImage(LIFE_HUMANOID, gameObject[i].attri);
 				else
 					gameObject[i].sprite = getImage(LIFE_HUMANOID, gameObject[i].attri | ((gameObject[i].facingDir & 1) ^ 1));
-				if (gameObject[i].sprite == oldImage)
+				if (gameObject[i].sprite == oldImage || gameObject[i].sprite == NULL || checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
 				{
-					gameObject[i].facingDir ^= (TURNING_UNSETTLED | 1);
+					gameObject[i].sprite = oldImage;
+					gameObject[i].facingDir ^= TURNING_UNSETTLED;
 				}
-				else if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y)) {
+				else {
 					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
 					registerEnvironmentObject(environment, i);
 					gameObject[i].facingDir ^= (TURNING_UNSETTLED | 1);
-				}
-				else {
-					gameObject[i].sprite = oldImage;
-					gameObject[i].facingDir ^= TURNING_UNSETTLED;
 				}
 			}
 			break;
@@ -1003,16 +1000,16 @@ void rotateObjects(Region *environment)
 			if (gameObject[i].facingDir & TURNING_UNSETTLED)
 			{
 				CharacterImage *oldImage = gameObject[i].sprite;
-				gameObject[i].sprite = getImage(LIFE_RABBIT, ~gameObject[i].facingDir);
-				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+				gameObject[i].sprite = getImage(LIFE_RABBIT, ((gameObject[i].facingDir & 1) ^ 1));
+				if (gameObject[i].sprite == oldImage || gameObject[i].sprite == NULL || checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
 				{
+					gameObject[i].sprite = oldImage;
+					gameObject[i].facingDir ^= TURNING_UNSETTLED;
+				}
+				else {
 					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
 					registerEnvironmentObject(environment, i);
 					gameObject[i].facingDir ^= (TURNING_UNSETTLED | 1);
-				}
-				else {
-					gameObject[i].sprite = oldImage;
-					gameObject[i].facingDir ^= TURNING_UNSETTLED;
 				}
 			}
 			break;
@@ -1020,16 +1017,16 @@ void rotateObjects(Region *environment)
 			if (gameObject[i].facingDir & TURNING_UNSETTLED)
 			{
 				CharacterImage *oldImage = gameObject[i].sprite;
-				gameObject[i].sprite = getImage(LIFE_SLUDGE, ~gameObject[i].facingDir);
-				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+				gameObject[i].sprite = getImage(LIFE_SLUDGE, ((gameObject[i].facingDir & 1) ^ 1));
+				if (gameObject[i].sprite == oldImage || gameObject[i].sprite == NULL || checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
 				{
+					gameObject[i].sprite = oldImage;
+					gameObject[i].facingDir ^= TURNING_UNSETTLED;
+				}
+				else {
 					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
 					registerEnvironmentObject(environment, i);
 					gameObject[i].facingDir ^= (TURNING_UNSETTLED | 1);
-				}
-				else {
-					gameObject[i].sprite = oldImage;
-					gameObject[i].facingDir ^= TURNING_UNSETTLED;
 				}
 			}
 			break;
@@ -1333,8 +1330,8 @@ BOOL interactObject(int objId, BOOL physicalTouch, int damage, int sphere, int e
 			if (gameObject[objId].underEffect[EFFECT_COLD_SLOW] < (500 * gameObject[objId].magicConductivity / 100))
 				gameObject[objId].underEffect[EFFECT_COLD_SLOW] = (500 * gameObject[objId].magicConductivity / 100);
 		if (effect & ENCHANT_SLOW)
-			if (gameObject[objId].underEffect[EFFECT_SLOW] < (1000 * gameObject[objId].magicConductivity / 100))
-				gameObject[objId].underEffect[EFFECT_SLOW] = (1000 * gameObject[objId].magicConductivity / 100) - 1;
+			if (gameObject[objId].underEffect[EFFECT_SLOW] < (200 * gameObject[objId].magicConductivity / 100))
+				gameObject[objId].underEffect[EFFECT_SLOW] = (200 * gameObject[objId].magicConductivity / 100) - 1;
 		if (effect & ENCHANT_BLIND)
 			if (gameObject[objId].underEffect[EFFECT_BLIND] < (500 * gameObject[objId].magicConductivity / 100))
 				gameObject[objId].underEffect[EFFECT_BLIND] = (500 * gameObject[objId].magicConductivity / 100);
