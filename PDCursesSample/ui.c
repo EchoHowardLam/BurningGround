@@ -3,12 +3,14 @@
 void drawUI(int observerId, int lv, int *skillSet, int selectedSkillIndex, int hpPotionNum, int mpPotionNum)
 {
 	if (observerId == -1) return;
-	if (move(UI_HP_POS_Y, UI_HP_POS_X) == ERR) return;
-	printw("                                                                              ");
-	if (move(UI_SKILL_POS_Y, UI_SKILL_POS_X) == ERR) return;
-	printw("                                                                              ");
+	for (int k = UI_SKILL_POS_Y; k <= UI_EXP_POS_Y; k++)
+		if (move(k, 1) == ERR) return;
+		else
+			printw("                                                                              ");
 	drawUIHPBar(UI_HP_BAR_LEN * gameObject[observerId].endurance / gameObject[observerId].max_endurance);
 	drawUIMPBar(UI_MP_BAR_LEN * gameObject[observerId].mana / gameObject[observerId].max_mana);
+	if (gameObject[observerId].type == LIFE_HUMANOID)
+		drawUIEXPBar(UI_EXP_BAR_LEN * gameObject[observerId].attri2 / EXP_NEEDED_TO_LV_UP[lv - 1]);
 	drawUILv(lv);
 	drawUISkillBar(skillSet, selectedSkillIndex);
 	drawUIPotions(hpPotionNum, mpPotionNum);
@@ -63,6 +65,21 @@ void drawUIMPBar(int coloredBarLen)
 		addch('_');
 	addch('|');
 	attroff(COLOR_PAIR(COLOR_BLUE));
+	return;
+}
+void drawUIEXPBar(int coloredBarLen)
+{
+	if (move(UI_EXP_POS_Y, UI_EXP_POS_X + (UI_EXP_BAR_LEN - coloredBarLen) / 2) == ERR) return;
+	char dispChar = '=';
+	if (coloredBarLen > UI_EXP_BAR_LEN)
+	{
+		coloredBarLen = UI_EXP_BAR_LEN;
+		dispChar = '!';
+	}
+	attron(COLOR_PAIR(COLOR_WHITE));
+	for (int i = 0; i < coloredBarLen; i++)
+		addch(dispChar);
+	attroff(COLOR_PAIR(COLOR_WHITE));
 	return;
 }
 
