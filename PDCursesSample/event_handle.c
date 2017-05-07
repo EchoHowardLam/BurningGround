@@ -157,6 +157,9 @@ void getAllUserInputs(BOOL *kb_output, MOutput *mouse_output)
 			{
 				mouse_output->buttonState |= BG_MOUSE_BUTTON1_PRESSED;
 			}
+			else if (WIN_EVENT_InRec.Event.MouseEvent.dwButtonState & RIGHTMOST_BUTTON_PRESSED) {
+				mouse_output->buttonState |= BG_MOUSE_BUTTON1_PRESSED;
+			}
 			mouse_output->x = WIN_EVENT_InRec.Event.MouseEvent.dwMousePosition.X;
 			mouse_output->y = WIN_EVENT_InRec.Event.MouseEvent.dwMousePosition.Y;
 			break;

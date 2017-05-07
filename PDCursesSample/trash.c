@@ -38,3 +38,8 @@ double destY = gameObject[playerId].y + DIRECTION2Y[playerFacing] - 0.4;
 
 
 */
+
+/*
+createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 200, 0, TRUE);
+createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 500, DESTROY_CRITERIA_STOP, TRUE);
+*/

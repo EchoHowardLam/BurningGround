@@ -236,13 +236,11 @@ int doGameLoop() {
 				coolDown2 += 300;
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 500, DESTROY_CRITERIA_STOP, TRUE);
 			}
 			else if (keyboardPress['g'] && coolDown2 <= 0) {
 				coolDown2 += 200;
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				createObjectProjectileDest(&localMap, playerId, BOMB, gameObject[playerId].x, gameObject[playerId].y, destX, destY, 0.3, 200, 0, TRUE);
 			}
 			else if (keyboardPress['l'] && coolDown2 <= 0) {
 				coolDown2 += 10;
@@ -279,7 +277,7 @@ int doGameLoop() {
 			displayObjects(&localMap, playerId, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			if (debugVision) drawLocalRegionObjId(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			displayCrossHair(mouseEvents.x, mouseEvents.y);
-			drawUI(playerId);
+			drawUI(playerId, 100);
 			refresh();		// update the display in one go
 		}
 
