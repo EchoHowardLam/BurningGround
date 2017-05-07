@@ -208,7 +208,7 @@ int doGameLoop() {
 	initializeObjects();
 	if (!initializeInputEvents()) return 0;
 	Coordinate start, end;
-	Region localMap = loadLevel(FOREST, &start, &end, executablePath);
+	Region localMap = loadLevel(TUTORIAL, &start, &end, executablePath);
 	int playerLv = 10;
 	playerId = createHumanoid(&localMap, -1, HUMANOID_TYPE_HUMAN, start.x, start.y, playerLv);
 	if (playerId == -1) return 0;
@@ -319,6 +319,14 @@ int doGameLoop() {
 			acceObjects(&localMap);
 			moveObjects(&localMap);
 			rotateObjects(&localMap);
+
+			// 3. Update player lv
+			while (gameObject[playerId].attri2 >= EXP_NEEDED_TO_LV_UP[playerLv - 1])
+			{
+				gameObject[playerId].attri2 -= EXP_NEEDED_TO_LV_UP[playerLv - 1];
+				updateHumanoidStatistic(playerId, playerLv, playerLv + 1);
+				playerLv++;
+			}
 		}
 
 		if (keyboardPress['h'] || keyboardPress['H'])
@@ -327,7 +335,7 @@ int doGameLoop() {
 			if (!initializeInputEvents()) return 0;
 		}
 		
-		// 3. render the display this turn
+		// 4. render the display this turn
 		if (playerAliveFlag >= 1)
 		{
 			clear();
@@ -341,7 +349,7 @@ int doGameLoop() {
 			refresh();		// update the display in one go
 		}
 
-		// 4. stop running for some time to prevent using up all CPU power;
+		// 5. stop running for some time to prevent using up all CPU power;
 		// if you want to compensate for computational time and sleep non-fixed amount of time,
 		// you will need to get system time like clock() and calculate, but that is not necessary most of the time
 		threadSleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library
@@ -368,6 +376,10 @@ int main(int argc, char *argv[])
 		error();
 		return 0;
 	}
+
+	// settings
+	for (int i = 1; i <= MAX_LV; i++)
+		EXP_NEEDED_TO_LV_UP[i - 1] = 3 * i * i + 3 * i + 1; // guess what geometry meaning it has
 	
 	// NOTE: Official HOWTO for Curses library: http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/
 	// NOTE: How to setup PDCurses: https://jdonaldmccarthy.wordpress.com/2014/09/05/how-to-set-up-pdcurses-in-visual-studio-2013-c/

@@ -119,6 +119,8 @@ extern double DIRECTION2X[4];
 extern double DIRECTION2Y[4];
 extern double DIAGONALX[4];
 extern double DIAGONALY[4];
+extern int EXP_NEEDED_TO_LV_UP[30];
+extern const int MAX_LV;
 
 void setupDisplay();
 void threadSleep(unsigned ms);

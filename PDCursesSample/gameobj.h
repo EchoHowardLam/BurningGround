@@ -45,7 +45,7 @@ typedef struct {
 
 	// usage depends on object type, basically private data
 	// For magic, attri = SPHERE, attri2 = ENCHANT
-	// For humanoid, attri = type of character
+	// For humanoid, attri = type of character, attri2 = exp
 	int attri;
 	int attri2;
 
@@ -59,6 +59,7 @@ typedef struct {
 extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
 
 void initializeObjects(void);
+void updateHumanoidStatistic(int id, int oldLv, int newLv);
 int createHumanoid(Region *environment, int master, int humanoidType, double startX, double startY, int lv);
 int createObject(Region *environment, int master, ObjectType type, double startX, double startY);
 int createObjectProjectileDir(Region *environment, int master, ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
@@ -79,7 +80,7 @@ void moveObjects(Region *environment); // please call updateObjectsStatus before
 void rotateObjects(Region *environment);
 void updateObjectsStatus(Region *environment);
 BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double newY);
-BOOL interactObject(int objId, BOOL physicalTouch, int damage, int sphere, int effect);
+BOOL interactObject(int sourceId, int targetId, BOOL physicalTouch, int damage, int sphere, int effect);
 BOOL checkObjectCollision(Region *environment, int objId, double x, double y); // please call updateObjectsStatus before calling this function, 0 miss 1 hit
 BOOL checkObjectOnFeet(Region *environment, int objId);
 BOOL removeEnvironmentBlock(Region *environment, double x, double y);
