@@ -166,7 +166,6 @@ void drawBackground() {
 extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
 
 int playerId;
-Direction playerFacing;
 
 // 0 fatal error 1 gameover 2 restart
 int doGameLoop() {
@@ -180,7 +179,7 @@ int doGameLoop() {
 	if (!initializeInputEvents()) return 0;
 	Coordinate start, end;
 	Region localMap = loadLevel(TUTORIAL, &start, &end, executablePath);
-	int playerLv = 10;
+	int playerLv = 1;
 	playerId = createHumanoid(&localMap, -1, HUMANOID_TYPE_HUMAN, start.x, start.y, playerLv);
 	if (playerId == -1) return 0;
 	int playerAliveFlag = 1;
@@ -195,9 +194,9 @@ int doGameLoop() {
 	mouseEvents.buttonState = 0;
 
 	BOOL restart = FALSE;
+	BOOL playerFlying = FALSE;
 	BOOL debugVision = FALSE;
 	int coolDown = 0;
-	int coolDown2 = 0;
 
 	// main game loop...
 	while (1) {
@@ -207,19 +206,45 @@ int doGameLoop() {
 
 		for (int L = 0; L < 5; L++)
 		{
+			// Auto-cancel flying state
+			if (checkObjectOnFeet(&localMap, playerId))
+				playerFlying = FALSE;
+
 			// 2. get buffered user input and determine player action
 			if (coolDown > 0) coolDown--;
-			if (coolDown2 > 0) coolDown2--;
 			for (int i = 0; i < ACCEPTABLE_KEY_NUM; i++)
 				keyboardPress[i] = FALSE;
 			getAllUserInputs(keyboardPress, &mouseEvents);
 			combineWASDwasdKeys(keyboardPress);
 			combineArrowKeys(keyboardPress);
 			combinewasdArrowKeys(keyboardPress);
-			if (keyboardPress[KB_UP_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.15); playerFacing = UP; }
-			else if (keyboardPress[KB_DOWN_KEY]) { controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.15); playerFacing = DOWN; }
-			if (keyboardPress[KB_LEFT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.15); playerFacing = WEST; }
-			else if (keyboardPress[KB_RIGHT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.15); playerFacing = EAST; }
+			if (keyboardPress[KB_UP_KEY])
+			{
+				playerFlying = TRUE;
+				if (playerFlying)
+					controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.075);
+				else
+					controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.15);
+			}
+			else if (keyboardPress[KB_DOWN_KEY]) {
+				if (playerFlying)
+					controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.15);
+				else
+					controlObjectY(playerId, floor(gameObject[playerId].y) + 1.5, 0.1);
+			}
+			if (keyboardPress[KB_LEFT_KEY])
+			{
+				if (playerFlying)
+					controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.15);
+				else
+					controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.1);
+			}
+			else if (keyboardPress[KB_RIGHT_KEY]) {
+				if (playerFlying)
+					controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.15);
+				else
+					controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.1);
+			}
 			if (mouseEvents.buttonState && coolDown <= 0) {
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
@@ -231,19 +256,8 @@ int doGameLoop() {
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
 				castMagic(&localMap, playerId, ARCANE_FIRELASER, destX, destY);
 			}
-			if (keyboardPress['e'] && coolDown2 <= 0)
+			if (keyboardPress['l'])
 			{
-				coolDown2 += 300;
-				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
-				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-			}
-			else if (keyboardPress['g'] && coolDown2 <= 0) {
-				coolDown2 += 200;
-				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
-				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-			}
-			else if (keyboardPress['l'] && coolDown2 <= 0) {
-				coolDown2 += 10;
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
 				castMagic(&localMap, playerId, ARCANE_ICERAIN, destX, destY);
@@ -255,6 +269,7 @@ int doGameLoop() {
 				deleteObject(&localMap, playerId, TRUE);
 				restart = TRUE;
 			}
+			playerFlying = castFlying(playerId, playerFlying);
 			
 			aiRun(&localMap, playerId);
 			spawnCheck(&localMap);

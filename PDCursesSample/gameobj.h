@@ -86,5 +86,7 @@ BOOL removeEnvironmentBlock(Region *environment, double x, double y);
 BOOL registerEnvironmentObject(Region *environment, int objId);
 BOOL removeEnvironmentObject(Region *environment, int objId, double oldX, double oldY, CharacterImage *oldImage);
 
+int setObjectFlyingState(int objId, BOOL enableFlying, BOOL stableFlight);
+
 void doInitialSpawn(Region *target);
 void spawnCheck(Region *target);

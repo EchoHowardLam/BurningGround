@@ -69,3 +69,22 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 	return cooldown;
 }
 //createObjectMagicProjectile(environment, gameObject[id].master, MAGIC_SPIKE, gameObject[id].x, gameObject[id].y, 0.0, 0.0, 0.0, 1000, SPHERE_ICE, 0);
+
+BOOL castFlying(int casterId, BOOL enableFlying)
+{
+	if (casterId == -1) return FALSE;
+	if (!enableFlying)
+	{
+		setObjectFlyingState(casterId, FALSE, TRUE);
+		return FALSE;
+	}
+	if (gameObject[casterId].underEffect[EFFECT_STUN] >= 0) return (!gameObject[casterId].underGravity);
+	BOOL flying = FALSE;
+	if (gameObject[casterId].mana >= 2)
+	{
+		flying = (setObjectFlyingState(casterId, TRUE, TRUE) == 2);
+		if (flying)
+			gameObject[casterId].mana -= 2;
+	}
+	return flying;
+}

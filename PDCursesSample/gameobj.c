@@ -1179,8 +1179,11 @@ void updateObjectsStatus(Region *environment)
 			}
 		}
 		gameObject[i].turnsAlive++;
-		if (gameObject[i].mana + (int)(gameObject[i].max_mana * 0.0005) + 1 < gameObject[i].max_mana)
-			gameObject[i].mana += (int)(gameObject[i].max_mana * 0.0005) + 1;
+		int manaRecovery = (int)(gameObject[i].max_mana * 0.0005) + 1;
+		if (!checkObjectOnFeet(environment, i))
+			manaRecovery /= 2;
+		if (gameObject[i].mana + manaRecovery < gameObject[i].max_mana)
+			gameObject[i].mana += manaRecovery;
 		else
 			gameObject[i].mana = gameObject[i].max_mana;
 		for (int index = 0; index < TOTAL_EFFECT_COUNT; index++)
@@ -1379,7 +1382,10 @@ BOOL interactObject(int objId, BOOL physicalTouch, int damage, int sphere, int e
 			if (gameObject[objId].underEffect[EFFECT_INVISIBLE] < (1000 * gameObject[objId].magicConductivity / 100))
 				gameObject[objId].underEffect[EFFECT_INVISIBLE] = (1000 * gameObject[objId].magicConductivity / 100);
 		if (effect & ENCHANT_SILENT)
-			gameObject[objId].mana = 0;
+			if (gameObject[objId].mana <= 1000)
+				gameObject[objId].mana = 0;
+			else
+				gameObject[objId].mana -= 1000;
 	}
 	return TRUE;
 }
@@ -1583,6 +1589,15 @@ BOOL removeEnvironmentObject(Region *environment, int objId, double oldX, double
 		}
 	}
 	return TRUE;
+}
+
+// 0 fail 1 now not flying 2 now flying
+int setObjectFlyingState(int objId, BOOL enableFlying, BOOL stableFlight)
+{
+	if (objId == -1) return 0;
+	gameObject[objId].underGravity = (!enableFlying);
+	gameObject[objId].fixedFlight = stableFlight;
+	return (1 + enableFlying);
 }
 
 void doInitialSpawn(Region *target) {
