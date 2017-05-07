@@ -410,8 +410,7 @@ int defaultObjectsInit(Region *environment, int objId)
 		gameObject[objId].sprite = getImage(LIFE_MOSQUITOES, rand()%4);
 		break;
 	case LIFE_MUSHROOM:
-		gameObject[objId].sprite = getImage(LIFE_MOSQUITOES, rand()%3);
-		if (!registerEnvironmentObject(environment, objId))
+		gameObject[objId].sprite = getImage(LIFE_MUSHROOM, rand()%3);
 		break;
 	case LIFE_RABBIT:
 		gameObject[objId].sprite = getImage(LIFE_RABBIT, gameObject[objId].facingDir & 1);
