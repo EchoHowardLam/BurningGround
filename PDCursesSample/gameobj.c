@@ -9,32 +9,33 @@ void initializeObjects(void)
 	return;
 }
 
-int createHumanoid(Region *environment, int master, int humanoidType, double startX, double startY)
+int createHumanoid(Region *environment, int master, int humanoidType, double startX, double startY, int lv)
 {
 	int ret = createObject(environment, master, LIFE_HUMANOID, startX, startY);
 	if (ret != -1)
 	{
+		int multipiler = (int)floor(pow(1.1, lv - 1));
 		gameObject[ret].attri = humanoidType;
 		switch (humanoidType)
 		{
 		case HUMANOID_TYPE_HUMAN:
-			gameObject[ret].max_endurance = 1000;
-			gameObject[ret].max_mana = 1000;
-			gameObject[ret].endurance = 1000;
-			gameObject[ret].mana = 1000;
+			gameObject[ret].max_endurance = 1000 * multipiler;
+			gameObject[ret].max_mana = 1000 * multipiler;
+			gameObject[ret].endurance = 1000 * multipiler;
+			gameObject[ret].mana = 1000 * multipiler;
 			break;
 		case HUMANOID_TYPE_WIZARD:
-			gameObject[ret].max_endurance = 10000;
-			gameObject[ret].max_mana = 100000;
-			gameObject[ret].endurance = 10000;
-			gameObject[ret].mana = 100000;
+			gameObject[ret].max_endurance = 20000;
+			gameObject[ret].max_mana = 200000;
+			gameObject[ret].endurance = 20000;
+			gameObject[ret].mana = 200000;
 			break;
 		case HUMANOID_TYPE_WINGMAN:
 		case HUMANOID_TYPE_CORRUPTED_WINGMAN:
-			gameObject[ret].max_endurance = 20000;
-			gameObject[ret].max_mana = 10000;
-			gameObject[ret].endurance = 20000;
-			gameObject[ret].mana = 10000;
+			gameObject[ret].max_endurance = 40000;
+			gameObject[ret].max_mana = 20000;
+			gameObject[ret].endurance = 40000;
+			gameObject[ret].mana = 20000;
 			break;
 		}
 	}
@@ -1151,8 +1152,10 @@ void updateObjectsStatus(Region *environment)
 			}
 		}
 		gameObject[i].turnsAlive++;
-		if (gameObject[i].mana < gameObject[i].max_mana)
-			gameObject[i].mana++;
+		if (gameObject[i].mana + (int)(gameObject[i].max_mana * 0.0005) + 1 < gameObject[i].max_mana)
+			gameObject[i].mana += (int)(gameObject[i].max_mana * 0.0005) + 1;
+		else
+			gameObject[i].mana = gameObject[i].max_mana;
 		for (int index = 0; index < TOTAL_EFFECT_COUNT; index++)
 		{
 			if (gameObject[i].underEffect[index] >= 0)

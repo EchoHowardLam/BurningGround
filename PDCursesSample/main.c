@@ -180,11 +180,12 @@ int doGameLoop() {
 	if (!initializeInputEvents()) return 0;
 	Coordinate start, end;
 	Region localMap = loadLevel(TUTORIAL, &start, &end, executablePath);
-	playerId = createHumanoid(&localMap, -1, HUMANOID_TYPE_HUMAN, start.x, start.y);
+	int playerLv = 10;
+	playerId = createHumanoid(&localMap, -1, HUMANOID_TYPE_HUMAN, start.x, start.y, playerLv);
 	if (playerId == -1) return 0;
 	int playerAliveFlag = 1;
 	gameObject[playerId].spawnRegionCount = &playerAliveFlag;
-	if (createHumanoid(&localMap, -1, HUMANOID_TYPE_WIZARD, start.x + 10, start.y) == -1) return 0;
+	if (createHumanoid(&localMap, -1, HUMANOID_TYPE_WIZARD, start.x + 10, start.y, 1) == -1) return 0;
 	
 	doInitialSpawn(&localMap);
 
@@ -220,10 +221,9 @@ int doGameLoop() {
 			if (keyboardPress[KB_LEFT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) - 0.5, 0.15); playerFacing = WEST; }
 			else if (keyboardPress[KB_RIGHT_KEY]) { controlObjectX(playerId, floor(gameObject[playerId].x) + 1.5, 0.15); playerFacing = EAST; }
 			if (mouseEvents.buttonState && coolDown <= 0) {
-				coolDown += 50;
 				double destX = mouseEvents.x + scrTopLeft.x + 0.5;
 				double destY = mouseEvents.y + scrTopLeft.y + 0.5;
-				castMagic(&localMap, playerId, ARCANE_FIREBALL, destX, destY);
+				coolDown += castMagic(&localMap, playerId, ARCANE_FIREBALL, destX, destY);
 			}
 			if (keyboardPress[' '])
 			{
@@ -267,7 +267,7 @@ int doGameLoop() {
 		}
 		
 		// 4. render the display this turn
-		if (playerAliveFlag == 1)
+		if (playerAliveFlag >= 1)
 		{
 			scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
 			scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
@@ -275,7 +275,7 @@ int doGameLoop() {
 			displayObjects(&localMap, playerId, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			if (debugVision) drawLocalRegionObjId(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			displayCrossHair(mouseEvents.x, mouseEvents.y);
-			drawUI(playerId, 100);
+			drawUI(playerId, playerLv);
 			refresh();		// update the display in one go
 		}
 

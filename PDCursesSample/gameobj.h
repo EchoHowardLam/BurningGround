@@ -59,7 +59,7 @@ typedef struct {
 extern GameObject gameObject[MAX_OBJECT];		// stores all game object!
 
 void initializeObjects(void);
-int createHumanoid(Region *environment, int master, int humanoidType, double startX, double startY);
+int createHumanoid(Region *environment, int master, int humanoidType, double startX, double startY, int lv);
 int createObject(Region *environment, int master, ObjectType type, double startX, double startY);
 int createObjectProjectileDir(Region *environment, int master, ObjectType type, double startX, double startY, double dirX, double dirY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
 int createObjectProjectileDest(Region *environment, int master, ObjectType type, double startX, double startY, double destX, double destY, double speed, int lifespan, int destroyCriteria, BOOL underGravity);
