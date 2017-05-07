@@ -235,7 +235,7 @@ int colorCodeToPair(char code) {
 		case 'W':
 			return COLOR_PAIR(COLOR_B_WHITE);
 	}
-	return -1;
+	return COLOR_PAIR(COLOR_BLACK);
 }
 
 void setUpColors() {

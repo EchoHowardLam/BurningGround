@@ -123,6 +123,16 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].underGravity = FALSE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
+		case SPAWN_DURIAN_TREE:
+			gameObject[i].isBackground = TRUE;
+			gameObject[i].underGravity = TRUE;
+			gameObject[i].fixedFlight = TRUE;
+			break;
+		case LIFE_DURIAN:
+			gameObject[i].endurance = 10;
+			gameObject[i].underGravity = TRUE;
+			gameObject[i].fixedFlight = TRUE;
+			break;
 		case DEMO_LIFE_CANNOT_FLY:
 		default:
 			gameObject[i].underGravity = TRUE;
@@ -408,6 +418,12 @@ int defaultObjectsInit(Region *environment, int objId)
 	case LIFE_BEE:
 		gameObject[objId].sprite = getImage(LIFE_BEE, 2 + rand() % 2);
 		break;
+	case SPAWN_DURIAN_TREE:
+		gameObject[objId].sprite = getImage(SPAWN_DURIAN_TREE, 0);
+		break;
+	case LIFE_DURIAN:
+		gameObject[objId].sprite = getImage(LIFE_DURIAN, 1);
+		break;
 	case MAGIC_FLAME:
 	case MAGIC_FRAGMENT:
 		if (environment->blocked[fY][fX])
@@ -576,6 +592,8 @@ void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPo
 		case LIFE_GRASS:
 		case SPAWN_BEE_HIVE:
 		case LIFE_BEE:
+		case SPAWN_DURIAN_TREE:
+		case LIFE_DURIAN:
 			{
 				if (gameObject[i].sprite == NULL) break;
 				int grx, gry;
@@ -1142,6 +1160,18 @@ void updateObjectsStatus(Region *environment)
 			newImage = getImage(LIFE_BEE, gameObject[i].sprite->charaID);
 		}
 			break;
+		case SPAWN_DURIAN_TREE:
+		{
+			oldImage = gameObject[i].sprite;
+			newImage = getImage(SPAWN_DURIAN_TREE, 0);
+		}
+			break;
+		case LIFE_DURIAN:
+		{
+			oldImage = gameObject[i].sprite;
+			newImage = getImage(LIFE_DURIAN, 1);
+		}
+			break;
 		case MAGIC_LASER: // can use middle-line algorithm here for optimization
 			{
 				double curX = gameObject[i].x;
@@ -1268,6 +1298,13 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 			}
 		}
 		break;
+	case LIFE_DURIAN: {
+		//TODO damage player
+		//if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
+		//	interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+		deleteObject(environment, objId, FALSE);
+		break;
+	}
 	case MAGIC_BLOB:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
 			interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
@@ -1411,6 +1448,8 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case LIFE_GRASS:
 	case SPAWN_BEE_HIVE:
 	case LIFE_BEE:
+	case SPAWN_DURIAN_TREE:
+	case LIFE_DURIAN:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;

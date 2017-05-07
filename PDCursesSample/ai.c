@@ -119,6 +119,12 @@ void aiRun(Region *environment, int playerId) {
 				}
 				break;
 			}
+			case SPAWN_DURIAN_TREE: {
+				if (rand() % 200 == 0) {
+					createObject(environment, i, LIFE_DURIAN, gameObject[i].x + getRandomOfRange(10), gameObject[i].y-10);
+				}
+				break;
+			}
 			case MIST: {
 				double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
 				double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));

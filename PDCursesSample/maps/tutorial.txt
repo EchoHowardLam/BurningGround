@@ -18,8 +18,8 @@
 159 68 1 2 \,120\e 
 \mob 70 69 1 0 mush 0 1 1
 \mob 72 69 1 0 mush 0 1 1
-\mob 165 68 0 0 slu 0 1 1
-\mob 173 68 0 0 slime 0 1 1
+\mob 165 68 1 0 slu 0 1 1
+\mob 173 68 1 0 slime 0 1 1
 // island
 20 70 350 5 \cK 
 25 75 340 4
