@@ -277,7 +277,7 @@ int doGameLoop() {
 			scrTopLeft.y = floor(gameObject[playerId].y) - SCREEN_HEIGHT / 2;
 			drawLocalRegion(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			displayObjects(&localMap, playerId, scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
-			if (debugVision) drawLocalRegionBlocked(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
+			if (debugVision) drawLocalRegionObjId(&localMap, gameObject[playerId].underEffect[EFFECT_BLIND], scrTopLeft, SCREEN_WIDTH, SCREEN_HEIGHT);
 			displayCrossHair(mouseEvents.x, mouseEvents.y);
 			drawUI(playerId);
 			refresh();		// update the display in one go

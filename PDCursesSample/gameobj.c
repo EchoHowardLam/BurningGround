@@ -64,7 +64,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 		gameObject[i].vel.y = 0.0;
 		gameObject[i].motiveVel.x = 0.0;
 		gameObject[i].motiveVel.y = 0.0;
-		gameObject[i].turnsAlive = -1;
+		gameObject[i].turnsAlive = 0;
 		gameObject[i].lifespan = -1;
 		gameObject[i].destroyCriteria = 0;
 		gameObject[i].underMove = FALSE;
@@ -109,15 +109,15 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].endurance = 1;
 			gameObject[i].destroyCriteria = DESTROY_CRITERIA_HIT;
 			gameObject[i].underGravity = TRUE;
-			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
+			gameObject[i].fixedFlight = TRUE;
 			break;
 		case SPAWN_BEE_HIVE:
 			gameObject[i].endurance = 100;
 			gameObject[i].underGravity = FALSE;
-			gameObject[i].fixedFlight = TRUE; // can still immediately fly if underGravity = FALSE
+			gameObject[i].fixedFlight = TRUE;
 			break;
 		case LIFE_BEE:
-			gameObject[i].endurance = 20;
+			gameObject[i].endurance = 200;
 			gameObject[i].underGravity = FALSE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
@@ -128,7 +128,6 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			break;
 		}
 		gameObject[i].facingDir = 1;
-		gameObject[i].sprite = NULL;
 		gameObject[i].master = master;
 
 		gameObject[i].attri = 0;
@@ -171,14 +170,13 @@ int createObjectProjectileDir(Region *environment, int master, ObjectType type, 
 		}
 		gameObject[i].motiveVel.x = 0.0;
 		gameObject[i].motiveVel.y = 0.0;
-		gameObject[i].turnsAlive = -1;
+		gameObject[i].turnsAlive = 0;
 		gameObject[i].lifespan = lifespan;
 		gameObject[i].destroyCriteria = destroyCriteria;
 		gameObject[i].underMove = FALSE;
 		gameObject[i].underGravity = underGravity;
 		gameObject[i].fixedFlight = FALSE;
 		gameObject[i].facingDir = 1;
-		gameObject[i].sprite = NULL;
 		gameObject[i].master = master;
 
 		gameObject[i].attri = 0;
@@ -226,7 +224,7 @@ int createObjectMagicProjectileDir(Region *environment, int master, ObjectType t
 		}
 		gameObject[i].motiveVel.x = 0.0;
 		gameObject[i].motiveVel.y = 0.0;
-		gameObject[i].turnsAlive = -1;
+		gameObject[i].turnsAlive = 0;
 		gameObject[i].lifespan = lifespan;
 
 		switch (type)
@@ -250,6 +248,7 @@ int createObjectMagicProjectileDir(Region *environment, int master, ObjectType t
 			gameObject[i].y += gameObject[i].dispY;
 			gameObject[i].vel.x = 0.0;
 			gameObject[i].vel.y = 0.0;
+			gameObject[i].turnsAlive = -1;
 			gameObject[i].lifespan = 1;
 			gameObject[i].destroyCriteria = 0;
 			gameObject[i].underMove = FALSE;
@@ -274,7 +273,6 @@ int createObjectMagicProjectileDir(Region *environment, int master, ObjectType t
 			break;
 		}
 		gameObject[i].facingDir = 1;
-		gameObject[i].sprite = NULL;
 		gameObject[i].master = master;
 
 		gameObject[i].attri = sphere;
@@ -331,7 +329,7 @@ int createObjectMist(Region *environment, int master, ObjectType type, double st
 		gameObject[i].vel.y = 0.0;
 		gameObject[i].motiveVel.x = 0.0;
 		gameObject[i].motiveVel.y = 0.0;
-		gameObject[i].turnsAlive = -1;
+		gameObject[i].turnsAlive = 0;
 		gameObject[i].lifespan = lifespan;
 
 		gameObject[i].destroyCriteria = 0;
@@ -348,7 +346,6 @@ int createObjectMist(Region *environment, int master, ObjectType type, double st
 			return -1;
 		}
 		gameObject[i].facingDir = 1;
-		gameObject[i].sprite = NULL;
 		gameObject[i].master = master;
 
 		gameObject[i].attri = sphere;
@@ -372,6 +369,7 @@ int defaultObjectsInit(Region *environment, int objId)
 	int fY = (int)floor(gameObject[objId].y);
 	if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
 		return -1;
+	gameObject[objId].sprite = NULL;
 	switch (gameObject[objId].type)
 	{
 	case LIFE_HUMANOID:
@@ -379,75 +377,31 @@ int defaultObjectsInit(Region *environment, int objId)
 			gameObject[objId].sprite = getImage(LIFE_HUMANOID, gameObject[objId].attri);
 		else
 			gameObject[objId].sprite = getImage(LIFE_HUMANOID, gameObject[objId].attri | (gameObject[objId].facingDir & 1));
-		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
 		break;
 	case LIFE_EYEBALL:
 		gameObject[objId].sprite = getImage(LIFE_EYEBALL, rand()%3);
-		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
 		break;
 	case LIFE_MOSQUITOES:
 		gameObject[objId].sprite = getImage(LIFE_MOSQUITOES, rand()%4);
-		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
 		break;
 	case LIFE_MUSHROOM:
 		gameObject[objId].sprite = getImage(LIFE_MOSQUITOES, rand()%3);
 		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
 		break;
 	case LIFE_RABBIT:
 		gameObject[objId].sprite = getImage(LIFE_RABBIT, gameObject[objId].facingDir & 1);
-		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
 		break;
 	case LIFE_SLUDGE:
 		gameObject[objId].sprite = getImage(LIFE_SLUDGE, gameObject[objId].facingDir & 1);
-		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
 		break;
 	case LIFE_GRASS:
 		gameObject[objId].sprite = getImage(LIFE_GRASS, (rand()%8==0)?(3+rand()%2):rand()%3);
-		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
 		break;
 	case SPAWN_BEE_HIVE:
 		gameObject[objId].sprite = getImage(SPAWN_BEE_HIVE, rand()%2);
-		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
 		break;
 	case LIFE_BEE:
-		gameObject[objId].sprite = getImage(LIFE_BEE, 2+rand()%2);
-		if (!registerEnvironmentObject(environment, objId))
-		{
-			deleteObject(environment, objId, TRUE);
-			return -1;
-		}
+		gameObject[objId].sprite = getImage(LIFE_BEE, 2 + rand() % 2);
 		break;
 	case MAGIC_FLAME:
 	case MAGIC_FRAGMENT:
@@ -460,6 +414,14 @@ int defaultObjectsInit(Region *environment, int objId)
 	default:
 		break;
 	}
+	if (gameObject[objId].sprite != NULL)
+	{
+		if (!registerEnvironmentObject(environment, objId))
+		{
+			deleteObject(environment, objId, TRUE);
+			return -1;
+		}
+	}
 	for (int index = 0; index < TOTAL_EFFECT_COUNT; index++)
 	{
 		gameObject[objId].underEffect[index] = -1;
@@ -471,7 +433,6 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 {
 	if (environment == NULL) return;
 	if (gameObject[id].type == NOTHING) return;
-
 	removeEnvironmentObject(environment, id, gameObject[id].x, gameObject[id].y, gameObject[id].sprite);
 	if (!silentDelete)
 	{
@@ -499,7 +460,6 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 			break;
 		}
 		case SPAWN_BEE_HIVE: {
-			// TODO fix this problem
 			for (int k=0; k<5; k++) {
 				createObject(environment, -1, LIFE_BEE, gameObject[id].x + getRandomOfRange(3), gameObject[id].y + getRandomOfRange(3));
 			}
@@ -1074,6 +1034,10 @@ void rotateObjects(Region *environment)
 			}
 			break;
 		default:
+			if (gameObject[i].facingDir & TURNING_UNSETTLED)
+			{
+				gameObject[i].facingDir ^= TURNING_UNSETTLED;
+			}
 			break;
 		}
 	}
@@ -1093,172 +1057,67 @@ void updateObjectsStatus(Region *environment)
 			deleteObject(environment, i, FALSE);
 			continue;
 		}
+		CharacterImage *oldImage = NULL;
+		CharacterImage *newImage = NULL;
 		switch (gameObject[i].type)
 		{
 		case LIFE_HUMANOID:
 			{
-				CharacterImage *oldImage = gameObject[i].sprite;
-				CharacterImage *newImage;
+				oldImage = gameObject[i].sprite;
 				if ((gameObject[i].attri & HUMANOID_TYPE_MASK) == HUMANOID_TYPE_HUMAN)
 					newImage = getImage(LIFE_HUMANOID, gameObject[i].attri);
 				else
 					newImage = getImage(LIFE_HUMANOID, gameObject[i].attri | (gameObject[i].facingDir & 1));
-				if (oldImage != newImage)
-				{
-					gameObject[i].sprite = newImage;
-					if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
-					{
-						removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
-						registerEnvironmentObject(environment, i);
-					}
-					else {
-						gameObject[i].sprite = oldImage;
-					}
-				}
 			}
 			break;
 		case LIFE_EYEBALL:
 			{
-				CharacterImage *oldImage = gameObject[i].sprite;
-				CharacterImage *newImage = getImage(LIFE_EYEBALL, gameObject[i].sprite->charaID);
-				if (oldImage != newImage)
-				{
-					gameObject[i].sprite = newImage;
-					if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
-					{
-						removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
-						registerEnvironmentObject(environment, i);
-					}
-					else {
-						gameObject[i].sprite = oldImage;
-					}
-				}
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(LIFE_EYEBALL, gameObject[i].sprite->charaID);
 			}
 			break;
 		case LIFE_MOSQUITOES:
 			{
-				CharacterImage *oldImage = gameObject[i].sprite;
-				CharacterImage *newImage = getImage(LIFE_MOSQUITOES, gameObject[i].sprite->charaID);
-				if (oldImage != newImage)
-				{
-					gameObject[i].sprite = newImage;
-					if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
-					{
-						removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
-						registerEnvironmentObject(environment, i);
-					}
-					else {
-						gameObject[i].sprite = oldImage;
-					}
-				}
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(LIFE_MOSQUITOES, gameObject[i].sprite->charaID);
 			}
 			break;
 		case LIFE_MUSHROOM:
 			{
-				CharacterImage *oldImage = gameObject[i].sprite;
-				CharacterImage *newImage = getImage(LIFE_MUSHROOM, gameObject[i].sprite->charaID);
-				if (oldImage != newImage)
-				{
-					gameObject[i].sprite = newImage;
-					if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
-					{
-						removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
-						registerEnvironmentObject(environment, i);
-					}
-					else {
-						gameObject[i].sprite = oldImage;
-					}
-				}
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(LIFE_MUSHROOM, gameObject[i].sprite->charaID);
 			}
 			break;
 		case LIFE_RABBIT:
 		{
-			CharacterImage *oldImage = gameObject[i].sprite;
-			CharacterImage *newImage = getImage(LIFE_RABBIT, gameObject[i].facingDir & 1);
-			if (oldImage != newImage)
-			{
-				gameObject[i].sprite = newImage;
-				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
-				{
-					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
-					registerEnvironmentObject(environment, i);
-				}
-				else {
-					gameObject[i].sprite = oldImage;
-				}
-			}
+			oldImage = gameObject[i].sprite;
+			newImage = getImage(LIFE_RABBIT, gameObject[i].facingDir & 1);
 		}
 			break;
 		case LIFE_SLUDGE:
 		{
-			CharacterImage *oldImage = gameObject[i].sprite;
-			CharacterImage *newImage = getImage(LIFE_SLUDGE, gameObject[i].facingDir & 1);
-			if (oldImage != newImage)
-			{
-				gameObject[i].sprite = newImage;
-				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
-				{
-					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
-					registerEnvironmentObject(environment, i);
-				}
-				else {
-					gameObject[i].sprite = oldImage;
-				}
-			}
+			oldImage = gameObject[i].sprite;
+			newImage = getImage(LIFE_SLUDGE, gameObject[i].facingDir & 1);
 		}
 			break;
 		case LIFE_GRASS:
 		{
-			CharacterImage *oldImage = gameObject[i].sprite;
-			CharacterImage *newImage = getImage(LIFE_GRASS, gameObject[i].sprite->charaID);
-			if (oldImage != newImage)
-			{
-				gameObject[i].sprite = newImage;
-				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
-				{
-					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
-					registerEnvironmentObject(environment, i);
-				}
-				else {
-					gameObject[i].sprite = oldImage;
-				}
-			}
+			oldImage = gameObject[i].sprite;
+			newImage = getImage(LIFE_GRASS, gameObject[i].sprite->charaID);
 		}
 			break;
 		case SPAWN_BEE_HIVE:
 		{
-			CharacterImage *oldImage = gameObject[i].sprite;
-			CharacterImage *newImage = getImage(SPAWN_BEE_HIVE, gameObject[i].sprite->charaID);
-			if (oldImage != newImage)
-			{
-				gameObject[i].sprite = newImage;
-				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
-				{
-					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
-					registerEnvironmentObject(environment, i);
-				}
-				else {
-					gameObject[i].sprite = oldImage;
-				}
-			}
+			if (rand() % 100 == 0)
+				createObject(environment, -1, LIFE_BEE, gameObject[i].x + getRandomOfRange(3), gameObject[i].y + getRandomOfRange(3));
+			oldImage = gameObject[i].sprite;
+			newImage = getImage(SPAWN_BEE_HIVE, gameObject[i].sprite->charaID);
 		}
 			break;
 		case LIFE_BEE:
 		{
-			CharacterImage *oldImage = gameObject[i].sprite;
-			CharacterImage *newImage = getImage(LIFE_BEE, gameObject[i].sprite->charaID);
-			if (oldImage != newImage)
-			{
-				gameObject[i].sprite = newImage;
-				if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
-				{
-					removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
-					registerEnvironmentObject(environment, i);
-				}
-				else {
-					gameObject[i].sprite = oldImage;
-				}
-			}
+			oldImage = gameObject[i].sprite;
+			newImage = getImage(LIFE_BEE, gameObject[i].sprite->charaID);
 		}
 			break;
 		case MAGIC_LASER: // can use middle-line algorithm here for optimization
@@ -1285,6 +1144,18 @@ void updateObjectsStatus(Region *environment)
 		default:
 			break;
 		}
+		if (oldImage != newImage)
+		{
+			gameObject[i].sprite = newImage;
+			if (!checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
+			{
+				removeEnvironmentObject(environment, i, gameObject[i].x, gameObject[i].y, oldImage);
+				registerEnvironmentObject(environment, i);
+			}
+			else {
+				gameObject[i].sprite = oldImage;
+			}
+		}
 		gameObject[i].turnsAlive++;
 		if (gameObject[i].mana < gameObject[i].max_mana)
 			gameObject[i].mana++;
@@ -1304,9 +1175,14 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 	if (gameObject[objId].type == NOTHING) return FALSE;
 	int master = gameObject[objId].master;
 	if (master == -1) master = -2;
+	int tmpDmg;
 	switch (gameObject[objId].type)
 	{
 	case LIFE_MOSQUITOES:
+		tmpDmg = 1;
+	case LIFE_BEE:
+		if (gameObject[objId].type == LIFE_BEE)
+			tmpDmg = 2;
 		if (gameObject[objId].sprite != NULL)
 		{
 			int gax, gay;
@@ -1326,8 +1202,8 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
 								int tId = environment->objId[gay][gax];
-								if (tId != -1 && (gameObject[tId].type != LIFE_MOSQUITOES))
-									interactObject(environment->objId[gay][gax], FALSE, 1, 0, 0);
+								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type != SPAWN_BEE_HIVE))
+									interactObject(environment->objId[gay][gax], FALSE, tmpDmg, 0, 0);
 							}
 						}
 					}
@@ -1355,7 +1231,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
 								int tId = environment->objId[gay][gax];
-								if (tId != -1 && (gameObject[tId].type != LIFE_SLUDGE))
+								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type))
 									interactObject(environment->objId[gay][gax], TRUE, 1, 0, ENCHANT_SLOW);
 							}
 						}
@@ -1434,7 +1310,7 @@ BOOL interactObject(int objId, BOOL physicalTouch, int damage, int sphere, int e
 	if (gameObject[objId].type == NOTHING) return FALSE;
 	// this function is called in moveObjects, the bumped object may still haven't executed its hitEvent
 	// so we cannot directly call deleteObject()
-	if (physicalTouch || (damage > 1))
+	if (physicalTouch || (damage > 5))
 		if (gameObject[objId].destroyCriteria & DESTROY_CRITERIA_HIT)
 			gameObject[objId].endurance = 0;
 	if (damage > 0) // No healing by negative number
@@ -1638,7 +1514,7 @@ BOOL registerEnvironmentObject(Region *environment, int objId)
 			{
 				if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
 				{
-					if (!environment->blocked[gay][gax])
+					if ((!environment->blocked[gay][gax]) && (environment->objId[gay][gax] == -1))
 					{
 						environment->blocked[gay][gax] = TRUE;
 						environment->objId[gay][gax] = objId;
@@ -1672,7 +1548,7 @@ BOOL removeEnvironmentObject(Region *environment, int objId, double oldX, double
 			{
 				if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
 				{
-					if (environment->objId[gay][gax] == objId)
+					if ((environment->blocked[gay][gax]) && (environment->objId[gay][gax] == objId))
 					{
 						environment->blocked[gay][gax] = FALSE;
 						environment->objId[gay][gax] = -1;

@@ -44,3 +44,4 @@ void localRegionDelUTri(Region *target, int cx, int cy, int width, int height, i
 
 void drawLocalRegion(Region *target, int blind, Coordinate scrTopLeftPos, int scrW, int scrH); // x, y refer to the global coordinates of screen's top left corner
 void drawLocalRegionBlocked(Region *target, int blind, Coordinate scrTopLeftPos, int scrW, int scrH); // x, y refer to the global coordinates of screen's top left corner
+void drawLocalRegionObjId(Region *target, int blind, Coordinate scrTopLeftPos, int scrW, int scrH); // x, y refer to the global coordinates of screen's top left corner

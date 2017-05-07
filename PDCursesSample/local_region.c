@@ -212,3 +212,30 @@ void drawLocalRegionBlocked(Region *target, int blind, Coordinate scrTopLeftPos,
 	}
 	return;
 }
+
+void drawLocalRegionObjId(Region *target, int blind, Coordinate scrTopLeftPos, int scrW, int scrH)
+{
+	if (target == NULL) return;
+	scrW = SCREEN_WIDTH;
+	scrH = SCREEN_HEIGHT;
+	int x = (int)floor(scrTopLeftPos.x);
+	int y = (int)floor(scrTopLeftPos.y);
+	if (target == NULL) return;
+	for (int i = 0, ry = y; i < scrH; i++, ry++)
+	{
+		for (int j = 0, rx = x; j < scrW; j++, rx++)
+		{
+			if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width))
+			{
+				if (move(i, j) == ERR) return;
+				if (target->objId[ry][rx] != -1)
+				{
+					attron(COLOR_PAIR(COLOR_WHITE));
+					addch(target->objId[ry][rx] % 10 + '0');
+					attroff(COLOR_PAIR(COLOR_WHITE));
+				}
+			}
+		}
+	}
+	return;
+}
