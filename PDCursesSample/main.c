@@ -208,7 +208,7 @@ int doGameLoop() {
 	initializeObjects();
 	if (!initializeInputEvents()) return 0;
 	Coordinate start, end;
-	Region localMap = loadLevel(TUTORIAL, &start, &end, executablePath);
+	Region localMap = loadLevel(FOREST, &start, &end, executablePath);
 	int playerLv = 10;
 	playerId = createHumanoid(&localMap, -1, HUMANOID_TYPE_HUMAN, start.x, start.y, playerLv);
 	if (playerId == -1) return 0;

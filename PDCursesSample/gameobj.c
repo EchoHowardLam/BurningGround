@@ -1313,7 +1313,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 	case LIFE_DURIAN: {
 		//TODO damage player
 		//if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
-		//	interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+			//interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
 		deleteObject(environment, objId, FALSE);
 		break;
 	}

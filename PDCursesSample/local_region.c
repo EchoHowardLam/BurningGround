@@ -56,19 +56,21 @@ void localRegionAddRectWithChar(Region *target, int x, int y, int rectW, int rec
 	{
 		for (int j = 0, rx = x; j < rectW; j++, rx++)
 		{
-			if (fill)
-			{
-				if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width)) {
-					target->appearance[ry][rx] = display;
-					target->blocked[ry][rx] = block;
-					target->color[ry][rx] = color;
+			if (rx >= 0 && ry >= 0 && rx < target->width && ry < target->height) {
+				if (fill)
+				{
+					if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width)) {
+						target->appearance[ry][rx] = display;
+						target->blocked[ry][rx] = block;
+						target->color[ry][rx] = color;
+					}
 				}
-			}
-			else if ((i == 0 || i == rectH - 1) || (j == 0 || j == rectW - 1)) {
-				if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width)) {
-					target->appearance[ry][rx] = display;
-					target->blocked[ry][rx] = block;
-					target->color[ry][rx] = color;
+				else if ((i == 0 || i == rectH - 1) || (j == 0 || j == rectW - 1)) {
+					if ((ry >= 0 && ry < target->height) && (rx >= 0 && rx < target->width)) {
+						target->appearance[ry][rx] = display;
+						target->blocked[ry][rx] = block;
+						target->color[ry][rx] = color;
+					}
 				}
 			}
 		}
@@ -95,17 +97,19 @@ double euclidean(int x, int y) {
 void localRegionAddCircleWithChar(Region *target, int cx, int cy, int radius, int height, int fill, BOOL block, chtype display, int color) {
 	for (int i=0, ry=cy-(height-radius); i <= height; i++, ry++) {
 		for (int j=0, rx=cx-radius; j <= 2*radius; j++, rx++) {
-			if (fill) {
-				if (euclidean(cx-rx, cy-ry) <= radius) {
-					target->appearance[ry][rx] = display;
-					target->blocked[ry][rx] = block;
-					target->color[ry][rx] = color;
-				}
-			} else {
-				if (euclidean(cx-rx, cy-ry) <= radius && euclidean(cx-rx, cy-ry) >= radius-1) {
-					target->appearance[ry][rx] = display;
-					target->blocked[ry][rx] = block;
-					target->color[ry][rx] = color;
+			if (rx >= 0 && ry >= 0 && rx < target->width && ry < target->height) {
+				if (fill) {
+					if (euclidean(cx-rx, cy-ry) <= radius) {
+						target->appearance[ry][rx] = display;
+						target->blocked[ry][rx] = block;
+						target->color[ry][rx] = color;
+					}
+				} else {
+					if (euclidean(cx-rx, cy-ry) <= radius && euclidean(cx-rx, cy-ry) >= radius-1) {
+						target->appearance[ry][rx] = display;
+						target->blocked[ry][rx] = block;
+						target->color[ry][rx] = color;
+					}
 				}
 			}
 		}
@@ -123,13 +127,14 @@ void localRegionAddUTriWithChar(Region *target, int cx, int cy, int width, int h
 	double slope = (width/2.0f)/height;
 	for (int i=0, ry=cy; i < height; i++, ry++) {
 		for (int j=0, rx=left; j < width; j++, rx++) {
-			if (fill) {
-				if (rx >= left+(slope*(height-i)) && rx <= right-(slope*(height-i))) {
-					target->appearance[ry][rx] = display;
-					target->blocked[ry][rx] = block;
-					target->color[ry][rx] = color;
+			if (rx >= 0 && ry >= 0 && rx < target->width && ry < target->height) {
+				if (fill) {
+					if (rx >= left+(slope*(height-i)) && rx <= right-(slope*(height-i))) {
+						target->appearance[ry][rx] = display;
+						target->blocked[ry][rx] = block;
+						target->color[ry][rx] = color;
+					}
 				}
-			} else {
 			}
 		}
 	}
