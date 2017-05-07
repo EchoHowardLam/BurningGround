@@ -1310,10 +1310,34 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 			}
 		}
 		break;
-	case LIFE_DURIAN: {
-		//TODO damage player
-		//if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
-			//interactObject(environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+		case LIFE_DURIAN: {
+			if (gameObject[objId].sprite != NULL)
+			{
+				int gax, gay;
+				int lx, ly;
+				int topLeftgx = (int)floor(newX) - (int)floor(gameObject[objId].sprite->center->x);
+				int topLeftgy = (int)floor(newY) - (int)floor(gameObject[objId].sprite->center->y);
+				int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
+				int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+				for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+				{
+					for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+					{
+						if (gameObject[objId].sprite->solid[ly][lx] > 0)
+						{
+							if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+							{
+								if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
+								{
+									int tId = environment->objId[gay][gax];
+									if (tId != -1 && (gameObject[tId].type != gameObject[objId].type))
+										interactObject(gameObject[objId].master, environment->objId[gay][gax], FALSE, 100, 0, ENCHANT_CONFUSE);
+								}
+							}
+						}
+					}
+				}
+			}
 		deleteObject(environment, objId, FALSE);
 		break;
 	}
