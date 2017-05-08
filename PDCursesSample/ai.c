@@ -9,10 +9,34 @@ void aiRun(Region *environment, int playerId) {
 			case LIFE_HUMANOID:
 				if (i != playerId)
 				{
-					double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
-					double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
-					controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.15); // + 0.5 is compulsory as it is the center of a grid
-					controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.15);
+					if (gameObject[i].attri == HUMANOID_TYPE_CORRUPTED_WINGMAN) {
+						double dx, dy;
+						dx = gameObject[playerId].x - gameObject[i].x;
+						dy = gameObject[playerId].y - gameObject[i].y;
+						if (fabs(dx) < 40 && fabs(dy) < 40) {
+							if (rand() % 150 == 0)
+							createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 0.2, -1, SPHERE_FIRE, ENCHANT_SHRAPNEL, DMG_STANDARD_DEMON_DAMAGE);
+							if (fabs(dx) < 10 && fabs(dy) < 10) {
+								controlObjectX(i, floor(gameObject[i].x) - dx / 10 + 0.5, 0.2);
+								controlObjectY(i, floor(gameObject[i].y) - dy / 10 + 0.5, 0.2);
+							} else {
+								double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+								double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+								controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.2);
+								controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.2);
+							}
+						} else {
+							double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+							double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+							controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.1);
+							controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.1);
+						}
+					} else {
+						double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+						double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+						controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.15); // + 0.5 is compulsory as it is the center of a grid
+						controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.15);
+					}
 				}
 				break;
 			case LIFE_EYEBALL: {

@@ -190,7 +190,7 @@ CharacterImage* getImage(ObjectType objType, int ID) {
 			temp = allObjs[10]->next;
 			break;
 		case PROFESSOR_HTRAHDIS:
-			temp = allObjs[11]->next;
+			temp = allObjs[11];
 			break;
 		default:
 			return NULL;
