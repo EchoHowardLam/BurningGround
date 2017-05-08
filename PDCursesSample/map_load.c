@@ -271,6 +271,8 @@ ObjectType codeToType(char *code) {
 		return LIFE_BIRD;
 	else if (strcmp(code, "dur") == 0)
 		return SPAWN_DURIAN_TREE;
+	else if (strcmp(code, "demon") == 0)
+		return LIFE_HUMANOID;
 	else
 		return NOTHING;
 }

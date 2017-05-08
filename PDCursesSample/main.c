@@ -496,7 +496,7 @@ int main(int argc, char *argv[])
 			BOOL restart;
 			do {
 				restart = FALSE;
-				switch (doGameLoop(&playerStat, TUTORIAL))
+				switch (doGameLoop(&playerStat, HELL))
 				{
 				case 0:
 					error();
