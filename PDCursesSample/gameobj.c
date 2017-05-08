@@ -1464,7 +1464,10 @@ BOOL interactObject(int sourceId, int targetId, BOOL physicalTouch, int damage, 
 	{
 		if (sphere)
 		{
-			damage = damage * gameObject[targetId].magicConductivity / 100;
+			int magicConductivity = gameObject[targetId].magicConductivity;
+			if (magicConductivity < 10)
+				magicConductivity = 10;
+			damage = damage * magicConductivity / 100;
 			// as long as there is at least 1 dmg before reduction, we still need to give some damage to avoid invincibility
 			if (damage <= 0)
 				damage = 1;

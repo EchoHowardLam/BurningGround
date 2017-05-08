@@ -298,7 +298,8 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 	BOOL holdKey[2] = {FALSE, FALSE}; // corresponds to qQ, eE
 
 	// main game loop...
-	while (1) {
+	for (int round = 0; ; round++)
+	{
 		for (int L = 0; L < 5; L++)
 		{
 			// Auto-cancel flying state
@@ -409,7 +410,7 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 		}
 		
 		// 4. render the display this turn
-		if (playerAliveFlag >= 1)
+		if (round > 50 && playerAliveFlag >= 1)
 		{
 			clear();
 			scrTopLeft.x = floor(gameObject[playerId].x) - SCREEN_WIDTH / 2;
@@ -425,7 +426,8 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 		// 5. stop running for some time to prevent using up all CPU power;
 		// if you want to compensate for computational time and sleep non-fixed amount of time,
 		// you will need to get system time like clock() and calculate, but that is not necessary most of the time
-		threadSleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library
+		if (round > 50)
+			threadSleep(20);			// want to sleep for a few ms; for Mac, probably have to include another library
 
 		if (playerAliveFlag < 1)
 			break;
@@ -488,13 +490,13 @@ int main(int argc, char *argv[])
 				.hp = 1000,
 				.mp = 1000,
 				.exp = 0,
-				.skillSet = { ARCANE_FIREBALL, ARCANE_MYTHRAIN, 0 },
+				.skillSet = { ARCANE_FIREBALL, 0, 0 },
 				.potions = { 8, 8 }
 			};
 			BOOL restart;
 			do {
 				restart = FALSE;
-				switch (doGameLoop(&playerStat, FOREST))
+				switch (doGameLoop(&playerStat, TUTORIAL))
 				{
 				case 0:
 					error();

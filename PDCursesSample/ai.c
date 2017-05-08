@@ -16,27 +16,60 @@ void aiRun(Region *environment, int playerId) {
 				}
 				break;
 			case LIFE_EYEBALL: {
-				double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
-				double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
-				if (gameObject[i].attri <= 0)
+				if (gameObject[i].attri != 0)
 				{
-					if (rand() % 10000 == 0)
-					{
-						gameObject[i].attri = 3600;
-						gameObject[i].attri2 = rand() % 3600;
-					}
-				}
-				if (gameObject[i].attri > 0)
-				{
-					gameObject[i].attri--;
-					gameObject[i].attri2 = (++gameObject[i].attri2) % 3600;
+					int direction;
+					if (gameObject[i].attri > 0)
+						direction = -1;
+					else
+						direction = 1;
+					double dx, dy;
+					gameObject[i].attri += (direction * 2);
+					gameObject[i].attri2 = (gameObject[i].attri2 + direction * 2) % 3600;
 					dx = cos((gameObject[i].attri2 / 10.0 / 180.0) * M_PI);
 					dy = sin((gameObject[i].attri2 / 10.0 / 180.0) * M_PI);
-					createObjectMagicProjectileDir(environment, i, MAGIC_LASER, gameObject[i].x, gameObject[i].y, dx, dy, 0.0, -1, SPHERE_ICE, 0, DMG_STANDARD_ICELASER_DAMAGE);
+					if (gameObject[i].sprite->charaID < 1)
+						createObjectMagicProjectileDir(environment, i, MAGIC_LASER, gameObject[i].x, gameObject[i].y, dx, dy, 0.0, -1, SPHERE_ICE, 0, DMG_STANDARD_ICELASER_DAMAGE);
+					else
+						createObjectMagicProjectileDir(environment, i, MAGIC_LASER, gameObject[i].x, gameObject[i].y, dx, dy, 0.0, -1, SPHERE_FIRE, 0, DMG_STANDARD_FIRELASER_DAMAGE);
+				}
+				else if (fabs(gameObject[playerId].x - gameObject[i].x) > 200 ||
+						 fabs(gameObject[playerId].y - gameObject[i].y) > 200) {
+					double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+					double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+					controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.2);
+					controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.2);
+				}
+				else if (fabs(gameObject[playerId].x - gameObject[i].x) > 20 ||
+						 fabs(gameObject[playerId].y - gameObject[i].y) > 20) {
+					if (rand() % 10 < 3)
+						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.2);
+					else if (rand() % 10 < 3)
+						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? 1.5 : -1.5), 0.2);
+					if (rand() % 10 < 3)
+						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? -1.5 : 1.5), 0.2);
+					else if (rand() % 10 < 3)
+						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? 1.5 : -1.5), 0.2);
 				}
 				else {
-					controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.2); // + 0.5 is compulsory as it is the center of a grid
-					controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.2);
+					if (rand() % 300 == 0)
+					{
+						gameObject[i].attri = 450; // scan for 45 deg
+						int direction = (rand() % 2 ? -1 : 1);
+						gameObject[i].attri *= direction;
+						int angle = (int)(atan((gameObject[playerId].y - gameObject[i].y) / (gameObject[playerId].x - gameObject[i].x)) / M_PI * 180);
+						if (gameObject[playerId].x - gameObject[i].x < 0.0)
+							angle = ((angle + 360 + 180) % 360);
+						else
+							angle = ((angle + 360) % 360);
+						gameObject[i].attri2 = (angle * 10 + 225 * direction);
+					}
+					else {
+						double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+						double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+						controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.2);
+						controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.2);
+					}
 				}
 				break;
 			}
@@ -63,9 +96,9 @@ void aiRun(Region *environment, int playerId) {
 			case LIFE_RABBIT: {
 				if (gameObject[i].attri != 0) // hiding
 				{
-					if ((fabs(gameObject[playerId].x - gameObject[i].x) < 10 && // Ambush!
+					if ((fabs(gameObject[playerId].x - gameObject[i].x) < 20 && // Ambush!
 						 fabs(gameObject[playerId].x - gameObject[i].x) > 2 && // Ambush!
-						 fabs(gameObject[playerId].y - gameObject[i].y) <= 5) || // Ambush!
+						 fabs(gameObject[playerId].y - gameObject[i].y) <= 15) || // Ambush!
 						 (rand() % 2000 == 0)) { // Poke the head around
 						if (checkObjectSubmergedInGround(environment, i))
 							controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
@@ -76,12 +109,14 @@ void aiRun(Region *environment, int playerId) {
 					}
 				}
 				else if (gameObject[i].attri == 0) { // not hiding
-					if (fabs(gameObject[playerId].x - gameObject[i].x) < 30 &&
+					if (fabs(gameObject[playerId].x - gameObject[i].x) < 80 &&
 						fabs(gameObject[playerId].x - gameObject[i].x) > 2 &&
-						fabs(gameObject[playerId].y - gameObject[i].y) <= 15) {
-						if (gameObject[playerId].y + 1.0 < gameObject[i].y) {
-							controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.2);
-							controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
+						fabs(gameObject[playerId].y - gameObject[i].y) <= 30) {
+						if (gameObject[playerId].y + 0.5 < gameObject[i].y) {
+							if (rand() % 3)
+								controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.2);
+							if (rand() % 2)
+								controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
 						}
 						else {
 							controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.1); // + 0.5 is compulsory as it is the center of a grid

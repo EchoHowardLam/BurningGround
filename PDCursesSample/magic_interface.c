@@ -5,6 +5,8 @@ MagicNameString magicNameString[100] = {
 	{ "Fire Ball", COLOR_RED },
 	{ "Ice Ball", COLOR_CYAN },
 	{ "Dirt Ball", COLOR_YELLOW },
+	{ "Firework", COLOR_RED },
+	{ "Cold Bomb", COLOR_CYAN },
 	{ "Fire Rain", COLOR_RED },
 	{ "Ice Rain", COLOR_CYAN },
 	{ "Hail", COLOR_CYAN },
@@ -16,7 +18,7 @@ MagicNameString magicNameString[100] = {
 ArcaneType magicUnlockedAtLevel[MAX_LV] = {
 	ARCANE_ICEBALL, 0, ARCANE_FIRERAIN, ARCANE_ICERAIN, 0,
 	ARCANE_ICESPIKERAIN, 0, ARCANE_FIRELASER, ARCANE_ICELASER, 0,
-	0, 0, 0, ARCANE_MYTHRAIN, 0,
+	ARCANE_MYTHRAIN, 0, ARCANE_FIREBALL_FRAG, ARCANE_ICEBALL_FRAG, 0,
 	0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0,
@@ -31,7 +33,7 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 	{
 	case ARCANE_FIREBALL:
 		if (gameObject[casterId].mana >= 300)
-			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, -1, SPHERE_FIRE, 0, DMG_STANDARD_FIREBALL_DAMAGE) != -1)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_FIRE, 0, DMG_STANDARD_FIREBALL_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 300;
 				cooldown = 50;
@@ -39,7 +41,7 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 		break;
 	case ARCANE_ICEBALL:
 		if (gameObject[casterId].mana >= 300)
-			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, -1, SPHERE_ICE, 0, DMG_STANDARD_ICEBALL_DAMAGE) != -1)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_ICE, 0, DMG_STANDARD_ICEBALL_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 300;
 				cooldown = 50;
@@ -47,9 +49,25 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 		break;
 	case ARCANE_DIRTBALL:
 		if (gameObject[casterId].mana >= 200)
-			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, -1, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_STUN | ENCHANT_ENTANGLE | ENCHANT_SILENT, DMG_STANDARD_DIRTBALL_DAMAGE) != -1)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_STUN | ENCHANT_ENTANGLE | ENCHANT_SILENT, DMG_STANDARD_DIRTBALL_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 200;
+				cooldown = 50;
+			}
+		break;
+	case ARCANE_FIREBALL_FRAG:
+		if (gameObject[casterId].mana >= 350)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_FIRE, ENCHANT_SHRAPNEL, DMG_STANDARD_FIREBALL_DAMAGE) != -1)
+			{
+				gameObject[casterId].mana -= 350;
+				cooldown = 50;
+			}
+		break;
+	case ARCANE_ICEBALL_FRAG:
+		if (gameObject[casterId].mana >= 350)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_ICE, ENCHANT_SHRAPNEL, DMG_STANDARD_ICEBALL_DAMAGE) != -1)
+			{
+				gameObject[casterId].mana -= 350;
 				cooldown = 50;
 			}
 		break;
