@@ -263,12 +263,18 @@ int createObjectMagicProjectileDir(Region *environment, int master, ObjectType t
 
 		switch (type)
 		{
-		case MAGIC_BLOB:
-			gameObject[i].destroyCriteria = 0;
-			gameObject[i].underMove = FALSE;
-			gameObject[i].underGravity = FALSE;
-			gameObject[i].fixedFlight = FALSE;
-			break;
+			case MAGIC_BLOB:
+				gameObject[i].destroyCriteria = 0;
+				gameObject[i].underMove = FALSE;
+				gameObject[i].underGravity = FALSE;
+				gameObject[i].fixedFlight = FALSE;
+				break;
+			case ESTR_MEMORY:
+				gameObject[i].destroyCriteria = 0;
+				gameObject[i].underMove = FALSE;
+				gameObject[i].underGravity = FALSE;
+				gameObject[i].fixedFlight = FALSE;
+				break;
 		case MAGIC_SPIKE:
 			gameObject[i].lifespan = 1000;
 			gameObject[i].destroyCriteria = 0;
@@ -447,6 +453,9 @@ int defaultObjectsInit(Region *environment, int objId)
 	case LIFE_DURIAN:
 		gameObject[objId].sprite = getImage(LIFE_DURIAN, 1);
 		break;
+	case ESTR_MEMORY:
+			gameObject[objId].sprite = getImage(ESTR_MEMORY, rand()%8);
+			break;
 	case MAGIC_FLAME:
 	case MAGIC_FRAGMENT:
 		if (environment->blocked[fY][fX])
@@ -625,6 +634,7 @@ void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPo
 		case SPAWN_DURIAN_TREE:
 		case LIFE_DURIAN:
 		case PROFESSOR_HTRAHDIS:
+		case ESTR_MEMORY:
 			{
 				if (gameObject[i].sprite == NULL) break;
 				int gax, gay;
@@ -1211,13 +1221,19 @@ void updateObjectsStatus(Region *environment)
 				oldImage = gameObject[i].sprite;
 				newImage = getImage(SPAWN_DURIAN_TREE, 0);
 			}
-			break;
-		case LIFE_DURIAN:
+				break;
+			case LIFE_DURIAN:
 			{
 				oldImage = gameObject[i].sprite;
 				newImage = getImage(LIFE_DURIAN, 1);
 			}
-			break;
+				break;
+			case ESTR_MEMORY:
+			{
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(ESTR_MEMORY, gameObject[i].sprite->charaID);
+			}
+				break;
 		case MAGIC_LASER: // can use middle-line algorithm here for optimization
 			{
 				double curX = gameObject[i].x;
@@ -1350,7 +1366,9 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 			}
 		}
 		break;
-	case LIFE_DURIAN: {
+	case LIFE_DURIAN:
+	case ESTR_MEMORY:
+		{
 		if (gameObject[objId].sprite != NULL)
 		{
 			int gax, gay;
@@ -1597,6 +1615,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case SPAWN_DURIAN_TREE:
 	case LIFE_DURIAN:
 	case PROFESSOR_HTRAHDIS:
+	case ESTR_MEMORY:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
@@ -1668,6 +1687,7 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 	case BULLET:
 	case BOMB:
 	case FRAGMENT:
+	case ESTR_MEMORY:
 		{
 			int fX = (int)floor(gameObject[objId].x);
 			int fY = (int)floor(gameObject[objId].y) + 1;
@@ -1736,6 +1756,7 @@ BOOL checkObjectSubmergedInGround(Region *environment, int objId)
 	case SPAWN_DURIAN_TREE:
 	case LIFE_DURIAN:
 	case PROFESSOR_HTRAHDIS:
+	case ESTR_MEMORY:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
