@@ -184,7 +184,23 @@ void winGame(void)
 		clear();
 		printInMiddle(7, COLOR_B_YELLOW, "Congratulations");
 		printInMiddle(9, COLOR_B_YELLOW, "You Win");
-		printInMiddle(20, COLOR_B_RED, "[Space] Quit ELITE STREAM... ");
+		printInMiddle(20, COLOR_B_RED, "Press space to quit ELITE Stream...");
+		refresh();
+		threadSleep(10);
+	}
+	return;
+}
+
+void bossMsg(void)
+{
+	while (1) {
+		int ch = getch();
+		if (ch == ' ')
+			return;
+		clear();
+		printInMiddle(7, COLOR_B_RED, "Htrahdis Algebraica:");
+		printInMiddle(9, COLOR_B_RED, "You Shall Not Pass!");
+		printInMiddle(20, COLOR_B_RED, "Press space to continue...");
 		refresh();
 		threadSleep(10);
 	}
@@ -297,11 +313,14 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 	gameObject[playerId].attri2 = playerStat->exp;
 	gameObject[playerId].spawnRegionCount = &playerAliveFlag;
 	int bossAliveFlag = 1;
-	if (gameLevel == FOREST)
+	if (gameLevel == HELL)
 	{
-		if (createObject(&localMap, -1, PROFESSOR_HTRAHDIS, start.x + 40, start.y - 10) == -1)
+		bossMsg();
+		if (!initializeInputEvents()) return 0;
+		int bossId = createObject(&localMap, -1, PROFESSOR_HTRAHDIS, start.x + 40, start.y - 10);
+		if ( bossId == -1)
 			return 0;
-		gameObject[playerId].spawnRegionCount = &bossAliveFlag;
+		gameObject[bossId].spawnRegionCount = &bossAliveFlag;
 	}
 	
 	doInitialSpawn(&localMap);
@@ -539,7 +558,7 @@ int main(int argc, char *argv[])
 				.potions = { 8, 8 }
 			};
 			BOOL restart;
-			int curGameLevel = TUTORIAL;
+			int curGameLevel = HELL;
 			do {
 				restart = FALSE;
 				switch (doGameLoop(&playerStat, curGameLevel))

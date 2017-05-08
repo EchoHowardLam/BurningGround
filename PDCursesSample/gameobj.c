@@ -148,7 +148,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case PROFESSOR_HTRAHDIS:
-			gameObject[i].endurance = 50000;
+			gameObject[i].endurance = 50;
 			gameObject[i].underGravity = FALSE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
@@ -1440,14 +1440,13 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							{
 								int tId = environment->objId[gay][gax];
 								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type == LIFE_HUMANOID))
-									interactObject(gameObject[objId].master, tId, TRUE, DMG_STANDARD_ICESPIKE_DAMAGE, 0, ENCHANT_SLOW | ENCHANT_STUN | ENCHANT_ENTANGLE | ENCHANT_CONFUSE | ENCHANT_SILENT);
+									interactObject(gameObject[objId].master, tId, FALSE, DMG_STANDARD_SLUDGE_MELEE_DAMAGE, 0, ENCHANT_SLOW | ENCHANT_CONFUSE | ENCHANT_SILENT);
 							}
 						}
 					}
 				}
 			}
 		}
-		deleteObject(environment, objId, FALSE);
 		break;
 	case MIST:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
