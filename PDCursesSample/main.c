@@ -317,7 +317,7 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 	{
 		bossMsg();
 		if (!initializeInputEvents()) return 0;
-		int bossId = createObject(&localMap, -1, PROFESSOR_HTRAHDIS, start.x + 40, start.y - 10);
+		int bossId = createObject(&localMap, -1, PROFESSOR_HTRAHDIS, start.x + 300, start.y);
 		if ( bossId == -1)
 			return 0;
 		gameObject[bossId].spawnRegionCount = &bossAliveFlag;
@@ -440,7 +440,7 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 			rotateObjects(&localMap);
 
 			// 3. Update player lv and check for finishing level
-			if (playerAliveFlag >= 1)
+			if (playerAliveFlag >= 1 && (bossAliveFlag >= 1))
 			{
 				while (gameObject[playerId].attri2 >= EXP_NEEDED_TO_LV_UP[playerLv - 1])
 				{
@@ -520,8 +520,9 @@ int main(int argc, char *argv[])
 {
 	srand((unsigned int)time(NULL));
 #if defined(_WIN32) || defined(_WIN64)
-	system("cd ../PDCursesSample/");
-	executablePath = ".\\";
+	//system("cd ../PDCursesSample/");
+	//executablePath = ".\\";
+	executablePath = argv[0];
 #else
 	executablePath = argv[0];
 #endif

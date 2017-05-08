@@ -52,6 +52,7 @@ int loadImageFiles(char *path) {
 		strcat(tempFileName, filesToRead[i]);
 		
 		FILE *raw = fopen(tempFileName, "rb");
+
 		//size_t length = 0;
 		unsigned char line[100];
 		

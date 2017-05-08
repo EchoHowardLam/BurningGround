@@ -41,7 +41,7 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 		break;
 	case ARCANE_ICEBALL:
 		if (gameObject[casterId].mana >= 300)
-			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_ICE, 0, DMG_STANDARD_ICEBALL_DAMAGE) != -1)
+			if (createObjectMagicProjectile(environment, casterId, ESTR_MEMORY, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_ICE, 0, DMG_STANDARD_ICEBALL_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 300;
 				cooldown = 50;

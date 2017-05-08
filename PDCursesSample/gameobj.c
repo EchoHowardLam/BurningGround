@@ -263,18 +263,18 @@ int createObjectMagicProjectileDir(Region *environment, int master, ObjectType t
 
 		switch (type)
 		{
-			case MAGIC_BLOB:
-				gameObject[i].destroyCriteria = 0;
-				gameObject[i].underMove = FALSE;
-				gameObject[i].underGravity = FALSE;
-				gameObject[i].fixedFlight = FALSE;
-				break;
-			case ESTR_MEMORY:
-				gameObject[i].destroyCriteria = 0;
-				gameObject[i].underMove = FALSE;
-				gameObject[i].underGravity = FALSE;
-				gameObject[i].fixedFlight = FALSE;
-				break;
+		case MAGIC_BLOB:
+			gameObject[i].destroyCriteria = 0;
+			gameObject[i].underMove = FALSE;
+			gameObject[i].underGravity = FALSE;
+			gameObject[i].fixedFlight = FALSE;
+			break;
+		case ESTR_MEMORY:
+			gameObject[i].destroyCriteria = 0;
+			gameObject[i].underMove = FALSE;
+			gameObject[i].underGravity = FALSE;
+			gameObject[i].fixedFlight = FALSE;
+			break;
 		case MAGIC_SPIKE:
 			gameObject[i].lifespan = 1000;
 			gameObject[i].destroyCriteria = 0;
@@ -412,52 +412,66 @@ int defaultObjectsInit(Region *environment, int objId)
 	if (fX < 0 || fX >= environment->width || fY < 0 || fY >= environment->height)
 		return -1;
 	gameObject[objId].sprite = NULL;
+	BOOL needReg = FALSE;
 	switch (gameObject[objId].type)
 	{
 	case LIFE_HUMANOID:
+		needReg = TRUE;
 		if ((gameObject[objId].attri & HUMANOID_TYPE_MASK) == HUMANOID_TYPE_HUMAN)
 			gameObject[objId].sprite = getImage(LIFE_HUMANOID, gameObject[objId].attri);
 		else
 			gameObject[objId].sprite = getImage(LIFE_HUMANOID, gameObject[objId].attri | (gameObject[objId].facingDir & 1));
 		break;
 	case LIFE_EYEBALL:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(LIFE_EYEBALL, rand()%3);
 		break;
 	case LIFE_MOSQUITOES:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(LIFE_MOSQUITOES, rand()%4);
 		break;
 	case LIFE_MUSHROOM:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(LIFE_MUSHROOM, rand()%3);
 		break;
 	case LIFE_RABBIT:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(LIFE_RABBIT, gameObject[objId].facingDir & 1);
 		break;
 	case LIFE_SLIME:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(LIFE_SLIME, (gameObject[objId].facingDir & 1));
 		break;
 	case LIFE_SLUDGE:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(LIFE_SLUDGE, 2 + (gameObject[objId].facingDir & 1));
 		break;
 	case LIFE_GRASS:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(LIFE_GRASS, (rand()%8==0)?(4+rand()%2):rand()%4);
 		break;
 	case SPAWN_BEE_HIVE:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(SPAWN_BEE_HIVE, rand()%2);
 		break;
 	case LIFE_BEE:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(LIFE_BEE, 2 + rand() % 2);
 		break;
 	case SPAWN_DURIAN_TREE:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(SPAWN_DURIAN_TREE, 0);
 		break;
 	case LIFE_DURIAN:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(LIFE_DURIAN, 1);
 		break;
 	case ESTR_MEMORY:
-			gameObject[objId].sprite = getImage(ESTR_MEMORY, rand()%8);
-			break;
+		gameObject[objId].sprite = getImage(ESTR_MEMORY, rand()%8);
+		break;
 	case MAGIC_FLAME:
 	case MAGIC_FRAGMENT:
+		needReg = TRUE;
 		if (environment->blocked[fY][fX])
 		{
 			deleteObject(environment, objId, TRUE);
@@ -465,12 +479,13 @@ int defaultObjectsInit(Region *environment, int objId)
 		}
 		break;
 	case PROFESSOR_HTRAHDIS:
+		needReg = TRUE;
 		gameObject[objId].sprite = getImage(PROFESSOR_HTRAHDIS, 0);
 		break;
 	default:
 		break;
 	}
-	if (gameObject[objId].sprite != NULL)
+	if (gameObject[objId].sprite != NULL && needReg)
 	{
 		if (!registerEnvironmentObject(environment, objId))
 		{
@@ -1051,6 +1066,11 @@ void rotateObjects(Region *environment)
 	{
 		if (gameObject[i].type == NOTHING)
 			continue;
+		if (gameObject[i].endurance <= 0)
+		{
+			deleteObject(environment, i, FALSE);
+			continue;
+		}
 		switch (gameObject[i].type)
 		{
 		case LIFE_HUMANOID:
@@ -1379,11 +1399,10 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 					{
 						if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
 						{
-							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
+							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != master))
 							{
 								int tId = environment->objId[gay][gax];
-								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type == LIFE_HUMANOID))
-									interactObject(gameObject[objId].master, environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+								interactObject(gameObject[objId].master, tId, FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
 							}
 						}
 					}
@@ -1608,6 +1627,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case SPAWN_DURIAN_TREE:
 	case LIFE_DURIAN:
 	case PROFESSOR_HTRAHDIS:
+	case ESTR_MEMORY:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
