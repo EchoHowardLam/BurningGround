@@ -1853,6 +1853,8 @@ void doInitialSpawn(Region *target) {
 					if (tempID != -1) {
 						target->spawns[i]->currMobSpawned++;
 						gameObject[tempID].spawnRegionCount = &(target->spawns[i]->currMobSpawned);
+						if (target->spawns[i]->mob == LIFE_HUMANOID)
+							gameObject[tempID].attri = HUMANOID_TYPE_CORRUPTED_WINGMAN;
 					}
 				}
 			}
@@ -1869,6 +1871,8 @@ void spawnCheck(Region *target) {
 				if (tempID != -1) {
 					target->spawns[i]->currMobSpawned++;
 					gameObject[tempID].spawnRegionCount = &(target->spawns[i]->currMobSpawned);
+					if (target->spawns[i]->mob == LIFE_HUMANOID)
+						gameObject[tempID].attri = HUMANOID_TYPE_CORRUPTED_WINGMAN;
 				}
 			}
 		}

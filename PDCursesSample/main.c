@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
 				.potions = { 8, 8 }
 			};
 			BOOL restart;
-			int curGameLevel = FOREST;
+			int curGameLevel = HELL;
 			do {
 				restart = FALSE;
 				switch (doGameLoop(&playerStat, curGameLevel))
