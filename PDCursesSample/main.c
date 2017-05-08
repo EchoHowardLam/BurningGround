@@ -488,7 +488,7 @@ int main(int argc, char *argv[])
 				.hp = 1000,
 				.mp = 1000,
 				.exp = 0,
-				.skillSet = { ARCANE_FIREBALL, 0, 0 },
+				.skillSet = { ARCANE_FIREBALL, ARCANE_MYTHRAIN, 0 },
 				.potions = { 8, 8 }
 			};
 			BOOL restart;

@@ -8,6 +8,7 @@ MagicNameString magicNameString[100] = {
 	{ "Fire Rain", COLOR_RED },
 	{ "Ice Rain", COLOR_CYAN },
 	{ "Hail", COLOR_CYAN },
+	{ "Fall Rain", COLOR_B_BLACK },
 	{ "Fire Ray", COLOR_RED },
 	{ "Freezing Ray", COLOR_CYAN },
 };
@@ -15,7 +16,7 @@ MagicNameString magicNameString[100] = {
 ArcaneType magicUnlockedAtLevel[MAX_LV] = {
 	ARCANE_ICEBALL, 0, ARCANE_FIRERAIN, ARCANE_ICERAIN, 0,
 	ARCANE_ICESPIKERAIN, 0, ARCANE_FIRELASER, ARCANE_ICELASER, 0,
-	0, 0, 0, 0, 0,
+	0, 0, 0, ARCANE_MYTHRAIN, 0,
 	0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0,
@@ -66,6 +67,14 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 			{
 				gameObject[casterId].mana -= 80;
 				cooldown = 10;
+			}
+		break;
+	case ARCANE_MYTHRAIN:
+		if (gameObject[casterId].mana >= 10)
+			if (createObjectMagicRain(environment, casterId, MAGIC_BLOB, destX, destY, 100, 20, 0.1, SPHERE_MYTH, ENCHANT_ENTANGLE | ENCHANT_SILENT, 0) != -1)
+			{
+				gameObject[casterId].mana -= 10;
+				cooldown = 5;
 			}
 		break;
 	case ARCANE_ICESPIKERAIN:
