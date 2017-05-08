@@ -407,8 +407,7 @@ int defaultObjectsInit(Region *environment, int objId)
 		if ((gameObject[objId].attri & HUMANOID_TYPE_MASK) == HUMANOID_TYPE_HUMAN)
 			gameObject[objId].sprite = getImage(LIFE_HUMANOID, gameObject[objId].attri);
 		else
-			gameObject[objId].sprite = getImage(PROFESSOR_HTRAHDIS, 0); // $$$
-			//gameObject[objId].sprite = getImage(LIFE_HUMANOID, gameObject[objId].attri | (gameObject[objId].facingDir & 1));
+			gameObject[objId].sprite = getImage(LIFE_HUMANOID, gameObject[objId].attri | (gameObject[objId].facingDir & 1));
 		break;
 	case LIFE_EYEBALL:
 		gameObject[objId].sprite = getImage(LIFE_EYEBALL, rand()%3);
@@ -1051,10 +1050,9 @@ void rotateObjects(Region *environment)
 			{
 				CharacterImage *oldImage = gameObject[i].sprite;
 				if ((gameObject[i].attri & HUMANOID_TYPE_MASK) == HUMANOID_TYPE_HUMAN)
-					gameObject[i].sprite = getImage(PROFESSOR_HTRAHDIS, 0); // $$$
-				else
 					gameObject[i].sprite = getImage(LIFE_HUMANOID, gameObject[i].attri);
-					//gameObject[i].sprite = getImage(LIFE_HUMANOID, gameObject[i].attri | ((gameObject[i].facingDir & 1) ^ 1));
+				else
+					gameObject[i].sprite = getImage(LIFE_HUMANOID, gameObject[i].attri | ((gameObject[i].facingDir & 1) ^ 1));
 				if (gameObject[i].sprite == oldImage || gameObject[i].sprite == NULL || checkObjectCollision(environment, i, gameObject[i].x, gameObject[i].y))
 				{
 					gameObject[i].sprite = oldImage;
@@ -1153,8 +1151,7 @@ void updateObjectsStatus(Region *environment)
 				if ((gameObject[i].attri & HUMANOID_TYPE_MASK) == HUMANOID_TYPE_HUMAN)
 					newImage = getImage(LIFE_HUMANOID, gameObject[i].attri);
 				else
-					newImage = getImage(PROFESSOR_HTRAHDIS, 0); // $$$
-					//newImage = getImage(LIFE_HUMANOID, gameObject[i].attri | (gameObject[i].facingDir & 1));
+					newImage = getImage(LIFE_HUMANOID, gameObject[i].attri | (gameObject[i].facingDir & 1));
 			}
 			break;
 		case LIFE_EYEBALL:

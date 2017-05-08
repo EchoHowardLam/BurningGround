@@ -296,7 +296,7 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 	gameObject[playerId].mana = playerStat->mp;
 	gameObject[playerId].attri2 = playerStat->exp;
 	gameObject[playerId].spawnRegionCount = &playerAliveFlag;
-	if (createHumanoid(&localMap, -1, HUMANOID_TYPE_WIZARD, start.x + 10, start.y + 10, 1) == -1) return 0;
+	if (createHumanoid(&localMap, -1, HUMANOID_TYPE_WIZARD, start.x + 10, start.y - 10, 1) == -1) return 0;
 	
 	doInitialSpawn(&localMap);
 
