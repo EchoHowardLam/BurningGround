@@ -1679,7 +1679,6 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 	switch (gameObject[objId].type)
 	{
 	// add special cases that has no sprite
-	case MAGIC_BLOB:
 	case MAGIC_SPIKE:
 	case MAGIC_FLAME:
 	case MAGIC_FRAGMENT:
