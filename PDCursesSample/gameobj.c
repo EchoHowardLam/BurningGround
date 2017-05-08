@@ -147,6 +147,11 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
+		case PROFESSOR_HTRAHDIS:
+			gameObject[i].endurance = 50000;
+			gameObject[i].underGravity = FALSE;
+			gameObject[i].fixedFlight = TRUE;
+			break;
 		case DEMO_LIFE_CANNOT_FLY:
 		default:
 			gameObject[i].underGravity = TRUE;
@@ -450,6 +455,9 @@ int defaultObjectsInit(Region *environment, int objId)
 			return -1;
 		}
 		break;
+	case PROFESSOR_HTRAHDIS:
+		gameObject[objId].sprite = getImage(PROFESSOR_HTRAHDIS, 0);
+		break;
 	default:
 		break;
 	}
@@ -616,6 +624,7 @@ void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPo
 		case LIFE_BEE:
 		case SPAWN_DURIAN_TREE:
 		case LIFE_DURIAN:
+		case PROFESSOR_HTRAHDIS:
 			{
 				if (gameObject[i].sprite == NULL) break;
 				int gax, gay;
@@ -1011,17 +1020,6 @@ void moveObjects(Region *environment)
 				gameObject[i].y = newY;
 				registerEnvironmentObject(environment, i);
 			}
-			/*BOOL underGravity = (gameObject[i].underGravity || (gameObject[i].underEffect[EFFECT_ENTANGLE] >= 0));
-			if (underGravity && gameObject[i].submergeGround)
-			{
-				if ((gameObject[i].vel.y > FRICTION_TRIGGER) && checkObjectOnFeet(environment, i)) // friction and normal force only works if you press it against the surface
-				{
-					gameObject[i].y = floor(gameObject[i].y) + 0.8; // debug
-					gameObject[i].vel.x = 0.0; // friction coefficient is infinite
-					gameObject[i].vel.y = 0.0; // absorb all downward momentum
-					triggerObjectHitEvent(environment, i, gameObject[i].x, gameObject[i].y + 1);
-				}
-			}*/
 		}
 		else {
 			toDelete = TRUE;
@@ -1241,6 +1239,12 @@ void updateObjectsStatus(Region *environment)
 				}
 			}
 			break;
+		case PROFESSOR_HTRAHDIS:
+			{
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(PROFESSOR_HTRAHDIS, 0);
+			}
+			break;
 		default:
 			break;
 		}
@@ -1374,8 +1378,8 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 				}
 			}
 		}
-	deleteObject(environment, objId, FALSE);
-	break;
+		deleteObject(environment, objId, FALSE);
+		break;
 	}
 	case MAGIC_BLOB:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
@@ -1395,6 +1399,36 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 	case MAGIC_FRAGMENT:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
 			interactObject(gameObject[objId].master, environment->objId[(int)floor(newY)][(int)floor(newX)], TRUE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+		deleteObject(environment, objId, FALSE);
+		break;
+	case PROFESSOR_HTRAHDIS:
+		if (gameObject[objId].sprite != NULL)
+		{
+			int gax, gay;
+			int lx, ly;
+			int topLeftgx = (int)floor(newX) - (int)floor(gameObject[objId].sprite->center->x);
+			int topLeftgy = (int)floor(newY) - (int)floor(gameObject[objId].sprite->center->y);
+			int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
+			int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+			for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+			{
+				for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+				{
+					if (gameObject[objId].sprite->solid[ly][lx] > 0)
+					{
+						if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+						{
+							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
+							{
+								int tId = environment->objId[gay][gax];
+								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type == LIFE_HUMANOID))
+									interactObject(gameObject[objId].master, tId, TRUE, DMG_STANDARD_ICESPIKE_DAMAGE, 0, ENCHANT_SLOW | ENCHANT_STUN | ENCHANT_ENTANGLE | ENCHANT_CONFUSE | ENCHANT_SILENT);
+							}
+						}
+					}
+				}
+			}
+		}
 		deleteObject(environment, objId, FALSE);
 		break;
 	case MIST:
@@ -1495,7 +1529,9 @@ BOOL interactObject(int sourceId, int targetId, BOOL physicalTouch, int damage, 
 				case LIFE_BEE:
 					gameObject[sourceId].attri2 += 3; break;
 				case SPAWN_BEE_HIVE:
-					gameObject[sourceId].attri2 += 20; break;
+					gameObject[sourceId].attri2 += 20; break; 
+				case PROFESSOR_HTRAHDIS:
+					gameObject[sourceId].attri2 += 1000; break;
 				default:
 					break;
 				}
@@ -1560,6 +1596,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case LIFE_BEE:
 	case SPAWN_DURIAN_TREE:
 	case LIFE_DURIAN:
+	case PROFESSOR_HTRAHDIS:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
@@ -1698,6 +1735,7 @@ BOOL checkObjectSubmergedInGround(Region *environment, int objId)
 	case LIFE_BEE:
 	case SPAWN_DURIAN_TREE:
 	case LIFE_DURIAN:
+	case PROFESSOR_HTRAHDIS:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;

@@ -238,6 +238,43 @@ void aiRun(Region *environment, int playerId) {
 				}
 				break;
 			}
+			case PROFESSOR_HTRAHDIS:
+			{
+				double dx, dy;
+				dx = gameObject[playerId].x - gameObject[i].x;
+				dy = gameObject[playerId].y - gameObject[i].y;
+				if (fabs(dx) >= 40 || fabs(dy) >= 40) {
+					if (rand() % 10 < 7)
+						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.4);
+					else if (rand() % 10 < 3)
+						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? 1.5 : -1.5), 0.4);
+					if (rand() % 10 < 7)
+						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? -1.5 : 1.5), 0.4);
+					else if (rand() % 10 < 3)
+						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? 1.5 : -1.5), 0.4);
+				}
+				else if (fabs(dx) < 40 && fabs(dy) < 40) {
+					if (rand() % 150 == 0)
+						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 0.2, -1, SPHERE_FIRE, ENCHANT_SHRAPNEL, DMG_STANDARD_DEMON_DAMAGE);
+					if (fabs(dx) < 10 && fabs(dy) < 10) {
+						controlObjectX(i, floor(gameObject[i].x) - dx / 10 + 0.5, 0.2);
+						controlObjectY(i, floor(gameObject[i].y) - dy / 10 + 0.5, 0.2);
+					}
+					else {
+						double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+						double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+						controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.2);
+						controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.2);
+					}
+				}
+				else {
+					double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+					double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
+					controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.1);
+					controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.1);
+				}
+				break;
+			}
 			case MIST: {
 				double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
 				double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
