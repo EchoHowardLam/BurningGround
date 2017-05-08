@@ -147,26 +147,46 @@ void error(void)
 	return;
 }
 
-void gameOver(void)
+// 0 no restart, 1 restart
+BOOL gameOver(void)
 {
-
 	while (1) {
 		// 1. get buffered user input
 		int ch = getch();
-		if (ch == ' ')
-			break;
+		if ((ch == 'q') || (ch == 'Q'))
+			return FALSE;
+		else if ((ch == 'r') || (ch == 'R'))
+			return TRUE;
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 
 		printInMiddle(7, COLOR_B_RED, "Game Over");
 		printInMiddle(9, COLOR_RED, "You died");
 
-		printInMiddle(20, COLOR_WHITE, "Press space to return to menu ... ");
+		printInMiddle(11, COLOR_WHITE, "[R] restart");
+
+		printInMiddle(20, COLOR_B_RED, "Press [Q] to quit ... ");
 
 		refresh();		// update the display in one go, very important
 
 						// 3. stop running for some time to prevent using up all CPU power;
 		threadSleep(10);			// want to sleep for roughly 10ms
+	}
+	return FALSE;
+}
+
+void winGame(void)
+{
+	while (1) {
+		int ch = getch();
+		if (ch == ' ')
+			return;
+		clear();
+		printInMiddle(7, COLOR_B_YELLOW, "Congratulations");
+		printInMiddle(9, COLOR_B_YELLOW, "You Win");
+		printInMiddle(20, COLOR_B_RED, "[Space] Quit ELITE STREAM... ");
+		refresh();
+		threadSleep(10);
 	}
 	return;
 }
@@ -267,7 +287,7 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 	if (!initializeInputEvents()) return 0;
 	int playerLv = playerStat->lv;
 	int lastKnownExp = playerStat->exp;
-	Coordinate start, end;
+	Coordinate start, end = { .x = -1,.y = -1 };
 	Region localMap = loadLevel(gameLevel, &start, &end, executablePath);
 	playerId = createHumanoid(&localMap, -1, HUMANOID_TYPE_HUMAN, start.x, start.y, playerLv);
 	if (playerId == -1) return 0;
@@ -286,6 +306,7 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 	mouseEvents.buttonState = 0;
 
 	BOOL restart = FALSE;
+	BOOL pass = FALSE;
 	BOOL playerFlying = FALSE;
 	int skillSet[UI_SKILL_SLOT];
 	for (int k = 0; k < UI_SKILL_SLOT; k++)
@@ -385,7 +406,7 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 			moveObjects(&localMap);
 			rotateObjects(&localMap);
 
-			// 3. Update player lv
+			// 3. Update player lv and check for finishing level
 			if (playerAliveFlag >= 1)
 			{
 				while (gameObject[playerId].attri2 >= EXP_NEEDED_TO_LV_UP[playerLv - 1])
@@ -400,8 +421,18 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 					}
 				}
 				lastKnownExp = gameObject[playerId].attri2;
+				if (end.x != -1) // valid
+				{
+					if ((abs(gameObject[playerId].x - end.x) <= 3.0) && (abs(gameObject[playerId].y - end.y) <= 3.0))
+					{
+						pass = TRUE;
+						break;
+					}
+				}
 			}
 		}
+		if (pass)
+			break;
 
 		if (keyboardPress['h'] || keyboardPress['H'])
 		{
@@ -441,6 +472,12 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 		playerStat->skillSet[k] = skillSet[k];
 	playerStat->potions[0] = potions[0];
 	playerStat->potions[1] = potions[1];
+	if (pass == TRUE)
+	{
+		playerStat->hp = gameObject[playerId].endurance;
+		playerStat->mp = gameObject[playerId].mana;
+		return 3;
+	}
 	return 1;
 }
 
@@ -486,7 +523,7 @@ int main(int argc, char *argv[])
 		if (selectedMenu == 0)
 		{
 			PlayerState playerStat = {
-				.lv = 1,
+				.lv = 30,
 				.hp = 1000,
 				.mp = 1000,
 				.exp = 0,
@@ -494,19 +531,36 @@ int main(int argc, char *argv[])
 				.potions = { 8, 8 }
 			};
 			BOOL restart;
+			int curGameLevel = FOREST;
 			do {
 				restart = FALSE;
-				switch (doGameLoop(&playerStat, TUTORIAL))
+				switch (doGameLoop(&playerStat, curGameLevel))
 				{
 				case 0:
 					error();
 					return 0;
 				case 1:
-					gameOver();
+					restart = gameOver();
 					break;
 				case 2:
 					restart = TRUE;
 					break;
+				case 3:
+				{
+					restart = TRUE;
+					switch (curGameLevel)
+					{
+					case FOREST:
+						curGameLevel = PLATFORM; break;
+					case PLATFORM:
+						curGameLevel = HELL; break;
+					case HELL:
+						winGame(); restart = FALSE; break;
+					default:
+						break;
+					}
+					break;
+				}
 				default:
 					break;
 				}
