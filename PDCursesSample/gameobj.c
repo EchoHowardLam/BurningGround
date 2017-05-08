@@ -148,7 +148,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 			gameObject[i].fixedFlight = TRUE;
 			break;
 		case PROFESSOR_HTRAHDIS:
-			gameObject[i].endurance = 50;
+			gameObject[i].endurance = 20000;
 			gameObject[i].underGravity = FALSE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
@@ -1228,12 +1228,6 @@ void updateObjectsStatus(Region *environment)
 				newImage = getImage(LIFE_DURIAN, 1);
 			}
 				break;
-			case ESTR_MEMORY:
-			{
-				oldImage = gameObject[i].sprite;
-				newImage = getImage(ESTR_MEMORY, gameObject[i].sprite->charaID);
-			}
-				break;
 		case MAGIC_LASER: // can use middle-line algorithm here for optimization
 			{
 				double curX = gameObject[i].x;
@@ -1389,7 +1383,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							{
 								int tId = environment->objId[gay][gax];
 								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type == LIFE_HUMANOID))
-									interactObject(gameObject[objId].master, tId, FALSE, DMG_STANDARD_DURIAN_DAMAGE, 0, ENCHANT_CONFUSE);
+									interactObject(gameObject[objId].master, environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
 							}
 						}
 					}
@@ -1440,7 +1434,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							{
 								int tId = environment->objId[gay][gax];
 								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type == LIFE_HUMANOID))
-									interactObject(gameObject[objId].master, tId, FALSE, DMG_STANDARD_SLUDGE_MELEE_DAMAGE, 0, ENCHANT_SLOW | ENCHANT_CONFUSE | ENCHANT_SILENT);
+									interactObject(gameObject[objId].master, tId, FALSE, DMG_STANDARD_SLUDGE_MELEE_DAMAGE, 0, ENCHANT_CONFUSE);
 							}
 						}
 					}
@@ -1614,7 +1608,6 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	case SPAWN_DURIAN_TREE:
 	case LIFE_DURIAN:
 	case PROFESSOR_HTRAHDIS:
-	case ESTR_MEMORY:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;
@@ -1685,7 +1678,6 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 	case BULLET:
 	case BOMB:
 	case FRAGMENT:
-	case ESTR_MEMORY:
 		{
 			int fX = (int)floor(gameObject[objId].x);
 			int fY = (int)floor(gameObject[objId].y) + 1;
@@ -1754,7 +1746,6 @@ BOOL checkObjectSubmergedInGround(Region *environment, int objId)
 	case SPAWN_DURIAN_TREE:
 	case LIFE_DURIAN:
 	case PROFESSOR_HTRAHDIS:
-	case ESTR_MEMORY:
 		{
 			if (gameObject[objId].sprite == NULL) return FALSE;
 			int gax, gay;

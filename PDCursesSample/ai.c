@@ -254,22 +254,22 @@ void aiRun(Region *environment, int playerId) {
 						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? 1.5 : -1.5), 0.4);
 				}
 				else if (fabs(dx) >= 20 || fabs(dy) >= 20) {
-					if (rand() % 150 == 0)
-						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 0.2, -1, SPHERE_FIRE, ENCHANT_SHRAPNEL, DMG_STANDARD_DEMON_DAMAGE);
+					if (rand() % 100 == 0)
+						createObjectMagicProjectile(environment, i, MAGIC_BLOB, gameObject[i].x, gameObject[i].y, gameObject[playerId].x, gameObject[playerId].y, 0.2, -1, SPHERE_MYTH, rand() & ENCHANT_EFFECT_MASK, DMG_STANDARD_DEMON_DAMAGE);
 					if (fabs(dx) < 10 && fabs(dy) < 10) {
-						controlObjectX(i, floor(gameObject[i].x) - dx / 10 + 0.5, 0.2);
-						controlObjectY(i, floor(gameObject[i].y) - dy / 10 + 0.5, 0.2);
+						controlObjectX(i, floor(gameObject[i].x) - dx / 10 + 0.5, 0.05);
+						controlObjectY(i, floor(gameObject[i].y) - dy / 10 + 0.5, 0.05);
 					}
 					else {
 						double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
 						double dy = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));
-						controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.2);
-						controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.2);
+						controlObjectX(i, floor(gameObject[i].x) + dx + 0.5, 0.05);
+						controlObjectY(i, floor(gameObject[i].y) + dy + 0.5, 0.05);
 					}
 				}
 				else {
-					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.2);
-					controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - gameObject[i].y<0) ? -1.5 : 1.5), 0.2);
+					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.05);
+					controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - gameObject[i].y<0) ? -1.5 : 1.5), 0.05);
 				}
 				break;
 			}

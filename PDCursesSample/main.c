@@ -550,7 +550,7 @@ int main(int argc, char *argv[])
 		if (selectedMenu == 0)
 		{
 			PlayerState playerStat = {
-				.lv = 30,
+				.lv = 1,
 				.hp = 1000,
 				.mp = 1000,
 				.exp = 0,
@@ -558,7 +558,7 @@ int main(int argc, char *argv[])
 				.potions = { 8, 8 }
 			};
 			BOOL restart;
-			int curGameLevel = HELL;
+			int curGameLevel = TUTORIAL;
 			do {
 				restart = FALSE;
 				switch (doGameLoop(&playerStat, curGameLevel))
