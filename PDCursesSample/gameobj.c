@@ -81,6 +81,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 		gameObject[i].lifespan = -1;
 		gameObject[i].destroyCriteria = 0;
 		gameObject[i].underMove = FALSE;
+		gameObject[i].submergeGround = FALSE;
 		switch (type)
 		{
 		case DEMO_LIFE_CAN_FLY:
@@ -109,7 +110,7 @@ int createObject(Region *environment, int master, ObjectType type, double startX
 		case LIFE_SLUDGE:
 		case LIFE_SLIME:
 			gameObject[i].magicConductivity = 0;
-			gameObject[i].endurance = 100;
+			gameObject[i].endurance = 50;
 			gameObject[i].underGravity = TRUE;
 			gameObject[i].fixedFlight = TRUE;
 			break;
@@ -197,6 +198,7 @@ int createObjectProjectileDir(Region *environment, int master, ObjectType type, 
 		gameObject[i].turnsAlive = 0;
 		gameObject[i].lifespan = lifespan;
 		gameObject[i].destroyCriteria = destroyCriteria;
+		gameObject[i].submergeGround = FALSE;
 		gameObject[i].underMove = FALSE;
 		gameObject[i].underGravity = underGravity;
 		gameObject[i].fixedFlight = FALSE;
@@ -250,6 +252,8 @@ int createObjectMagicProjectileDir(Region *environment, int master, ObjectType t
 		gameObject[i].motiveVel.y = 0.0;
 		gameObject[i].turnsAlive = 0;
 		gameObject[i].lifespan = lifespan;
+
+		gameObject[i].submergeGround = FALSE;
 
 		switch (type)
 		{
@@ -358,6 +362,7 @@ int createObjectMist(Region *environment, int master, ObjectType type, double st
 		gameObject[i].lifespan = lifespan;
 
 		gameObject[i].destroyCriteria = 0;
+		gameObject[i].submergeGround = FALSE;
 
 		switch (type)
 		{
@@ -612,29 +617,35 @@ void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPo
 		case LIFE_DURIAN:
 			{
 				if (gameObject[i].sprite == NULL) break;
+				int gax, gay;
 				int grx, gry;
 				int lx, ly;
+				int topLeftgx = (int)floor(gameObject[i].x) - (int)floor(gameObject[i].sprite->center->x);
+				int topLeftgy = (int)floor(gameObject[i].y) - (int)floor(gameObject[i].sprite->center->y);
 				int fdimx = (int)floor(gameObject[i].sprite->dimension->x);
 				int fdimy = (int)floor(gameObject[i].sprite->dimension->y);
-				for (ly = 0, gry = -(int)floor(gameObject[i].sprite->center->y); ly < fdimy; gry++, ly++)
+				for (ly = 0, gay = topLeftgy, gry = -(int)floor(gameObject[i].sprite->center->y); ly < fdimy; gay++, gry++, ly++)
 				{
-					for (lx = 0, grx = -(int)floor(gameObject[i].sprite->center->x); lx < fdimx; grx++, lx++)
+					for (lx = 0, gax = topLeftgx, grx = -(int)floor(gameObject[i].sprite->center->x); lx < fdimx; gax++, grx++, lx++)
 					{
 						if (gameObject[i].sprite->solid[ly][lx] > 0)
 						{
-							if (move(screenY + gry, screenX + grx) != ERR)
+							if ((!environment->blocked[gay][gax]) || (environment->objId[gay][gax] == i)) // debug (!environment->blocked[gay][gax]) indicates something unusual, likely a bug
 							{
-								fcolor = gameObject[i].sprite->color[ly][lx];
-								// KEYWORD: effectcolor enchantcolor
-								if (gameObject[i].underEffect[EFFECT_INVISIBLE] >= 0)
-									fcolor = COLOR_PAIR(COLOR_B_BLACK);
-								else if (gameObject[i].underEffect[EFFECT_STUN] >= 0)
-									fcolor = COLOR_PAIR(COLOR_WHITE);
-								else if (gameObject[i].underEffect[EFFECT_COLD_SLOW] >= 0)
-									fcolor = COLOR_PAIR(COLOR_B_BLUE);
-								attron(fcolor);
-								addch(gameObject[i].sprite->display[ly][lx]);
-								attroff(fcolor);
+								if (move(screenY + gry, screenX + grx) != ERR)
+								{
+									fcolor = gameObject[i].sprite->color[ly][lx];
+									// KEYWORD: effectcolor enchantcolor
+									if (gameObject[i].underEffect[EFFECT_INVISIBLE] >= 0)
+										fcolor = COLOR_PAIR(COLOR_B_BLACK);
+									else if (gameObject[i].underEffect[EFFECT_STUN] >= 0)
+										fcolor = COLOR_PAIR(COLOR_WHITE);
+									else if (gameObject[i].underEffect[EFFECT_COLD_SLOW] >= 0)
+										fcolor = COLOR_PAIR(COLOR_B_BLUE);
+									attron(fcolor);
+									addch(gameObject[i].sprite->display[ly][lx]);
+									attroff(fcolor);
+								}
 							}
 						}
 					}
@@ -836,7 +847,10 @@ void acceObjects(Region *environment)
 					if (gameObject[i].endurance < 0)
 						gameObject[i].endurance = 0;
 				}
-				gameObject[i].y = floor(gameObject[i].y) + 0.8; // debug
+				if (!gameObject[i].submergeGround)
+				{
+					gameObject[i].y = floor(gameObject[i].y) + 0.8; // debug
+				}
 				onFeet = TRUE;
 				gameObject[i].vel.x = 0.0; // friction coefficient is infinite
 				gameObject[i].vel.y = 0.0; // absorb all downward momentum
@@ -996,6 +1010,17 @@ void moveObjects(Region *environment)
 				gameObject[i].y = newY;
 				registerEnvironmentObject(environment, i);
 			}
+			/*BOOL underGravity = (gameObject[i].underGravity || (gameObject[i].underEffect[EFFECT_ENTANGLE] >= 0));
+			if (underGravity && gameObject[i].submergeGround)
+			{
+				if ((gameObject[i].vel.y > FRICTION_TRIGGER) && checkObjectOnFeet(environment, i)) // friction and normal force only works if you press it against the surface
+				{
+					gameObject[i].y = floor(gameObject[i].y) + 0.8; // debug
+					gameObject[i].vel.x = 0.0; // friction coefficient is infinite
+					gameObject[i].vel.y = 0.0; // absorb all downward momentum
+					triggerObjectHitEvent(environment, i, gameObject[i].x, gameObject[i].y + 1);
+				}
+			}*/
 		}
 		else {
 			toDelete = TRUE;
@@ -1147,52 +1172,52 @@ void updateObjectsStatus(Region *environment)
 			}
 			break;
 		case LIFE_RABBIT:
-		{
-			oldImage = gameObject[i].sprite;
-			newImage = getImage(LIFE_RABBIT, gameObject[i].facingDir & 1);
-		}
+			{
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(LIFE_RABBIT, gameObject[i].facingDir & 1);
+			}
 			break;
 		case LIFE_SLIME:
-		{
-			oldImage = gameObject[i].sprite;
-			newImage = getImage(LIFE_SLIME, (gameObject[i].facingDir & 1));
-		}
+			{
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(LIFE_SLIME, (gameObject[i].facingDir & 1));
+			}
 			break;
 		case LIFE_SLUDGE:
-		{
-			oldImage = gameObject[i].sprite;
-			newImage = getImage(LIFE_SLUDGE, 2 + (gameObject[i].facingDir & 1));
-		}
+			{
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(LIFE_SLUDGE, 2 + (gameObject[i].facingDir & 1));
+			}
 			break;
 		case LIFE_GRASS:
-		{
-			oldImage = gameObject[i].sprite;
-			newImage = getImage(LIFE_GRASS, gameObject[i].sprite->charaID);
-		}
+			{
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(LIFE_GRASS, gameObject[i].sprite->charaID);
+			}
 			break;
 		case SPAWN_BEE_HIVE:
-		{
-			oldImage = gameObject[i].sprite;
-			newImage = getImage(SPAWN_BEE_HIVE, gameObject[i].sprite->charaID);
-		}
+			{
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(SPAWN_BEE_HIVE, gameObject[i].sprite->charaID);
+			}
 			break;
 		case LIFE_BEE:
-		{
-			oldImage = gameObject[i].sprite;
-			newImage = getImage(LIFE_BEE, gameObject[i].sprite->charaID);
-		}
+			{
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(LIFE_BEE, gameObject[i].sprite->charaID);
+			}
 			break;
 		case SPAWN_DURIAN_TREE:
-		{
-			oldImage = gameObject[i].sprite;
-			newImage = getImage(SPAWN_DURIAN_TREE, 0);
-		}
+			{
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(SPAWN_DURIAN_TREE, 0);
+			}
 			break;
 		case LIFE_DURIAN:
-		{
-			oldImage = gameObject[i].sprite;
-			newImage = getImage(LIFE_DURIAN, 1);
-		}
+			{
+				oldImage = gameObject[i].sprite;
+				newImage = getImage(LIFE_DURIAN, 1);
+			}
 			break;
 		case MAGIC_LASER: // can use middle-line algorithm here for optimization
 			{
@@ -1281,8 +1306,8 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
 								int tId = environment->objId[gay][gax];
-								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type != SPAWN_BEE_HIVE) && (gameObject[tId].type == HUMANOID_TYPE_HUMAN))
-									interactObject(gameObject[objId].master, environment->objId[gay][gax], FALSE, tmpDmg, 0, 0);
+								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type != SPAWN_BEE_HIVE) && (gameObject[tId].type == LIFE_HUMANOID))
+									interactObject(gameObject[objId].master, tId, FALSE, tmpDmg, 0, 0);
 							}
 						}
 					}
@@ -1311,8 +1336,8 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
 								int tId = environment->objId[gay][gax];
-								if (tId != -1 && (gameObject[tId].type != LIFE_SLUDGE) && (gameObject[tId].type != LIFE_SLIME) && (gameObject[tId].type == HUMANOID_TYPE_HUMAN))
-									interactObject(gameObject[objId].master, environment->objId[gay][gax], TRUE, DMG_STANDARD_SLUDGE_MELEE_DAMAGE, 0, ENCHANT_SLOW);
+								if (tId != -1 && (gameObject[tId].type != LIFE_SLUDGE) && (gameObject[tId].type != LIFE_SLIME) && (gameObject[tId].type == LIFE_HUMANOID))
+									interactObject(gameObject[objId].master, tId, TRUE, DMG_STANDARD_SLUDGE_MELEE_DAMAGE, 0, ENCHANT_SLOW);
 							}
 						}
 					}
@@ -1340,8 +1365,8 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
 								int tId = environment->objId[gay][gax];
-								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type == HUMANOID_TYPE_HUMAN))
-									interactObject(gameObject[objId].master, environment->objId[gay][gax], FALSE, DMG_STANDARD_DURIAN_DAMAGE, 0, ENCHANT_CONFUSE);
+								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type == LIFE_HUMANOID))
+									interactObject(gameObject[objId].master, tId, FALSE, DMG_STANDARD_DURIAN_DAMAGE, 0, ENCHANT_CONFUSE);
 							}
 						}
 					}
@@ -1460,9 +1485,9 @@ BOOL interactObject(int sourceId, int targetId, BOOL physicalTouch, int damage, 
 				case LIFE_RABBIT:
 					gameObject[sourceId].attri2 += 5; break;
 				case LIFE_SLUDGE:
-					gameObject[sourceId].attri2 += 10; break;
+					gameObject[sourceId].attri2 += 5; break;
 				case LIFE_SLIME:
-					gameObject[sourceId].attri2 += 10; break;
+					gameObject[sourceId].attri2 += 5; break;
 				case LIFE_BEE:
 					gameObject[sourceId].attri2 += 3; break;
 				case SPAWN_BEE_HIVE:
@@ -1551,11 +1576,12 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 							{
 								if (gameObject[objId].isBackground) // debug
 								{
-									if (environment->objId[gay][gax] == -1)
+									if (environment->objId[gay][gax] == -1 && (!gameObject[objId].submergeGround)) // can only detect ground
 										return TRUE;
 								}
 								else {
-									return TRUE;
+									if ((!gameObject[objId].submergeGround) || (environment->objId[gay][gax] != -1))
+										return TRUE;
 								}
 							}
 						}
@@ -1583,7 +1609,7 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 	return FALSE;
 }
 
-// 0 error/not on feet 1 on feet
+// 0 error/not on feet 1 on feet, submergeGround objects are counted as on feet as long as the feet above a block
 BOOL checkObjectOnFeet(Region *environment, int objId)
 {
 	if (environment == NULL) return FALSE;
@@ -1647,6 +1673,64 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 	return FALSE;
 }
 
+// 0 error/not inside ground 1 inside ground
+BOOL checkObjectSubmergedInGround(Region *environment, int objId)
+{
+	if (environment == NULL) return FALSE;
+	if (gameObject[objId].type == NOTHING) return FALSE;
+	if (!gameObject[objId].submergeGround) return FALSE;
+	switch (gameObject[objId].type)
+	{
+	case DEMO_OBJ_USING_IMG_LOADER:
+	case LIFE_HUMANOID:
+	case LIFE_EYEBALL:
+	case LIFE_MOSQUITOES:
+	case LIFE_MUSHROOM:
+	case LIFE_RABBIT:
+	case LIFE_SLIME:
+	case LIFE_SLUDGE:
+	case LIFE_GRASS:
+	case SPAWN_BEE_HIVE:
+	case LIFE_BEE:
+	case SPAWN_DURIAN_TREE:
+	case LIFE_DURIAN:
+		{
+			if (gameObject[objId].sprite == NULL) return FALSE;
+			int gax, gay;
+			int lx, ly;
+			int topLeftgx = (int)floor(gameObject[objId].x) - (int)floor(gameObject[objId].sprite->center->x);
+			int topLeftgy = (int)floor(gameObject[objId].y) - (int)floor(gameObject[objId].sprite->center->y);
+			int fdimx = (int)round(gameObject[objId].sprite->dimension->x);
+			int fdimy = (int)round(gameObject[objId].sprite->dimension->y);
+			for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+				for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+					if (gameObject[objId].sprite->solid[ly][lx] > 0)
+						if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] == -1))
+									return TRUE;
+		}
+		break;
+	case MAGIC_BLOB:
+	case MAGIC_SPIKE:
+	case MAGIC_FLAME:
+	case MAGIC_FRAGMENT:
+	case MIST:
+	case BULLET:
+	case BOMB:
+	case FRAGMENT:
+		{
+			int topLeftgx = (int)floor(gameObject[objId].x);
+			int topLeftgy = (int)floor(gameObject[objId].y);
+			if (environment->blocked[topLeftgy][topLeftgx] && (environment->objId[topLeftgy][topLeftgx] == -1))
+				return TRUE;
+		}
+		break;
+	default:
+		break;
+	}
+	return FALSE;
+}
+
 BOOL removeEnvironmentBlock(Region *environment, double x, double y)
 {
 	return FALSE;
@@ -1681,7 +1765,7 @@ BOOL registerEnvironmentObject(Region *environment, int objId)
 			{
 				if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
 				{
-					if ((!environment->blocked[gay][gax])) // && (environment->objId[gay][gax] == -1) seems useless
+					if (!environment->blocked[gay][gax])
 					{
 						if (!gameObject[objId].isBackground) // debug
 						{
@@ -1690,8 +1774,15 @@ BOOL registerEnvironmentObject(Region *environment, int objId)
 						}
 					}
 					else {
-						if ((!gameObject[objId].isBackground) || (environment->objId[gay][gax] != -1)) // debug
-							return FALSE;
+						if (environment->objId[gay][gax] != -1) // non-ground beings
+						{
+							if (!gameObject[objId].isBackground)
+								return FALSE;
+						}
+						else {
+							if (!gameObject[objId].submergeGround)
+								return FALSE;
+						}
 					}
 				}
 			}

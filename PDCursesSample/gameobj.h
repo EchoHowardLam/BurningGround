@@ -37,6 +37,7 @@ typedef struct {
 	int destroyCriteria;		// what criteria trigger destruction, masked by DESTROY_CRITERIA_...
 	//BOOL holdPos;				// whether this object will hold position after dispX/Y is exhausted
 	BOOL underMove;				// whether this object will continue moving by motiveSpeed
+	BOOL submergeGround;		// whether this object can submerge underground
 	BOOL underGravity;			// whether this object is affected by gravity
 	BOOL fixedFlight;			// whether this object will stabilize in air when it is not underGravity
 	int facingDir;				// 0 left 1 right
@@ -46,7 +47,8 @@ typedef struct {
 	// usage depends on object type, basically private data
 	// For magic, attri = SPHERE, attri2 = ENCHANT
 	// For humanoid, attri = type of character, attri2 = exp
-	// For LIFE_RABBIT, attri = hiding state
+	// For LIFE_RABBIT, attri = hiding state(0 not hiding, 1 hiding), attri2 = which x direction to wander(-1, 0, 1)
+	// For LIFE_SLIME, LIFE_SLUDGE, attri2 = which x direction to wander(-1, 0, 1)
 	int attri;
 	int attri2;
 
@@ -84,6 +86,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 BOOL interactObject(int sourceId, int targetId, BOOL physicalTouch, int damage, int sphere, int effect);
 BOOL checkObjectCollision(Region *environment, int objId, double x, double y); // please call updateObjectsStatus before calling this function, 0 miss 1 hit
 BOOL checkObjectOnFeet(Region *environment, int objId);
+BOOL checkObjectSubmergedInGround(Region *environment, int objId);
 BOOL removeEnvironmentBlock(Region *environment, double x, double y);
 BOOL registerEnvironmentObject(Region *environment, int objId);
 BOOL removeEnvironmentObject(Region *environment, int objId, double oldX, double oldY, CharacterImage *oldImage);
