@@ -69,26 +69,26 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 			}
 		break;
 	case ARCANE_ICESPIKERAIN:
-		if (gameObject[casterId].mana >= 100)
+		if (gameObject[casterId].mana >= 300)
 			if (createObjectMagicRain(environment, casterId, MAGIC_SPIKE, destX, destY, 30, 20, 0.0, SPHERE_ICE, 0, DMG_STANDARD_ICESPIKE_DAMAGE) != -1)
 			{
-				gameObject[casterId].mana -= 100;
+				gameObject[casterId].mana -= 300;
 				cooldown = 10;
 			}
 		break;
 	case ARCANE_FIRELASER:
-		if (gameObject[casterId].mana >= 50)
+		if (gameObject[casterId].mana >= 60)
 			if (createObjectMagicProjectile(environment, casterId, MAGIC_LASER, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.0, -1, SPHERE_FIRE, 0, DMG_STANDARD_FIRELASER_DAMAGE) != -1)
 			{
-				gameObject[casterId].mana -= 50;
+				gameObject[casterId].mana -= 60;
 				cooldown = 1;
 			}
 		break;
 	case ARCANE_ICELASER:
-		if (gameObject[casterId].mana >= 50)
+		if (gameObject[casterId].mana >= 60)
 			if (createObjectMagicProjectile(environment, casterId, MAGIC_LASER, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.0, -1, SPHERE_ICE, 0, DMG_STANDARD_ICELASER_DAMAGE) != -1)
 			{
-				gameObject[casterId].mana -= 50;
+				gameObject[casterId].mana -= 60;
 				cooldown = 1;
 			}
 		break;

@@ -494,7 +494,7 @@ int main(int argc, char *argv[])
 			BOOL restart;
 			do {
 				restart = FALSE;
-				switch (doGameLoop(&playerStat, TUTORIAL))
+				switch (doGameLoop(&playerStat, FOREST))
 				{
 				case 0:
 					error();

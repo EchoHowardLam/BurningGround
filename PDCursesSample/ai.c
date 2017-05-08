@@ -61,10 +61,17 @@ void aiRun(Region *environment, int playerId) {
 				break;
 			}
 			case LIFE_RABBIT: {
+				//gameObject[i].attri
 				if (fabs(gameObject[playerId].x-gameObject[i].x) < 40 &&
 					fabs(gameObject[playerId].x-gameObject[i].x) > 2 &&
-					fabs(gameObject[playerId].y-gameObject[i].y) <= 2) {
-					controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x-gameObject[i].x<0)?-1.5:1.5), 0.1); // + 0.5 is compulsory as it is the center of a grid
+					fabs(gameObject[playerId].y-gameObject[i].y) <= 5) {
+					if (gameObject[playerId].y + 1.0 < gameObject[i].y) {
+						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.2);
+						controlObjectY(i, floor(gameObject[i].y) - 0.5, 0.1);
+					}
+					else {
+						controlObjectX(i, floor(gameObject[i].x) + ((gameObject[playerId].x - gameObject[i].x<0) ? -1.5 : 1.5), 0.1); // + 0.5 is compulsory as it is the center of a grid
+					}
 				} else if (fabs(gameObject[playerId].x-gameObject[i].x) <= 2 &&
 						   fabs(gameObject[playerId].y-gameObject[i].y) <= 2) {
 					deleteObject(environment, i, FALSE);

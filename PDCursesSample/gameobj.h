@@ -46,6 +46,7 @@ typedef struct {
 	// usage depends on object type, basically private data
 	// For magic, attri = SPHERE, attri2 = ENCHANT
 	// For humanoid, attri = type of character, attri2 = exp
+	// For LIFE_RABBIT, attri = hiding state
 	int attri;
 	int attri2;
 

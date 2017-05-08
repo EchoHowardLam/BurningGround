@@ -487,11 +487,13 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 			createObjectProjectileDir(environment, -1, BOMB, gameObject[id].x + 1, gameObject[id].y - 1, 1.0, -1.0, 0.3, 15, 0, TRUE);
 			break;
 		}
-		case LIFE_SLIME: {
-			createObject(environment, -1, LIFE_SLIME, gameObject[id].x - 3, gameObject[id].y);
-			createObject(environment, -1, LIFE_SLIME, gameObject[id].x + 3, gameObject[id].y);
+		case LIFE_SLIME: 
+			if (rand() % 10 < 4)
+			{
+				createObject(environment, -1, LIFE_SLIME, gameObject[id].x - 3, gameObject[id].y);
+				createObject(environment, -1, LIFE_SLIME, gameObject[id].x + 3, gameObject[id].y);
+			}
 			break;
-		}
 		case SPAWN_BEE_HIVE: {
 			for (int k=0; k<10; k++) {
 				createObject(environment, -1, LIFE_BEE, gameObject[id].x + getRandomOfRange(3), gameObject[id].y + getRandomOfRange(3));
@@ -504,6 +506,8 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 				if (gameObject[id].attri & SPHERE_FIRE)
 				{
 					int diameter = 5; // must be odd number
+					if (gameObject[id].attri2 & ENCHANT_CHARGED)
+						diameter = 11;
 					int radius = diameter / 2;
 					int rsq = radius * radius;
 					int cx = (int)floor(gameObject[id].x);
@@ -826,7 +830,13 @@ void acceObjects(Region *environment)
 			gameObject[i].vel.y += GRAVITATIONAL_ACC;
 			if ((gameObject[i].vel.y > FRICTION_TRIGGER) && checkObjectOnFeet(environment, i)) // friction and normal force only works if you press it against the surface
 			{
-				gameObject[i].y = floor(gameObject[i].y) + 0.8;
+				if ((gameObject[i].vel.y > 0.3) && gameObject[i].type == LIFE_HUMANOID) // debug
+				{
+					gameObject[i].endurance -= (int)floor((gameObject[i].vel.y - 0.3) * 2000);
+					if (gameObject[i].endurance < 0)
+						gameObject[i].endurance = 0;
+				}
+				gameObject[i].y = floor(gameObject[i].y) + 0.8; // debug
 				onFeet = TRUE;
 				gameObject[i].vel.x = 0.0; // friction coefficient is infinite
 				gameObject[i].vel.y = 0.0; // absorb all downward momentum
@@ -1271,7 +1281,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
 								int tId = environment->objId[gay][gax];
-								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type != SPAWN_BEE_HIVE))
+								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type != SPAWN_BEE_HIVE) && (gameObject[tId].type == HUMANOID_TYPE_HUMAN))
 									interactObject(gameObject[objId].master, environment->objId[gay][gax], FALSE, tmpDmg, 0, 0);
 							}
 						}
@@ -1301,7 +1311,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
 								int tId = environment->objId[gay][gax];
-								if (tId != -1 && (gameObject[tId].type != LIFE_SLUDGE) && (gameObject[tId].type != LIFE_SLIME))
+								if (tId != -1 && (gameObject[tId].type != LIFE_SLUDGE) && (gameObject[tId].type != LIFE_SLIME) && (gameObject[tId].type == HUMANOID_TYPE_HUMAN))
 									interactObject(gameObject[objId].master, environment->objId[gay][gax], TRUE, DMG_STANDARD_SLUDGE_MELEE_DAMAGE, 0, ENCHANT_SLOW);
 							}
 						}
@@ -1309,7 +1319,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 				}
 			}
 		}
-	break;
+		break;
 	case LIFE_DURIAN: {
 		if (gameObject[objId].sprite != NULL)
 		{
@@ -1330,7 +1340,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
 								int tId = environment->objId[gay][gax];
-								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type))
+								if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type == HUMANOID_TYPE_HUMAN))
 									interactObject(gameObject[objId].master, environment->objId[gay][gax], FALSE, DMG_STANDARD_DURIAN_DAMAGE, 0, ENCHANT_CONFUSE);
 							}
 						}
@@ -1368,7 +1378,7 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 	case BULLET:
 	case FRAGMENT:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
-			interactObject(gameObject[objId].master, environment->objId[(int)floor(newY)][(int)floor(newX)], TRUE, 10, 0, 0);
+			interactObject(gameObject[objId].master, environment->objId[(int)floor(newY)][(int)floor(newX)], TRUE, 100, 0, 0);
 		deleteObject(environment, objId, FALSE);
 		break;
 	case DEMO_OBJ_USING_IMG_LOADER:
@@ -1410,9 +1420,21 @@ BOOL interactObject(int sourceId, int targetId, BOOL physicalTouch, int damage, 
 	if (gameObject[targetId].type == NOTHING) return FALSE;
 	// this function is called in moveObjects, the bumped object may still haven't executed its hitEvent
 	// so we cannot directly call deleteObject()
-	if (physicalTouch || (damage > 5))
-		if (gameObject[targetId].destroyCriteria & DESTROY_CRITERIA_HIT)
-			gameObject[targetId].endurance = 0;
+	if (gameObject[targetId].type != LIFE_MUSHROOM) // debug
+	{
+		if (physicalTouch || (damage > 5))
+		{
+			if (gameObject[targetId].destroyCriteria & DESTROY_CRITERIA_HIT)
+				gameObject[targetId].endurance = 0;
+		}
+	}
+	else {
+		if ((physicalTouch || (damage > 5)) && gameObject[sourceId].type == HUMANOID_TYPE_HUMAN)
+		{
+			if (gameObject[targetId].destroyCriteria & DESTROY_CRITERIA_HIT)
+				gameObject[targetId].endurance = 0;
+		}
+	}
 	if (damage > 0) // No healing by negative number
 	{
 		if (sphere)
@@ -1438,9 +1460,9 @@ BOOL interactObject(int sourceId, int targetId, BOOL physicalTouch, int damage, 
 				case LIFE_RABBIT:
 					gameObject[sourceId].attri2 += 5; break;
 				case LIFE_SLUDGE:
-					gameObject[sourceId].attri2 += 20; break;
+					gameObject[sourceId].attri2 += 10; break;
 				case LIFE_SLIME:
-					gameObject[sourceId].attri2 += 20; break;
+					gameObject[sourceId].attri2 += 10; break;
 				case LIFE_BEE:
 					gameObject[sourceId].attri2 += 3; break;
 				case SPAWN_BEE_HIVE:
@@ -1527,7 +1549,14 @@ BOOL checkObjectCollision(Region *environment, int objId, double x, double y)
 						{
 							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
 							{
-								return TRUE;
+								if (gameObject[objId].isBackground) // debug
+								{
+									if (environment->objId[gay][gax] == -1)
+										return TRUE;
+								}
+								else {
+									return TRUE;
+								}
 							}
 						}
 					}
@@ -1600,7 +1629,16 @@ BOOL checkObjectOnFeet(Region *environment, int objId)
 					if (gax < 0 || gax >= environment->width)
 						return FALSE;
 					if (environment->blocked[gyUnderFoot][gax] && (environment->objId[gyUnderFoot][gax] != master))
-						return TRUE;
+					{
+						if (gameObject[objId].isBackground) // debug
+						{
+							if (environment->objId[gyUnderFoot][gax] == -1)
+								return TRUE;
+						}
+						else {
+							return TRUE;
+						}
+					}
 				}
 			}
 		}
@@ -1629,7 +1667,6 @@ BOOL registerEnvironmentObject(Region *environment, int objId)
 {
 	if (environment == NULL) return FALSE;
 	if (gameObject[objId].sprite == NULL) return FALSE;
-	if (gameObject[objId].isBackground) return TRUE;
 	int gax, gay;
 	int lx, ly;
 	int topLeftgx = (int)floor(gameObject[objId].x) - (int)floor(gameObject[objId].sprite->center->x);
@@ -1644,13 +1681,17 @@ BOOL registerEnvironmentObject(Region *environment, int objId)
 			{
 				if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
 				{
-					if ((!environment->blocked[gay][gax]) && (environment->objId[gay][gax] == -1))
+					if ((!environment->blocked[gay][gax])) // && (environment->objId[gay][gax] == -1) seems useless
 					{
-						environment->blocked[gay][gax] = TRUE;
-						environment->objId[gay][gax] = objId;
+						if (!gameObject[objId].isBackground) // debug
+						{
+							environment->blocked[gay][gax] = TRUE;
+							environment->objId[gay][gax] = objId;
+						}
 					}
 					else {
-						return FALSE;
+						if ((!gameObject[objId].isBackground) || (environment->objId[gay][gax] != -1)) // debug
+							return FALSE;
 					}
 				}
 			}
