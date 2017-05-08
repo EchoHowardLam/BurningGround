@@ -415,6 +415,14 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 			else holdKey[1] = FALSE;
 			if (keyboardPress['~'])
 				debugVision = !debugVision;
+			if (keyboardPress['+'])
+				gameObject[playerId].endurance += 1000;
+			if (gameObject[playerId].endurance > gameObject[playerId].max_endurance)
+				gameObject[playerId].endurance = gameObject[playerId].max_endurance;
+			if (keyboardPress['-'])
+				gameObject[playerId].mana += 1000;
+			if (gameObject[playerId].mana > gameObject[playerId].max_mana)
+				gameObject[playerId].mana = gameObject[playerId].max_mana;
 			if (keyboardPress['r'] || keyboardPress['R'])
 			{
 				deleteObject(&localMap, playerId, TRUE);
