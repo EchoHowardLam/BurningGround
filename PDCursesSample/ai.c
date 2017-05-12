@@ -76,17 +76,15 @@ void aiRun(Region *environment, int playerId) {
 						controlObjectY(i, floor(gameObject[i].y) + ((gameObject[playerId].y - 1.0 - gameObject[i].y<0) ? 1.5 : -1.5), 0.2);
 				}
 				else {
-					if (rand() % 300 == 0)
+					if (rand() % 500 == 0)
 					{
-						gameObject[i].attri = 450; // scan for 45 deg
-						int direction = (rand() % 2 ? -1 : 1);
-						gameObject[i].attri *= direction;
+						gameObject[i].attri = 1800; // scan for 45 deg
 						int angle = (int)(atan((gameObject[playerId].y - gameObject[i].y) / (gameObject[playerId].x - gameObject[i].x)) / M_PI * 180);
 						if (gameObject[playerId].x - gameObject[i].x < 0.0)
-							angle = ((angle + 360 + 180) % 360);
-						else
-							angle = ((angle + 360) % 360);
-						gameObject[i].attri2 = (angle * 10 + 225 * direction);
+							angle = (angle + 180);
+						int direction = (rand() % 2 ? -1 : 1);
+						gameObject[i].attri2 = (angle * 10 + (gameObject[i].attri / 2) * direction + 3600) % 3600;
+						gameObject[i].attri *= direction;
 					}
 					else {
 						double dx = ((double)rand()) / RAND_MAX * (((rand() % 2 == 0) ? 1 : -1));

@@ -550,7 +550,6 @@ void deleteObject(Region *environment, int id, BOOL silentDelete)
 					int rsq = radius * radius;
 					int cx = (int)floor(gameObject[id].x);
 					int cy = (int)floor(gameObject[id].y);
-					int ox, oy;
 					for (int yc = 0, oy = cy - radius; yc < diameter; yc++, oy++)
 					{
 						for (int xc = 0, ox = cx - radius; xc < diameter; xc++, ox++)
@@ -665,21 +664,24 @@ void displayObjects(Region *environment, int observerId, Coordinate scrTopLeftPo
 					{
 						if (gameObject[i].sprite->solid[ly][lx] > 0)
 						{
-							if ((!environment->blocked[gay][gax]) || (environment->objId[gay][gax] == i)) // debug (!environment->blocked[gay][gax]) indicates something unusual, likely a bug
+							if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
 							{
-								if (move(screenY + gry, screenX + grx) != ERR)
+								if ((!environment->blocked[gay][gax]) || (environment->objId[gay][gax] == i)) // debug (!environment->blocked[gay][gax]) indicates something unusual, likely a bug
 								{
-									fcolor = gameObject[i].sprite->color[ly][lx];
-									// KEYWORD: effectcolor enchantcolor
-									if (gameObject[i].underEffect[EFFECT_INVISIBLE] >= 0)
-										fcolor = COLOR_PAIR(COLOR_B_BLACK);
-									else if (gameObject[i].underEffect[EFFECT_STUN] >= 0)
-										fcolor = COLOR_PAIR(COLOR_WHITE);
-									else if (gameObject[i].underEffect[EFFECT_COLD_SLOW] >= 0)
-										fcolor = COLOR_PAIR(COLOR_B_BLUE);
-									attron(fcolor);
-									addch(gameObject[i].sprite->display[ly][lx]);
-									attroff(fcolor);
+									if (move(screenY + gry, screenX + grx) != ERR)
+									{
+										fcolor = gameObject[i].sprite->color[ly][lx];
+										// KEYWORD: effectcolor enchantcolor
+										if (gameObject[i].underEffect[EFFECT_INVISIBLE] >= 0)
+											fcolor = COLOR_PAIR(COLOR_B_BLACK);
+										else if (gameObject[i].underEffect[EFFECT_STUN] >= 0)
+											fcolor = COLOR_PAIR(COLOR_WHITE);
+										else if (gameObject[i].underEffect[EFFECT_COLD_SLOW] >= 0)
+											fcolor = COLOR_PAIR(COLOR_B_BLUE);
+										attron(fcolor);
+										addch(gameObject[i].sprite->display[ly][lx]);
+										attroff(fcolor);
+									}
 								}
 							}
 						}
@@ -1381,37 +1383,68 @@ BOOL triggerObjectHitEvent(Region *environment, int objId, double newX, double n
 		}
 		break;
 	case LIFE_DURIAN:
-	case ESTR_MEMORY:
 		{
-		if (gameObject[objId].sprite != NULL)
-		{
-			int gax, gay;
-			int lx, ly;
-			int topLeftgx = (int)floor(newX) - (int)floor(gameObject[objId].sprite->center->x);
-			int topLeftgy = (int)floor(newY) - (int)floor(gameObject[objId].sprite->center->y);
-			int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
-			int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
-			for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+			if (gameObject[objId].sprite != NULL)
 			{
-				for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+				int gax, gay;
+				int lx, ly;
+				int topLeftgx = (int)floor(newX) - (int)floor(gameObject[objId].sprite->center->x);
+				int topLeftgy = (int)floor(newY) - (int)floor(gameObject[objId].sprite->center->y);
+				int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
+				int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+				for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
 				{
-					if (gameObject[objId].sprite->solid[ly][lx] > 0)
+					for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
 					{
-						if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+						if (gameObject[objId].sprite->solid[ly][lx] > 0)
 						{
-							if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != master))
+							if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
 							{
-								int tId = environment->objId[gay][gax];
-								interactObject(gameObject[objId].master, tId, FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+								if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != objId) && (environment->objId[gay][gax] != master))
+								{
+									int tId = environment->objId[gay][gax];
+									if (tId != -1 && (gameObject[tId].type != gameObject[objId].type) && (gameObject[tId].type == LIFE_HUMANOID))
+										interactObject(gameObject[objId].master, tId, FALSE, DMG_STANDARD_DURIAN_DAMAGE, 0, ENCHANT_CONFUSE);
+								}
 							}
 						}
 					}
 				}
 			}
+			deleteObject(environment, objId, FALSE);
+			break;
 		}
-		deleteObject(environment, objId, FALSE);
-		break;
-	}
+	case ESTR_MEMORY:
+		{
+			if (gameObject[objId].sprite != NULL)
+			{
+				int gax, gay;
+				int lx, ly;
+				int topLeftgx = (int)floor(newX) - (int)floor(gameObject[objId].sprite->center->x);
+				int topLeftgy = (int)floor(newY) - (int)floor(gameObject[objId].sprite->center->y);
+				int fdimx = (int)floor(gameObject[objId].sprite->dimension->x);
+				int fdimy = (int)floor(gameObject[objId].sprite->dimension->y);
+				for (ly = 0, gay = topLeftgy; ly < fdimy; gay++, ly++)
+				{
+					for (lx = 0, gax = topLeftgx; lx < fdimx; gax++, lx++)
+					{
+						if (gameObject[objId].sprite->solid[ly][lx] > 0)
+						{
+							if (gax >= 0 && gax < environment->width && gay >= 0 && gay < environment->height)
+							{
+								if (environment->blocked[gay][gax] && (environment->objId[gay][gax] != master))
+								{
+									int tId = environment->objId[gay][gax];
+									interactObject(gameObject[objId].master, tId, FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);
+								}
+							}
+						}
+					}
+				}
+			}
+			deleteObject(environment, objId, FALSE);
+			break;
+		}
 	case MAGIC_BLOB:
 		if (environment->blocked[(int)floor(newY)][(int)floor(newX)] && (environment->objId[(int)floor(newY)][(int)floor(newX)] != master))
 			interactObject(gameObject[objId].master, environment->objId[(int)floor(newY)][(int)floor(newX)], FALSE, gameObject[objId].mana, gameObject[objId].attri, gameObject[objId].attri2 & ENCHANT_EFFECT_MASK);

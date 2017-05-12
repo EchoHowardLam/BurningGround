@@ -1,6 +1,6 @@
 #include "ui.h"
 
-void drawUI(int observerId, int lv, int *skillSet, int selectedSkillIndex, int hpPotionNum, int mpPotionNum)
+void drawUI(int observerId, int lv, ArcaneType *skillSet, int selectedSkillIndex, int hpPotionNum, int mpPotionNum)
 {
 	if (observerId == -1) return;
 	for (int k = UI_SKILL_POS_Y; k <= UI_EXP_POS_Y; k++)
@@ -98,7 +98,7 @@ void drawUILv(int lv)
 	return;
 }
 
-void drawUISkillBar(int *skillSet, int selectedSkillIndex)
+void drawUISkillBar(ArcaneType *skillSet, int selectedSkillIndex)
 {
 	if (skillSet == NULL) return;
 	for (int i = 0; i < UI_SKILL_SLOT; i++)

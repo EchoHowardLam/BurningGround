@@ -19,6 +19,7 @@ struct CharacterImage {
 };
 
 int loadImageFiles(char *path); // Load every single needed image file. Return 1 successful 0 failure
+void cleanUpImageFiles(void);
 CharacterImage* getImage(ObjectType objType, int ID); // Return 1 successful 0 failure
 //int getImage(ObjectType objType, int ID, CharacterImage* returnImg); // Return 1 successful 0 failure
 

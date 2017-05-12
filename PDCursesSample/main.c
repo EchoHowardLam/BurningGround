@@ -70,7 +70,7 @@ int doMenu(void)
 		// 2. render the display this turn
 		clear();		// clear what's on screen last time
 		
-		printInMiddle(7, COLOR_B_YELLOW, "Burning Ground");
+		printInMiddle(7, COLOR_B_YELLOW, "Burning Ground v1.1");
 		//printInMiddle(8, 0, "");
 		printInMiddle(9, COLOR_B_BLACK, "  Start Game  ");
 		printInMiddle(10, COLOR_B_BLACK, "  Credit  ");
@@ -237,7 +237,7 @@ void helpMenu(void)
 	return;
 }
 
-void chooseSkill(int skillSet[UI_SKILL_SLOT], int oldLv)
+void chooseSkill(ArcaneType skillSet[UI_SKILL_SLOT], int oldLv)
 {
 	if (magicUnlockedAtLevel[oldLv - 1] == NOMAGIC) return;
 	int selectedItem = 0;
@@ -303,8 +303,12 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 	if (!initializeInputEvents()) return 0;
 	int playerLv = playerStat->lv;
 	int lastKnownExp = playerStat->exp;
-	Coordinate start, end = { .x = -1,.y = -1 };
-	Region localMap = loadLevel(gameLevel, &start, &end, executablePath);
+	Coordinate start, end = {
+		-1,	//x
+		-1	//y 
+	};
+	Region localMap;
+	if (!loadLevel(&localMap, gameLevel, &start, &end, executablePath)) return 0;
 	playerId = createHumanoid(&localMap, -1, HUMANOID_TYPE_HUMAN, start.x, start.y, playerLv);
 	if (playerId == -1) return 0;
 	int playerAliveFlag = 1;
@@ -333,7 +337,7 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 	BOOL restart = FALSE;
 	BOOL pass = FALSE;
 	BOOL playerFlying = FALSE;
-	int skillSet[UI_SKILL_SLOT];
+	ArcaneType skillSet[UI_SKILL_SLOT];
 	for (int k = 0; k < UI_SKILL_SLOT; k++)
 		skillSet[k] = playerStat->skillSet[k];
 	int selectedSkillIndex = 0;
@@ -349,7 +353,7 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 		for (int L = 0; L < 5; L++)
 		{
 			// Auto-cancel flying state
-			if (checkObjectOnFeet(&localMap, playerId))
+			//if (checkObjectOnFeet(&localMap, playerId))
 				playerFlying = FALSE;
 
 			// 1. get buffered user input and determine player action
@@ -360,13 +364,16 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 			combineWASDwasdKeys(keyboardPress);
 			combineArrowKeys(keyboardPress);
 			combinewasdArrowKeys(keyboardPress);
-			if (keyboardPress[KB_UP_KEY])
+			if (keyboardPress[' '])
 			{
 				playerFlying = TRUE;
+			}
+			if (keyboardPress[KB_UP_KEY]) {
+				//playerFlying = TRUE;
 				if (playerFlying)
 					controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.1);
 				else
-					controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.15);
+					controlObjectY(playerId, floor(gameObject[playerId].y) - 0.5, 0.2);
 			}
 			else if (keyboardPress[KB_DOWN_KEY]) {
 				if (playerFlying)
@@ -456,7 +463,7 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 				lastKnownExp = gameObject[playerId].attri2;
 				if (end.x != -1) // valid
 				{
-					if ((abs(gameObject[playerId].x - end.x) <= 3.0) && (abs(gameObject[playerId].y - end.y) <= 3.0))
+					if ((fabs(gameObject[playerId].x - end.x) <= 3.0) && (fabs(gameObject[playerId].y - end.y) <= 3.0))
 					{
 						pass = TRUE;
 						break;
@@ -559,15 +566,15 @@ int main(int argc, char *argv[])
 		if (selectedMenu == 0)
 		{
 			PlayerState playerStat = {
-				.lv = 1,
-				.hp = 1000,
-				.mp = 1000,
-				.exp = 0,
-				.skillSet = { ARCANE_FIREBALL, 0, 0 },
-				.potions = { 8, 8 }
+				1,										//lv
+				1000,									//hp
+				1000,									//mp
+				0,										//exp
+				{ ARCANE_FIREBALL, NOMAGIC, NOMAGIC },	//skillset
+				{ 8, 8 }								//potions
 			};
 			BOOL restart;
-			int curGameLevel = TUTORIAL;
+			LevelName curGameLevel = TUTORIAL;
 			do {
 				restart = FALSE;
 				switch (doGameLoop(&playerStat, curGameLevel))
@@ -609,6 +616,7 @@ int main(int argc, char *argv[])
 	
 
 	// Cleaning up...
+	cleanUpImageFiles();
 	endwin();			// end the curses mode
 	return 0;
 

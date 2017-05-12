@@ -4,14 +4,6 @@
 #include "local_region.h"
 #include "gameobj.h"
 
-typedef enum {
-	NOMAGIC = 0,
-	ARCANE_FIREBALL, ARCANE_ICEBALL, ARCANE_DIRTBALL,
-	ARCANE_FIREBALL_FRAG, ARCANE_ICEBALL_FRAG,
-	ARCANE_FIRERAIN, ARCANE_ICERAIN, ARCANE_ICESPIKERAIN, ARCANE_MYTHRAIN,
-	ARCANE_FIRELASER, ARCANE_ICELASER,
-} ArcaneType;
-
 typedef struct {
 	char *string;
 	int color;

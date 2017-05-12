@@ -20,12 +20,12 @@
 #include "gameobj.h"
 #include "magic_interface.h"
 
-void drawUI(int observerId, int lv, int *skillSet, int selectedSkillIndex, int hpPotionNum, int mpPotionNum);
+void drawUI(int observerId, int lv, ArcaneType *skillSet, int selectedSkillIndex, int hpPotionNum, int mpPotionNum);
 void drawUIHPBar(int coloredBarLen);
 void drawUIMPBar(int coloredBarLen);
 void drawUIEXPBar(int coloredBarLen);
 void drawUILv(int lv);
-void drawUISkillBar(int *skillSet, int selectedSkillIndex);
+void drawUISkillBar(ArcaneType *skillSet, int selectedSkillIndex);
 void drawUIPotions(int hpPotionNum, int mpPotionNum);
 void drawUIMenuItem();
 

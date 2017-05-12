@@ -2,8 +2,11 @@
 
 CharacterImage **allObjs = NULL;
 
+// 0 fail, 1 successful
 int loadImageFiles(char *path) {
 	allObjs = (CharacterImage **) malloc(IMAGE_FILES * sizeof(CharacterImage *));
+	if (allObjs == NULL) // fail to allocate memory
+		return 0;
 	
 	char *filesToRead[IMAGE_FILES];
 #if defined(_WIN32) || defined(_WIN64)
@@ -46,12 +49,23 @@ int loadImageFiles(char *path) {
 	memcpy(newpath, path, cut);
 	newpath[cut] = '\0';
 	
+	BOOL success = TRUE;
 	for (int i=0; i<IMAGE_FILES; i++) {
 		char *tempFileName = (char *) malloc(size * sizeof(char) + 50);
-		strcpy(tempFileName, newpath);
-		strcat(tempFileName, filesToRead[i]);
+		if (tempFileName == NULL)
+		{
+			success = FALSE;
+			break;
+		}
+		strcpy_s(tempFileName, size + 50, newpath);
+		strcat_s(tempFileName, size + 50, filesToRead[i]);
 		
-		FILE *raw = fopen(tempFileName, "rb");
+		FILE *raw;
+		if (fopen_s(&raw, tempFileName, "rb") != 0) // error
+		{
+			success = FALSE;
+			break;
+		}
 
 		//size_t length = 0;
 		unsigned char line[100];
@@ -60,14 +74,20 @@ int loadImageFiles(char *path) {
 		int sectionOpening = 1;
 		int displayMode = 1;
 		int row = 0;
-		while (fgets(line, 100, raw) != NULL) {
+		while (fgets((char *)line, 100, raw) != NULL) {
 			if (sectionOpening) {
 				loadImage = (CharacterImage *) malloc(sizeof(CharacterImage));
+				if (loadImage == NULL)
+				{
+					success = FALSE;
+					break;
+				}
 				if (lastImage == NULL) allObjs[i] = loadImage;
 				else lastImage->next = loadImage;
 				loadImage->next = NULL;
 				
-				char *aInt = strtok(line, " ");
+				char *context;
+				char *aInt = strtok_s((char *)line, " ", &context);
 				int j=0;
 				while (aInt != NULL) {
 					if (j==0)
@@ -88,14 +108,14 @@ int loadImageFiles(char *path) {
 						sectionOpening = 0;
 					}
 					j++;
-					aInt = strtok(NULL, " ");
+					aInt = strtok_s(NULL, " ", &context);
 				}
 			} else {
 				if (displayMode) {
 					loadImage->display[row] = (chtype *) malloc(loadImage->dimension->x * sizeof(chtype));
 					loadImage->solid[row] = (int *) malloc(loadImage->dimension->x * sizeof(int));
-					int headChar = indexNotOf(line, ' ');
-					int tailChar = lastIndexNotOf(line, ' ');
+					int headChar = indexNotOf((char *)line, ' ');
+					int tailChar = lastIndexNotOf((char *)line, ' ');
 					for (int k = 0; k < loadImage->dimension->x; k++) {
 						if (line[k] >= 161)
 							loadImage->display[row][k] = (line[k] | A_ALTCHARSET);
@@ -119,13 +139,21 @@ int loadImageFiles(char *path) {
 				else if (row >= loadImage->dimension->y) {sectionOpening = 1; lastImage = loadImage; row = 0; displayMode = 1;}
 			}
 		}
-		
+
 		fclose(raw);
 		//free(line);
 		free(tempFileName);
 	}
-	free(newpath);
-	return 1;
+	if (newpath != NULL)
+		free(newpath);
+	return success;
+}
+
+void cleanUpImageFiles(void)
+{
+	if (allObjs != NULL)
+		free(allObjs);
+	return;
 }
 
 CharacterImage* getImage(ObjectType objType, int ID) {

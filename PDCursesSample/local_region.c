@@ -7,17 +7,17 @@ Region generateEmptyLocalRegion(int w, int h, int spawns)
 	new_region.width = w;
 	new_region.height = h;
 	new_region.numSpawns = spawns;
-	new_region.appearance = malloc(h * sizeof(chtype *));
-	new_region.blocked = malloc(h * sizeof(BOOL *));
-	new_region.objId = malloc(h * sizeof(int *));
-	new_region.color = malloc(h * sizeof(int *));
-	new_region.spawns = malloc(spawns * sizeof(SpawnRegion *));
+	new_region.appearance = (chtype **)malloc(h * sizeof(chtype *));
+	new_region.blocked = (BOOL **)malloc(h * sizeof(BOOL *));
+	new_region.objId = (int **)malloc(h * sizeof(int *));
+	new_region.color = (int **)malloc(h * sizeof(int *));
+	new_region.spawns = (SpawnRegion **)malloc(spawns * sizeof(SpawnRegion *));
 	for (int i = 0; i < h; i++)
 	{
-		new_region.appearance[i] = malloc(w * sizeof(chtype));
-		new_region.blocked[i] = malloc(w * sizeof(BOOL));
-		new_region.objId[i] = malloc(w * sizeof(int));
-		new_region.color[i] = malloc(w * sizeof(int));
+		new_region.appearance[i] = (chtype *)malloc(w * sizeof(chtype));
+		new_region.blocked[i] = (BOOL *)malloc(w * sizeof(BOOL));
+		new_region.objId[i] = (int *)malloc(w * sizeof(int));
+		new_region.color[i] = (int *)malloc(w * sizeof(int));
 		for (int j = 0; j < w; j++) {
 			new_region.appearance[i][j] = ' ';
 			new_region.blocked[i][j] = 0;
@@ -122,11 +122,11 @@ void localRegionDelCircle(Region *target, int cx, int cy, int radius, int height
 }
 
 void localRegionAddUTriWithChar(Region *target, int cx, int cy, int width, int height, int fill, BOOL block, chtype display, int color) {
-	double left = cx-(width/2.0f);
-	double right = cx+(width/2.0f);
-	double slope = (width/2.0f)/height;
+	double left = cx-(width/2.0);
+	double right = cx+(width/2.0);
+	double slope = (width/2.0)/height;
 	for (int i=0, ry=cy; i < height; i++, ry++) {
-		for (int j=0, rx=left; j < width; j++, rx++) {
+		for (int j=0, rx=(int)floor(left); j < width; j++, rx++) {
 			if (rx >= 0 && ry >= 0 && rx < target->width && ry < target->height) {
 				if (fill) {
 					if (rx >= left+(slope*(height-i)) && rx <= right-(slope*(height-i))) {

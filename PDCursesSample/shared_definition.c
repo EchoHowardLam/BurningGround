@@ -32,8 +32,8 @@ int lastIndexOf(char *str, char needle) {
 }
 
 int indexNotOf(char *str, char needle) {
-	int currIndex = 0;
-	while(currIndex < strlen(str)-1) {
+	unsigned int currIndex = 0;
+	while(currIndex + 1 < strlen(str)) {
 		if (str[currIndex] == needle) currIndex++;
 		else return currIndex;
 	}

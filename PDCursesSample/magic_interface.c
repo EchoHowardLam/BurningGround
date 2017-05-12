@@ -16,12 +16,12 @@ MagicNameString magicNameString[100] = {
 };
 
 ArcaneType magicUnlockedAtLevel[MAX_LV] = {
-	ARCANE_ICEBALL, 0, ARCANE_FIRERAIN, ARCANE_ICERAIN, 0,
-	ARCANE_ICESPIKERAIN, 0, ARCANE_FIRELASER, ARCANE_ICELASER, 0,
-	ARCANE_MYTHRAIN, 0, ARCANE_FIREBALL_FRAG, ARCANE_ICEBALL_FRAG, 0,
-	0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0,
+	ARCANE_ICEBALL, NOMAGIC, ARCANE_FIRERAIN, ARCANE_ICERAIN, NOMAGIC,
+	ARCANE_ICESPIKERAIN, NOMAGIC, ARCANE_FIRELASER, ARCANE_ICELASER, NOMAGIC,
+	ARCANE_MYTHRAIN, NOMAGIC, ARCANE_FIREBALL_FRAG, ARCANE_ICEBALL_FRAG, NOMAGIC,
+	NOMAGIC, NOMAGIC, NOMAGIC, NOMAGIC, NOMAGIC,
+	NOMAGIC, NOMAGIC, NOMAGIC, NOMAGIC, NOMAGIC,
+	NOMAGIC, NOMAGIC, NOMAGIC, NOMAGIC, NOMAGIC,
 };
 
 int castMagic(Region *environment, int casterId, ArcaneType magic, double destX, double destY)
@@ -29,11 +29,15 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 	if (casterId == -1) return 0;
 	if (gameObject[casterId].underEffect[EFFECT_STUN] >= 0) return 0;
 	int cooldown = 0;
+	double ox = gameObject[casterId].x;
+	double oy = gameObject[casterId].y;
+	if (gameObject[casterId].type == LIFE_HUMANOID && gameObject[casterId].attri == HUMANOID_TYPE_HUMAN)
+		oy--;
 	switch (magic)
 	{
 	case ARCANE_FIREBALL:
 		if (gameObject[casterId].mana >= 300)
-			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_FIRE, 0, DMG_STANDARD_FIREBALL_DAMAGE) != -1)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, ox, oy, destX, destY, 0.2, 200, SPHERE_FIRE, 0, DMG_STANDARD_FIREBALL_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 300;
 				cooldown = 50;
@@ -41,7 +45,7 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 		break;
 	case ARCANE_ICEBALL:
 		if (gameObject[casterId].mana >= 300)
-			if (createObjectMagicProjectile(environment, casterId, ESTR_MEMORY, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_ICE, 0, DMG_STANDARD_ICEBALL_DAMAGE) != -1)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, ox, oy, destX, destY, 0.2, 200, SPHERE_ICE, 0, DMG_STANDARD_ICEBALL_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 300;
 				cooldown = 50;
@@ -49,7 +53,7 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 		break;
 	case ARCANE_DIRTBALL:
 		if (gameObject[casterId].mana >= 200)
-			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_STUN | ENCHANT_ENTANGLE | ENCHANT_SILENT, DMG_STANDARD_DIRTBALL_DAMAGE) != -1)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, ox, oy, destX, destY, 0.2, 200, SPHERE_EARTH, ENCHANT_SLOW | ENCHANT_STUN | ENCHANT_ENTANGLE | ENCHANT_SILENT, DMG_STANDARD_DIRTBALL_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 200;
 				cooldown = 50;
@@ -57,7 +61,7 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 		break;
 	case ARCANE_FIREBALL_FRAG:
 		if (gameObject[casterId].mana >= 350)
-			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_FIRE, ENCHANT_SHRAPNEL, DMG_STANDARD_FIREBALL_DAMAGE) != -1)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, ox, oy, destX, destY, 0.2, 200, SPHERE_FIRE, ENCHANT_SHRAPNEL, DMG_STANDARD_FIREBALL_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 350;
 				cooldown = 50;
@@ -65,7 +69,7 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 		break;
 	case ARCANE_ICEBALL_FRAG:
 		if (gameObject[casterId].mana >= 350)
-			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.2, 200, SPHERE_ICE, ENCHANT_SHRAPNEL, DMG_STANDARD_ICEBALL_DAMAGE) != -1)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_BLOB, ox, oy, destX, destY, 0.2, 200, SPHERE_ICE, ENCHANT_SHRAPNEL, DMG_STANDARD_ICEBALL_DAMAGE) != -1)
 			{
 				gameObject[casterId].mana -= 350;
 				cooldown = 50;
@@ -104,18 +108,18 @@ int castMagic(Region *environment, int casterId, ArcaneType magic, double destX,
 			}
 		break;
 	case ARCANE_FIRELASER:
-		if (gameObject[casterId].mana >= 60)
-			if (createObjectMagicProjectile(environment, casterId, MAGIC_LASER, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.0, -1, SPHERE_FIRE, 0, DMG_STANDARD_FIRELASER_DAMAGE) != -1)
+		if (gameObject[casterId].mana >= 30)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_LASER, ox, oy, destX, destY, 0.0, -1, SPHERE_FIRE, 0, DMG_STANDARD_FIRELASER_DAMAGE) != -1)
 			{
-				gameObject[casterId].mana -= 60;
+				gameObject[casterId].mana -= 30;
 				cooldown = 1;
 			}
 		break;
 	case ARCANE_ICELASER:
-		if (gameObject[casterId].mana >= 60)
-			if (createObjectMagicProjectile(environment, casterId, MAGIC_LASER, gameObject[casterId].x, gameObject[casterId].y, destX, destY, 0.0, -1, SPHERE_ICE, 0, DMG_STANDARD_ICELASER_DAMAGE) != -1)
+		if (gameObject[casterId].mana >= 30)
+			if (createObjectMagicProjectile(environment, casterId, MAGIC_LASER, ox, oy, destX, destY, 0.0, -1, SPHERE_ICE, 0, DMG_STANDARD_ICELASER_DAMAGE) != -1)
 			{
-				gameObject[casterId].mana -= 60;
+				gameObject[casterId].mana -= 30;
 				cooldown = 1;
 			}
 		break;

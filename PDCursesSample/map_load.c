@@ -1,6 +1,7 @@
 #include "map_load.h"
 
-Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *executablePath) {
+// 0 fail, 1 success
+int loadLevel(Region *retRegion, LevelName level, Coordinate *start, Coordinate *end, char *executablePath) {
 	Region temp = {0};
 	
 	int size = ((int) strlen(executablePath)) + 1;
@@ -17,52 +18,56 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 #if defined(_WIN32) || defined(_WIN64)
 	switch (level) {
 		case TUTORIAL:
-			strcat(newpath, "\\maps\\tutorial.txt");
+			strcat_s(newpath, size + 50, "\\maps\\tutorial.txt");
 			break;
 		case TEST:
-			strcat(newpath, "\\maps\\test.txt");
+			strcat_s(newpath, size + 50, "\\maps\\test.txt");
 			break;
 		case TEST2:
-			strcat(newpath, "\\maps\\test2.txt");
+			strcat_s(newpath, size + 50, "\\maps\\test2.txt");
 			break;
 		case FOREST:
-			strcat(newpath, "\\maps\\forest.txt");
+			strcat_s(newpath, size + 50, "\\maps\\forest.txt");
 			break;
 		case PLATFORM:
-			strcat(newpath, "\\maps\\platform.txt");
+			strcat_s(newpath, size + 50, "\\maps\\platform.txt");
 			break;
 		case HELL:
-			strcat(newpath, "\\maps\\hell.txt");
+			strcat_s(newpath, size + 50, "\\maps\\hell.txt");
 			break;
 		default:
-			return temp;
+			(*retRegion) = temp;
+			return 0;
 	}
 #else
 	switch (level) {
 		case TUTORIAL:
-			strcat(newpath, "/maps/tutorial.txt");
+			strcat_s(newpath, size + 50, "/maps/tutorial.txt");
 			break;
 		case TEST:
-			strcat(newpath, "/maps/test.txt");
+			strcat_s(newpath, size + 50, "/maps/test.txt");
 			break;
 		case TEST2:
-			strcat(newpath, "/maps/test2.txt");
+			strcat_s(newpath, size + 50, "/maps/test2.txt");
 			break;
 		case FOREST:
-			strcat(newpath, "/maps/forest.txt");
+			strcat_s(newpath, size + 50, "/maps/forest.txt");
 			break;
 		case PLATFORM:
-			strcat(newpath, "/maps/platform.txt");
+			strcat_s(newpath, size + 50, "/maps/platform.txt");
 			break;
 		case HELL:
-			strcat(newpath, "/maps/hell.txt");
+			strcat_s(newpath, size + 50, "/maps/hell.txt");
 			break;
 		default:
-			return temp;
+			(*retRegion) = temp;
+			return 0;
 	}
 #endif
 	
-	FILE *raw = fopen(newpath, "rb");
+	FILE *raw;
+	if (fopen_s(&raw, newpath, "rb") != 0)
+		return 0;
 	
 	if (raw != NULL) {
 		char line[100];
@@ -71,7 +76,8 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 		int mobSpawnArea = 0;
 		while (fgets(line, 100, raw) != NULL) {
 			if (row == 0) {
-				char *aInt = strtok(line, " ");
+				char *context;
+				char *aInt = strtok_s(line, " ", &context);
 				int num = 0;
 				int tempX = 0, tempY = 0, tempSpawn = 0;
 				while (aInt != NULL) {
@@ -84,10 +90,11 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 						temp = generateEmptyLocalRegion(tempX, tempY, tempSpawn);
 					}
 					num++;
-					aInt = strtok(NULL, " ");
+					aInt = strtok_s(NULL, " ", &context);
 				}
 			} else if (row == 1 || row == 2) {
-				char *aInt = strtok(line, " ");
+				char *context;
+				char *aInt = strtok_s(line, " ", &context);
 				int num = 0;
 				while (aInt != NULL) {
 					if (num == 0) {
@@ -102,12 +109,13 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 							end->y = atoi(aInt);
 					}
 					num++;
-					aInt = strtok(NULL, " ");
+					aInt = strtok_s(NULL, " ", &context);
 				}
 			} else {
 				if (line[0] == '\\' && line[1] == 'm' && line[2] == 'o' && line[3] == 'b') {
 					// create mob spawning area
-					char *param = strtok(line, " ");
+					char *context;
+					char *param = strtok_s(line, " ", &context);
 					int num = 0;
 					SpawnRegion *tempSpawn = (SpawnRegion *) malloc(sizeof(SpawnRegion));
 					while (param != NULL) {
@@ -140,12 +148,13 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 								break;
 						}
 						num++;
-						param = strtok(NULL, " ");
+						param = strtok_s(NULL, " ", &context);
 					}
 					mobSpawnArea++;
 				} else if (line[0] == '\\' && line[1] == 'g' && line[2] == 'r' && line[3] == 's') {
 					// add grass
-					char *param = strtok(line, " ");
+					char *context;
+					char *param = strtok_s(line, " ", &context);
 					int num = 0;
 					SpawnRegion *tempSpawn = (SpawnRegion *) malloc(sizeof(SpawnRegion));
 					while (param != NULL) {
@@ -165,11 +174,12 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 								break;
 						}
 						num++;
-						param = strtok(NULL, " ");
+						param = strtok_s(NULL, " ", &context);
 					}
 					mobSpawnArea++;
 				} else if (line[0] != '/' && line[1] != '/') {
-					char *aInt = strtok(line, " ");
+					char *context;
+					char *aInt = strtok_s(line, " ", &context);
 					int num = 0;
 					BOOL del = 0;
 					int tempX = 0, tempY = 0, tempW = 0, tempH = 0, tempFill = 1, tempBlock = 1;
@@ -189,7 +199,8 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 						} else if (num == 3) {
 							tempH = atoi(aInt);
 						} else if (num == 4) {
-							char *modifier = strtok(aInt, "\\");
+							char *modContext;
+							char *modifier = strtok_s(aInt, "\\", &modContext);
 							while (modifier != NULL) {
 								if (strcmp((char *) modifier, "h") == 0)
 									tempFill = 0;
@@ -215,11 +226,11 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 									}
 									displayChar |= A_ALTCHARSET;
 								}
-								modifier = strtok(NULL, "\\");
+								modifier = strtok_s(NULL, "\\", &modContext);
 							}
 						}
 						num++;
-						aInt = strtok(NULL, " ");
+						aInt = strtok_s(NULL, " ", &context);
 					}
 					if (shape == 0) {
 						if (del)
@@ -251,7 +262,9 @@ Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *exec
 		fclose(raw);
 	}
 	free(newpath);
-	return temp;
+
+	(*retRegion) = temp;
+	return 1;
 }
 
 ObjectType codeToType(char *code) {

@@ -9,8 +9,9 @@
 #include <string.h>
 
 #if defined(_WIN32) || defined(_WIN64)
-#include "curses.h"
 #include <Windows.h>
+#undef MOUSE_MOVED
+#include "curses.h"
 #define COLOR_B_BLUE 9
 #define COLOR_B_CYAN 11
 #define COLOR_B_RED 12
@@ -99,21 +100,34 @@ struct vector {
 	double y;
 };
 
+struct intVector {
+	int x;
+	int y;
+};
+
 struct mouseOutput {
 	int x, y;
 	int buttonState;
 };
 
+typedef enum {
+	NOMAGIC = 0,
+	ARCANE_FIREBALL, ARCANE_ICEBALL, ARCANE_DIRTBALL,
+	ARCANE_FIREBALL_FRAG, ARCANE_ICEBALL_FRAG,
+	ARCANE_FIRERAIN, ARCANE_ICERAIN, ARCANE_ICESPIKERAIN, ARCANE_MYTHRAIN,
+	ARCANE_FIRELASER, ARCANE_ICELASER,
+} ArcaneType;
+
 typedef struct {
 	int lv;
 	int hp, mp, exp;
-	int skillSet[UI_SKILL_SLOT];
+	ArcaneType skillSet[UI_SKILL_SLOT];
 	int potions[2];
 } PlayerState;
 
 typedef struct vector Vector;
 typedef struct vector Coordinate;
-typedef struct vector Dimension;
+typedef struct intVector Dimension;
 typedef struct mouseOutput MOutput;
 typedef int BOOL;
 

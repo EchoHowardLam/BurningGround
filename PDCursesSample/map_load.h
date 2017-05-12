@@ -8,6 +8,6 @@
 
 typedef enum {TUTORIAL, TEST, TEST2, FOREST, PLATFORM, HELL} LevelName;
 
-Region loadLevel(LevelName level, Coordinate *start, Coordinate *end, char *executablePath);
+int loadLevel(Region *retRegion, LevelName level, Coordinate *start, Coordinate *end, char *executablePath);
 
 ObjectType codeToType(char *code);
