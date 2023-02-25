@@ -1,4 +1,8 @@
-#include "image_load.h"
+#include <image_load.h>
+
+#include <string.h>
+
+#include <cross_platform_bullshit.h>
 
 CharacterImage **allObjs = NULL;
 
@@ -10,33 +14,33 @@ int loadImageFiles(char *path) {
 	
 	char *filesToRead[IMAGE_FILES];
 #if defined(_WIN32) || defined(_WIN64)
-	filesToRead[0] = "\\graphics\\Player.txt";
-	filesToRead[1] = "\\graphics\\eyeballs.txt";
-	filesToRead[2] = "\\graphics\\mosquitoes.txt";
-	filesToRead[3] = "\\graphics\\mushrooms.txt";
-	filesToRead[4] = "\\graphics\\rabbit.txt";
-	filesToRead[5] = "\\graphics\\sludge.txt";
-	filesToRead[6] = "\\graphics\\grass.txt";
-	filesToRead[7] = "\\graphics\\bees.txt";
-	filesToRead[8] = "\\graphics\\bat.txt";
-	filesToRead[9] = "\\graphics\\birds.txt";
-	filesToRead[10] = "\\graphics\\durian.txt";
-	filesToRead[11] = "\\graphics\\htrahdis.txt";
-	filesToRead[12] = "\\graphics\\matrix.txt";
+	filesToRead[0] = "\\..\\graphics\\Player.txt";
+	filesToRead[1] = "\\..\\graphics\\eyeballs.txt";
+	filesToRead[2] = "\\..\\graphics\\mosquitoes.txt";
+	filesToRead[3] = "\\..\\graphics\\mushrooms.txt";
+	filesToRead[4] = "\\..\\graphics\\rabbit.txt";
+	filesToRead[5] = "\\..\\graphics\\sludge.txt";
+	filesToRead[6] = "\\..\\graphics\\grass.txt";
+	filesToRead[7] = "\\..\\graphics\\bees.txt";
+	filesToRead[8] = "\\..\\graphics\\bat.txt";
+	filesToRead[9] = "\\..\\graphics\\birds.txt";
+	filesToRead[10] = "\\..\\graphics\\durian.txt";
+	filesToRead[11] = "\\..\\graphics\\htrahdis.txt";
+	filesToRead[12] = "\\..\\graphics\\matrix.txt";
 #else
-	filesToRead[0] = "/graphics/Player.txt";
-	filesToRead[1] = "/graphics/eyeballs.txt";
-	filesToRead[2] = "/graphics/mosquitoes.txt";
-	filesToRead[3] = "/graphics/mushrooms.txt";
-	filesToRead[4] = "/graphics/rabbit.txt";
-	filesToRead[5] = "/graphics/sludge.txt";
-	filesToRead[6] = "/graphics/grass.txt";
-	filesToRead[7] = "/graphics/bees.txt";
-	filesToRead[8] = "/graphics/bat.txt";
-	filesToRead[9] = "/graphics/birds.txt";
-	filesToRead[10] = "/graphics/durian.txt";
-	filesToRead[11] = "/graphics/htrahdis.txt";
-	filesToRead[12] = "/graphics/matrix.txt";
+	filesToRead[0] = "/../graphics/Player.txt";
+	filesToRead[1] = "/../graphics/eyeballs.txt";
+	filesToRead[2] = "/../graphics/mosquitoes.txt";
+	filesToRead[3] = "/../graphics/mushrooms.txt";
+	filesToRead[4] = "/../graphics/rabbit.txt";
+	filesToRead[5] = "/../graphics/sludge.txt";
+	filesToRead[6] = "/../graphics/grass.txt";
+	filesToRead[7] = "/../graphics/bees.txt";
+	filesToRead[8] = "/../graphics/bat.txt";
+	filesToRead[9] = "/../graphics/birds.txt";
+	filesToRead[10] = "/../graphics/durian.txt";
+	filesToRead[11] = "/../graphics/htrahdis.txt";
+	filesToRead[12] = "/../graphics/matrix.txt";
 #endif
 	
 	int size = ((int) strlen(path)) + 1;

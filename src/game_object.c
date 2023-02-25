@@ -1,4 +1,4 @@
-#include "gameobj.h"
+#include <game_object.h>
 
 GameObject gameObject[MAX_OBJECT];
 
@@ -1628,11 +1628,12 @@ BOOL interactObject(int sourceId, int targetId, BOOL physicalTouch, int damage, 
 		if (effect & ENCHANT_CLOAK)
 			if (gameObject[targetId].underEffect[EFFECT_INVISIBLE] < (1000 * gameObject[targetId].magicConductivity / 100))
 				gameObject[targetId].underEffect[EFFECT_INVISIBLE] = (1000 * gameObject[targetId].magicConductivity / 100);
-		if (effect & ENCHANT_SILENT)
+		if (effect & ENCHANT_SILENT) {
 			if (gameObject[targetId].mana <= 1000)
 				gameObject[targetId].mana = 0;
 			else
 				gameObject[targetId].mana -= 1000;
+		}
 	}
 	return TRUE;
 }

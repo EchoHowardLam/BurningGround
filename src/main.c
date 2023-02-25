@@ -1,16 +1,16 @@
 #include <time.h>
 #include <math.h>
 
-#include "shared_definition.h"
-#include "gameobj.h"
-#include "local_region.h"
-#include "image_load.h"
-#include "map_load.h"
-#include "ai.h"
+#include <shared_definition.h>
+#include <game_object.h>
+#include <local_region.h>
+#include <image_load.h>
+#include <map_load.h>
+#include <ai.h>
 
-#include "ui.h"
-#include "magic_interface.h"
-#include "event_handle.h"
+#include <ui.h>
+#include <magic_interface.h>
+#include <event_handle.h>
 
 extern double DIRECTION2X[4];
 extern double DIRECTION2Y[4];

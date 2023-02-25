@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include "shared_definition.h"
+#include <shared_definition.h>
 
 typedef struct {
 	int x;

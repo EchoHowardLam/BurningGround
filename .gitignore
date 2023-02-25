@@ -8,6 +8,7 @@
 *.dll
 *.xcodeproj
 PDCursesSample/include/*
+settings.json
 
 # User-specific files
 *.suo

@@ -16,9 +16,9 @@
 
 #include <string.h>
 
-#include "shared_definition.h"
-#include "gameobj.h"
-#include "magic_interface.h"
+#include <shared_definition.h>
+#include <game_object.h>
+#include <magic_interface.h>
 
 void drawUI(int observerId, int lv, ArcaneType *skillSet, int selectedSkillIndex, int hpPotionNum, int mpPotionNum);
 void drawUIHPBar(int coloredBarLen);

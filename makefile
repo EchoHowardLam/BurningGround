@@ -2,6 +2,9 @@
 
 all: build
 
+# Build the third party lib
+builddep:
+
 # Build the software, dep auto resolved
 build:
 	meson setup build-debug && \

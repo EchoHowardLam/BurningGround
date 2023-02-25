@@ -1,4 +1,4 @@
-#include "magic_interface.h"
+#include <magic_interface.h>
 
 MagicNameString magicNameString[100] = {
 	{ "-NO SKILL-", COLOR_B_BLACK },

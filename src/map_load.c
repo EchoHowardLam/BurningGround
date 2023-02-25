@@ -1,4 +1,6 @@
-#include "map_load.h"
+#include <map_load.h>
+
+#include <cross_platform_bullshit.h>
 
 // 0 fail, 1 success
 int loadLevel(Region *retRegion, LevelName level, Coordinate *start, Coordinate *end, char *executablePath) {
@@ -18,22 +20,22 @@ int loadLevel(Region *retRegion, LevelName level, Coordinate *start, Coordinate 
 #if defined(_WIN32) || defined(_WIN64)
 	switch (level) {
 		case TUTORIAL:
-			strcat_s(newpath, size + 50, "\\maps\\tutorial.txt");
+			strcat_s(newpath, size + 50, "\\..\\maps\\tutorial.txt");
 			break;
 		case TEST:
-			strcat_s(newpath, size + 50, "\\maps\\test.txt");
+			strcat_s(newpath, size + 50, "\\..\\maps\\test.txt");
 			break;
 		case TEST2:
-			strcat_s(newpath, size + 50, "\\maps\\test2.txt");
+			strcat_s(newpath, size + 50, "\\..\\maps\\test2.txt");
 			break;
 		case FOREST:
-			strcat_s(newpath, size + 50, "\\maps\\forest.txt");
+			strcat_s(newpath, size + 50, "\\..\\maps\\forest.txt");
 			break;
 		case PLATFORM:
-			strcat_s(newpath, size + 50, "\\maps\\platform.txt");
+			strcat_s(newpath, size + 50, "\\..\\maps\\platform.txt");
 			break;
 		case HELL:
-			strcat_s(newpath, size + 50, "\\maps\\hell.txt");
+			strcat_s(newpath, size + 50, "\\..\\maps\\hell.txt");
 			break;
 		default:
 			(*retRegion) = temp;
@@ -42,22 +44,22 @@ int loadLevel(Region *retRegion, LevelName level, Coordinate *start, Coordinate 
 #else
 	switch (level) {
 		case TUTORIAL:
-			strcat_s(newpath, size + 50, "/maps/tutorial.txt");
+			strcat_s(newpath, size + 50, "/../maps/tutorial.txt");
 			break;
 		case TEST:
-			strcat_s(newpath, size + 50, "/maps/test.txt");
+			strcat_s(newpath, size + 50, "/../maps/test.txt");
 			break;
 		case TEST2:
-			strcat_s(newpath, size + 50, "/maps/test2.txt");
+			strcat_s(newpath, size + 50, "/../maps/test2.txt");
 			break;
 		case FOREST:
-			strcat_s(newpath, size + 50, "/maps/forest.txt");
+			strcat_s(newpath, size + 50, "/../maps/forest.txt");
 			break;
 		case PLATFORM:
-			strcat_s(newpath, size + 50, "/maps/platform.txt");
+			strcat_s(newpath, size + 50, "/../maps/platform.txt");
 			break;
 		case HELL:
-			strcat_s(newpath, size + 50, "/maps/hell.txt");
+			strcat_s(newpath, size + 50, "/../maps/hell.txt");
 			break;
 		default:
 			(*retRegion) = temp;

@@ -1,4 +1,4 @@
-#include "local_region.h"
+#include <local_region.h>
 
 Region generateEmptyLocalRegion(int w, int h, int spawns)
 {

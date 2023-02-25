@@ -1,4 +1,4 @@
-#include "shared_definition.h"
+#include <shared_definition.h>
 
 double DIRECTION2X[4] = { 0, 1, 0, -1 };
 double DIRECTION2Y[4] = { -1, 0, 1, 0 };

@@ -5,9 +5,9 @@
 #endif
 #include <math.h>
 
-#include "shared_definition.h"
-#include "local_region.h"
-#include "image_load.h"
+#include <shared_definition.h>
+#include <local_region.h>
+#include <image_load.h>
 
 #define MAX_OBJECT 500
 

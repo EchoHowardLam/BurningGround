@@ -17,7 +17,7 @@
 #define COLOR_B_RED 12
 #define COLOR_B_YELLOW 14
 #else
-#include "ncurses.h"
+#include <ncurses.h>
 #include <unistd.h>
 #define COLOR_B_RED 9
 #define COLOR_B_YELLOW 11
