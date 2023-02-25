@@ -1,0 +1,6 @@
+option(
+	'app_exe',
+	type: 'string',
+	value: 'BurningGround',
+	description: 'App executable name'
+)
