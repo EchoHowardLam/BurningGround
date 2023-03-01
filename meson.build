@@ -10,12 +10,12 @@ project(
 	],
 )
 
-is_static = false
+is_static = get_option('is_static')
 
 app_exe = get_option('app_exe')
 project_src_files = []
 project_inc = include_directories([ 'include' ])
-project_c_args = ['-Wall']
+project_c_args = ['-lm']
 project_cpp_args = []
 project_link_args = []
 project_deps = []
@@ -25,14 +25,16 @@ cc = meson.get_compiler('c')
 curses_dep = dependency('ncurses', required: false, disabler: true, static: is_static)
 if not curses_dep.found()
 	# Searching for pdcurses
-	curses_root = get_option('curses_root')
-	curses_lib = cc.find_library('curses', dirs : curses_root, required : false, disabler: true)
-	curses_dep = declare_dependency(include_directories: curses_root, dependencies: curses_lib, static: false)
+	curses_root = get_option('win_curses_root')
+	curses_full_root = meson.current_source_dir() + curses_root
+	message('Searching ' + curses_full_root)
+	curses_lib = cc.find_library('pdcurses', dirs : curses_full_root, required : true, disabler: true)
+	curses_dep = declare_dependency(include_directories: '.' + curses_root + '\\include', dependencies: curses_lib) # , static: is_static
 endif
 
-m_dep = cc.find_library('m', static: is_static)
+#m_dep = cc.find_library('m', static: is_static)
 
-project_deps = [curses_dep, m_dep]
+project_deps = [curses_dep]
 
 subdir('src')
 

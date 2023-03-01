@@ -430,6 +430,8 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 				gameObject[playerId].mana += 1000;
 			if (gameObject[playerId].mana > gameObject[playerId].max_mana)
 				gameObject[playerId].mana = gameObject[playerId].max_mana;
+			if (keyboardPress['/'])
+				gameObject[playerId].attri2++;
 			if (keyboardPress['r'] || keyboardPress['R'])
 			{
 				deleteObject(&localMap, playerId, TRUE);
