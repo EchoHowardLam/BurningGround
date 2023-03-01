@@ -4,3 +4,17 @@ option(
 	value: 'BurningGround',
 	description: 'App executable name'
 )
+
+option(
+	'is_static',
+	type: 'boolean',
+	value: 'true',
+	description: 'Whether the library should be compiled statically'
+)
+
+option(
+	'win_curses_root',
+	type: 'string',
+	value: '\\thirdparty\\lib',
+	description: 'Location of curses library for windows'
+)
