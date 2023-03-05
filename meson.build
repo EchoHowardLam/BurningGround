@@ -15,12 +15,14 @@ is_static = get_option('is_static')
 app_exe = get_option('app_exe')
 project_src_files = []
 project_inc = include_directories([ 'include' ])
-project_c_args = ['-lm']
+project_c_args = []
 project_cpp_args = []
-project_link_args = []
+project_link_args = ['-lm']
 project_deps = []
 
+
 cc = meson.get_compiler('c')
+
 
 curses_dep = dependency('ncurses', required: false, disabler: true, static: is_static)
 if not curses_dep.found()
@@ -31,12 +33,32 @@ if not curses_dep.found()
 	curses_lib = cc.find_library('pdcurses', dirs : curses_full_root, required : true, disabler: true)
 	curses_dep = declare_dependency(include_directories: '.' + curses_root + '\\include', dependencies: curses_lib) # , static: is_static
 endif
+project_deps += curses_dep
 
-#m_dep = cc.find_library('m', static: is_static)
 
-project_deps = [curses_dep]
+host_platform = host_machine.system()
+if cc.get_id() in [ 'msvc' ]
+	if host_platform != 'windows'
+		error('this seems fishy')
+	endif
+elif cc.get_id() in [ 'gcc' ] and host_platform == 'windows'
+	if get_option('b_lto')
+		warning('mingw does not like static + lto')
+	endif
+elif host_platform in [ 'darwin' ]
+elif host_platform in [ 'android' ]
+else
+	if host_platform != 'linux'
+		warning('host platform may not be linux but we will pretend that it is')
+		host_platform = 'linux'
+	endif
+	#m_dep = cc.find_library('m', static: is_static)
+	#project_deps += m_dep
+endif
+
 
 subdir('src')
+
 
 executable(
 	app_exe,

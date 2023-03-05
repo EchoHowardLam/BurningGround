@@ -437,6 +437,8 @@ int doGameLoop(PlayerState *playerStat, LevelName gameLevel) {
 				deleteObject(&localMap, playerId, TRUE);
 				restart = TRUE;
 			}
+			if (keyboardPress[27])
+				playerAliveFlag = 0;
 			playerFlying = castFlying(playerId, playerFlying);
 			
 			aiRun(&localMap, playerId);
@@ -568,11 +570,11 @@ int main(int argc, char *argv[])
 		if (selectedMenu == 0)
 		{
 			PlayerState playerStat = {
-				1,										//lv
-				1000,									//hp
-				1000,									//mp
+				30,										//lv
+				100000,									//hp
+				100000,									//mp
 				0,										//exp
-				{ ARCANE_FIREBALL, NOMAGIC, NOMAGIC },	//skillset
+				{ ARCANE_FIREBALL, ARCANE_FIRELASER, NOMAGIC },	//skillset
 				{ 8, 8 }								//potions
 			};
 			BOOL restart;
